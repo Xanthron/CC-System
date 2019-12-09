@@ -9,17 +9,17 @@ function new(path)
     ---@type alignment
     label.alignment = 1
     ---@class style.label.theme
-    local normal_label = {
+    local label_normal = {
         textColor = colors.black,
         backgroundColor = colors.white
     }
     ---@type style.label.theme
-    local disabled_label = {
+    local label_disabled = {
         textColor = colors.gray,
         backgroundColor = colors.white
     }
-    label.normalTheme = normal_label
-    label.disabledTheme = disabled_label
+    label.normalTheme = label_normal
+    label.disabledTheme = label_disabled
     this.label = label
 
     ---@class style.button
@@ -27,7 +27,7 @@ function new(path)
     ---@type alignment
     button.alignment = 5
     ---@class style.button.theme
-    local normal_button = {
+    local button_normal = {
         textColor = colors.lightBlue,
         textBackgroundColor = colors.blue,
         borderColor = colors.lightBlue,
@@ -46,7 +46,7 @@ function new(path)
         }
     }
     ---@class style.button.theme
-    local disabled_button = {
+    local button_disabled = {
         textColor = colors.lightGray,
         textBackgroundColor = colors.gray,
         borderColor = colors.lightGray,
@@ -65,7 +65,7 @@ function new(path)
         }
     }
     ---@class style.button.theme
-    local selected_button = {
+    local button_selected = {
         textColor = colors.white,
         textBackgroundColor = colors.blue,
         borderColor = colors.white,
@@ -84,7 +84,7 @@ function new(path)
         }
     }
     ---@class style.button.theme
-    local pressed_button = {
+    local button_pressed = {
         textColor = colors.white,
         textBackgroundColor = colors.lightBlue,
         borderColor = colors.white,
@@ -102,10 +102,10 @@ function new(path)
             {}
         }
     }
-    button.normalTheme = normal_button
-    button.disabledTheme = disabled_button
-    button.selectedTheme = selected_button
-    button.pressedTheme = pressed_button
+    button.normalTheme = button_normal
+    button.disabledTheme = button_disabled
+    button.selectedTheme = button_selected
+    button.pressedTheme = button_pressed
     this.button = button
 
     ---@class style.toggleButton
@@ -113,7 +113,7 @@ function new(path)
     ---@type alignment
     toggleButton.alignment = 1
     ---@class style.toggleButton.theme
-    local normal_toggleButton = {
+    local toggleButton_normal = {
         textColor = colors.black,
         backgroundColor = colors.white,
         uncheckedCheckbox = {" ", "O", " "},
@@ -124,7 +124,7 @@ function new(path)
         checkedCheckboxBackgroundColor = {colors.white, colors.red, colors.white}
     }
     ---@type style.toggleButton.theme
-    local disabled_toggleButton = {
+    local toggleButton_disabled = {
         textColor = colors.gray,
         backgroundColor = colors.white,
         uncheckedCheckbox = {"*", "O", "*"},
@@ -135,7 +135,7 @@ function new(path)
         checkedCheckboxBackgroundColor = {colors.gray, colors.lightGray, colors.gray}
     }
     ---@type style.toggleButton.theme
-    local selected_toggleButton = {
+    local toggleButton_selected = {
         textColor = colors.orange,
         backgroundColor = colors.white,
         uncheckedCheckbox = {">", "O", "< "},
@@ -146,7 +146,7 @@ function new(path)
         checkedCheckboxBackgroundColor = {colors.white, colors.red, colors.white}
     }
     ---@type style.toggleButton.theme
-    local pressed_toggleButton = {
+    local toggleButton_pressed = {
         textColor = colors.orange,
         backgroundColor = colors.white,
         uncheckedCheckbox = {">", "X", "<"},
@@ -156,16 +156,16 @@ function new(path)
         checkedCheckboxTextColor = {colors.orange, colors.white, colors.orange},
         checkedCheckboxBackgroundColor = {colors.white, colors.lightBlue, colors.white}
     }
-    toggleButton.normalTheme = normal_toggleButton
-    toggleButton.disabledTheme = disabled_toggleButton
-    toggleButton.selectedTheme = selected_toggleButton
-    toggleButton.pressedTheme = pressed_toggleButton
+    toggleButton.normalTheme = toggleButton_normal
+    toggleButton.disabledTheme = toggleButton_disabled
+    toggleButton.selectedTheme = toggleButton_selected
+    toggleButton.pressedTheme = toggleButton_pressed
     this.toggleButton = toggleButton
 
     ---@class style.slider
     local slider = {}
     ---@class style.slider.theme
-    local normal_slider = {
+    local slider_normal = {
         slider = {"|", "#", "|"},
         sliderColor = {colors.lightGray, colors.lightGray, colors.lightGray},
         sliderBackgroundColor = {colors.gray, colors.gray, colors.gray},
@@ -174,54 +174,54 @@ function new(path)
         handleBackgroundColor = {colors.lightGray, colors.black, colors.lightGray}
     }
     ---@class style.slider.button
-    local normal_slider_buttonPositive = {}
+    local slider_normal_buttonPositive = {}
     ---@class style.slider.button.theme
-    local normal_slider_normal_buttonPositive = {
+    local slider_normal_buttonPositive_normal = {
         text = {"[", "A", "]"},
         color = {colors.lightBlue, colors.lightBlue, colors.lightBlue},
         backgroundColor = {colors.blue, colors.blue, colors.blue}
     }
     ---@type style.slider.button.theme
-    local normal_slider_disabled_buttonPositive = {
+    local slider_normal_buttonPositive_disabled = {
         text = {"[", "A", "]"},
         color = {colors.lightGray, colors.lightGray, colors.lightGray},
         backgroundColor = {colors.gray, colors.gray, colors.gray}
     }
     ---@type style.slider.button.theme
-    local normal_slider_selected_buttonPositive = {
+    local slider_normal_buttonPositive_selected = {
         text = {"[", "A", "]"},
         color = {colors.white, colors.white, colors.white},
         backgroundColor = {colors.blue, colors.blue, colors.blue}
     }
-    normal_slider_buttonPositive.normal = normal_slider_normal_buttonPositive
-    normal_slider_buttonPositive.disabled = normal_slider_disabled_buttonPositive
-    normal_slider_buttonPositive.selected = normal_slider_selected_buttonPositive
+    slider_normal_buttonPositive.normal = slider_normal_buttonPositive_normal
+    slider_normal_buttonPositive.disabled = slider_normal_buttonPositive_disabled
+    slider_normal_buttonPositive.selected = slider_normal_buttonPositive_selected
     ---@type style.slider.button
-    local normal_slider_buttonNegative = {}
+    local slider_normal_buttonNegative = {}
     ---@type style.slider.button.theme
-    local normal_slider_normal_buttonNegative = {
+    local slider_normal_buttonNegative_normal = {
         text = {"[", "A", "]"},
         color = {colors.lightBlue, colors.lightBlue, colors.lightBlue},
         backgroundColor = {colors.blue, colors.blue, colors.blue}
     }
     ---@type style.slider.button.theme
-    local normal_slider_disabled_buttonNegative = {
+    local slider_normal_buttonNegative_disabled = {
         text = {"[", "A", "]"},
         color = {colors.lightGray, colors.lightGray, colors.lightGray},
         backgroundColor = {colors.gray, colors.gray, colors.gray}
     }
     ---@type style.slider.button.theme
-    local normal_slider_selected_buttonNegative = {
+    local slider_normal_buttonNegative_selected = {
         text = {"[", "A", "]"},
         color = {colors.white, colors.white, colors.white},
         backgroundColor = {colors.blue, colors.blue, colors.blue}
     }
-    normal_slider_buttonNegative.normal = normal_slider_normal_buttonNegative
-    normal_slider_buttonNegative.disabled = normal_slider_disabled_buttonNegative
-    normal_slider_buttonNegative.selected = normal_slider_selected_buttonNegative
-    normal_slider.buttonPositive = normal_slider_buttonPositive
-    normal_slider.buttonNegative = normal_slider_buttonNegative
-    local disabled_slider = {
+    slider_normal_buttonNegative.normal = slider_normal_buttonNegative_normal
+    slider_normal_buttonNegative.disabled = slider_normal_buttonNegative_disabled
+    slider_normal_buttonNegative.selected = slider_normal_buttonNegative_selected
+    slider_normal.buttonPositive = slider_normal_buttonPositive
+    slider_normal.buttonNegative = slider_normal_buttonNegative
+    local slider_disabled = {
         slider = {"|", "#", "|"},
         sliderColor = {colors.lightGray, colors.lightGray, colors.lightGray},
         sliderBackgroundColor = {colors.gray, colors.gray, colors.gray},
@@ -230,15 +230,15 @@ function new(path)
         handleBackgroundColor = {colors.lightGray, colors.black, colors.lightGray}
     }
     ---@type style.style.slider.button
-    local disabled_slider_buttonPositive = {}
+    local slider_disabled_buttonPositive = {}
     ---@type style.style.slider.button
-    local disabled_slider_buttonNegative = {}
-    disabled_slider_buttonPositive.disabled = normal_slider_disabled_buttonPositive
-    disabled_slider_buttonNegative.disabled = normal_slider_disabled_buttonNegative
-    disabled_slider.buttonPositive = disabled_slider_buttonPositive
-    disabled_slider.buttonNegative = disabled_slider_buttonNegative
-    slider.normal = normal_slider
-    slider.disabled = disabled_slider
+    local slider_disabled_buttonNegative = {}
+    slider_disabled_buttonPositive.disabled = slider_normal_buttonPositive_disabled
+    slider_disabled_buttonNegative.disabled = slider_normal_buttonNegative_disabled
+    slider_disabled.buttonPositive = slider_disabled_buttonPositive
+    slider_disabled.buttonNegative = slider_disabled_buttonNegative
+    slider.normal = slider_normal
+    slider.disabled = slider_disabled
     this.slider = slider
 
     ---@class style.textBox
@@ -286,7 +286,7 @@ function new(path)
     textBox.slider.disabled.handleBackgroundColor = {colors.gray}
 
     ---@class style.textBox.theme
-    local normal_textBox = {
+    local textBox_normal = {
         textColor = colors.lime,
         textBackgroundColor = colors.green,
         spaceColor = colors.white,
@@ -306,7 +306,7 @@ function new(path)
         }
     }
     ---@type style.textBox.theme
-    local disabled_textBox = {
+    local textBox_disabled = {
         textColor = colors.lightGray,
         textBackgroundColor = colors.gray,
         spaceColor = colors.white,
@@ -326,7 +326,7 @@ function new(path)
         }
     }
     ---@type style.textBox.theme
-    local selected_textBox = {
+    local textBox_selected = {
         textColor = colors.yellow,
         textBackgroundColor = colors.green,
         spaceColor = colors.white,
@@ -345,9 +345,9 @@ function new(path)
             {"+", "|", "+"}
         }
     }
-    textBox.normalTheme = normal_textBox
-    textBox.disabledTheme = disabled_textBox
-    textBox.selectedTheme = selected_textBox
+    textBox.normalTheme = textBox_normal
+    textBox.disabledTheme = textBox_disabled
+    textBox.selectedTheme = textBox_selected
     this.textBox = textBox
 
     ---@class style.scrollView
@@ -434,7 +434,7 @@ function new(path)
     scrollView.sliderHorizontal.disabled.handleBackgroundColor = {colors.gray}
 
     ---@class style.scrollView.theme
-    local normal_scrollView = {
+    local scrollView_normal = {
         textColor = colors.lime,
         textBackgroundColor = colors.green,
         spaceColor = colors.white,
@@ -454,7 +454,7 @@ function new(path)
         }
     }
     ---@type style.scrollView.theme
-    local disabled_scrollView = {
+    local scrollView_disabled = {
         textColor = colors.lightGray,
         textBackgroundColor = colors.gray,
         spaceColor = colors.white,
@@ -474,7 +474,7 @@ function new(path)
         }
     }
     ---@type style.scrollView.theme
-    local selected_scrollView = {
+    local scrollView_selected = {
         textColor = colors.yellow,
         textBackgroundColor = colors.green,
         spaceColor = colors.white,
@@ -493,10 +493,78 @@ function new(path)
             {"+"}
         }
     }
-    scrollView.normalTheme = normal_scrollView
-    scrollView.disabledTheme = disabled_scrollView
-    scrollView.selectedTheme = selected_scrollView
+    scrollView.normalTheme = scrollView_normal
+    scrollView.disabledTheme = scrollView_disabled
+    scrollView.selectedTheme = scrollView_selected
     this.scrollView = scrollView
+
+    ---@class  style.inputField
+    local inputField = {}
+    ---@type style.label
+    inputField.label = assets.extension.copyTable(this.label)
+    ---@class style.inputField.theme
+    local inputField_normal = {
+        textColor = colors.lime,
+        textBackgroundColor = colors.green,
+        spaceColor = colors.white,
+        borderColor = colors.lime,
+        borderBackgroundColor = colors.green,
+        ---@type border
+        border = {
+            {"+"},
+            {"-"},
+            {"+"},
+            {"|"},
+            {" "},
+            {"|"},
+            {"+", "|", "+"},
+            {"-", " ", "-"},
+            {"+", "|", "+"}
+        }
+    }
+    ---@type style.inputField.theme
+    local inputField_disabled = {
+        textColor = colors.lightGray,
+        textBackgroundColor = colors.gray,
+        spaceColor = colors.white,
+        borderColor = colors.lightGray,
+        borderBackgroundColor = colors.gray,
+        ---@type border
+        border = {
+            {"+"},
+            {"-"},
+            {"+"},
+            {"|"},
+            {" "},
+            {"|"},
+            {"+", "|", "+"},
+            {"-", " ", "-"},
+            {"+", "|", "+"}
+        }
+    }
+    ---@type style.inputField.theme
+    local inputField_selected = {
+        textColor = colors.yellow,
+        textBackgroundColor = colors.green,
+        spaceColor = colors.white,
+        borderColor = colors.lime,
+        borderBackgroundColor = colors.green,
+        ---@type border
+        border = {
+            {"+"},
+            {"-"},
+            {"+"},
+            {"|"},
+            {" "},
+            {"|"},
+            {"+", "|", "+"},
+            {"-", " ", "-"},
+            {"+", "|", "+"}
+        }
+    }
+    inputField.normalTheme = inputField_normal
+    inputField.disabledTheme = inputField_disabled
+    inputField.selectedTheme = inputField_selected
 
     ---@return style.any
     this.getStyle = function(elementType, arguments)

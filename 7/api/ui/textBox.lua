@@ -127,8 +127,14 @@ function new(parent, label, text, style, x, y, w, h)
         ui.buffer.borderBox(this.buffer, theme.border, theme.borderColor, theme.borderBackgroundColor)
         if this.label then
             local labelText = this.label
-            if this.mode == 3 then
+            local labelTheme
+            if this.mode == 1 then
+                labelTheme = this.style.label.normalTheme
+            elseif this.mode == 2 then
+                labelTheme = this.style.label.disabledTheme
+            else
                 labelText = ">" .. labelText .. "<"
+                labelTheme = this.style.label.normalTheme
             end
             ui.buffer.labelBox(
                 this.buffer,
