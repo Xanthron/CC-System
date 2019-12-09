@@ -5,37 +5,39 @@ local manager = ui.uiManager.new(1, 1, width, height)
 
 local style = ui.style.new()
 
+local inputField = ui.inputField.new(manager, "Input Field", "text", nil, style("inputField"), 15, 15, width - 15, 3)
+
 local button1 = ui.button.new(manager, "button", nil, style("button"), 2, 15, 12, 3)
-local toggleButton1 =
-    ui.toggleButton.new(
-    manager,
-    "Toggle",
-    true,
-    function(state)
-        redstone.setOutput("back", state)
-    end,
-    style("toggleButton"),
-    15,
-    16,
-    12,
-    1
-)
-toggleButton1._onToggle(toggleButton1._checked)
+-- local toggleButton1 =
+--     ui.toggleButton.new(
+--     manager,
+--     "Toggle",
+--     true,
+--     function(state)
+--         redstone.setOutput("back", state)
+--     end,
+--     style("toggleButton"),
+--     15,
+--     16,
+--     12,
+--     1
+-- )
+-- toggleButton1._onToggle(toggleButton1._checked)
 ---@type selectionGroup
 local selectionGroup = ui.selectionGroup.new()
 manager.selectionManager.addSelectionGroup(selectionGroup)
 
 local button1_selection = ui.selectionElement.new(button1)
-local toggleButton1_selection = ui.selectionElement.new(toggleButton1)
+-- local toggleButton1_selection = ui.selectionElement.new(toggleButton1)
 
-button1_selection.left = toggleButton1_selection
-button1_selection.right = toggleButton1_selection
-toggleButton1_selection.left = button1_selection
-toggleButton1_selection.right = button1_selection
+-- button1_selection.left = toggleButton1_selection
+-- button1_selection.right = toggleButton1_selection
+-- toggleButton1_selection.left = button1_selection
+-- toggleButton1_selection.right = button1_selection
 
 selectionGroup.addSelectionElement(button1_selection)
-selectionGroup.addSelectionElement(toggleButton1_selection)
-selectionGroup.currentSelectionElement = toggleButton1_selection
+-- selectionGroup.addSelectionElement(toggleButton1_selection)
+selectionGroup.currentSelectionElement = button1_selection
 
 ---@type textBox
 local textBox =

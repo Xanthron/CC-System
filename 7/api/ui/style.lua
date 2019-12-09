@@ -18,8 +18,14 @@ function new(path)
         textColor = colors.gray,
         backgroundColor = colors.white
     }
+    ---@type style.label.theme
+    local label_selected = {
+        textColor = colors.black,
+        backgroundColor = colors.orange
+    }
     label.normalTheme = label_normal
     label.disabledTheme = label_disabled
+    label.selectedTheme = label_selected
     this.label = label
 
     ---@class style.button
@@ -502,10 +508,14 @@ function new(path)
     local inputField = {}
     ---@type style.label
     inputField.label = assets.extension.copyTable(this.label)
+    inputField.label.normalTheme.textColor = colors.lime
+    inputField.label.normalTheme.backgroundColor = colors.green
+    inputField.label.selectedTheme.textColor = colors.yellow
+    inputField.label.selectedTheme.backgroundColor = colors.green
     ---@class style.inputField.theme
     local inputField_normal = {
-        textColor = colors.lime,
-        textBackgroundColor = colors.green,
+        textColor = colors.white,
+        textBackgroundColor = colors.black,
         spaceColor = colors.white,
         borderColor = colors.lime,
         borderBackgroundColor = colors.green,
@@ -565,6 +575,7 @@ function new(path)
     inputField.normalTheme = inputField_normal
     inputField.disabledTheme = inputField_disabled
     inputField.selectedTheme = inputField_selected
+    this.inputField = inputField
 
     ---@return style.any
     this.getStyle = function(elementType, arguments)

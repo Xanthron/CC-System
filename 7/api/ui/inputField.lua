@@ -21,15 +21,21 @@ function new(parent, label, text, onSubmit, style, x, y, w, h)
         ---@type style.label.theme
         local labelTheme = nil
 
+        ---@type string
+        local text
+
         if this.mode == 1 then
             theme = this.style.normalTheme
             labelTheme = this.style.label.normalTheme
+            text = this.text
         elseif this.mode == 2 then
             theme = this.style.disabledTheme
             labelTheme = this.style.label.disabledTheme
+            text = this.text
         else
             theme = this.style.selectedTheme
-            labelTheme = this.style.label.normalTheme
+            labelTheme = this.style.label.selectedTheme
+            text = this.text
         end
 
         ui.buffer.borderBox(this.buffer, theme.border, theme.borderColor, theme.borderBackgroundColor)
@@ -39,7 +45,7 @@ function new(parent, label, text, onSubmit, style, x, y, w, h)
                 this.buffer,
                 this.label,
                 labelTheme.textColor,
-                labelTheme.textBackgroundColor,
+                labelTheme.backgroundColor,
                 this.style.label.alignment,
                 nil,
                 #theme.border[4],
@@ -50,16 +56,15 @@ function new(parent, label, text, onSubmit, style, x, y, w, h)
         end
         ui.buffer.labelBox(
             this.buffer,
-            this.text,
-            theme,
+            text,
             theme.textColor,
             theme.textBackgroundColor,
             1,
-            theme.border[5],
+            theme.border[5][1],
             #theme.border[4],
-            theme.border[2],
-            theme.border[6],
-            theme.border[8]
+            #theme.border[2],
+            #theme.border[6],
+            #theme.border[8]
         )
     end
     this.recalculate()
