@@ -4,6 +4,7 @@
 ---@param onSubmit function
 ---@param style style.inputField
 function new(parent, label, text, onSubmit, style, x, y, w, h)
+    ---@class inputField:element
     local this = ui.element.new(parent, x, y, w, h)
 
     this.style = style
@@ -68,6 +69,20 @@ function new(parent, label, text, onSubmit, style, x, y, w, h)
         )
     end
     this.recalculate()
+
+    ---@param event event
+    this._doNormalEvent = function(event)
+        if this.mode == 3 then
+            if event.name == "char" then
+                return this
+            elseif event.name == "key" or event.name == "key_up" then
+                local key = keys.getName(event.param1)
+                if key == " " or key:gsub("%g", "key") == "key" then
+                    return this
+                end
+            end
+        end
+    end
 
     return this
 end
