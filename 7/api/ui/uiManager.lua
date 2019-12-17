@@ -3,6 +3,11 @@ function new(x, y, w, h)
     ---@class uiManager:element
     local this = ui.element.new(nil, x, y, w, h)
 
+    ---Puts the Cursor at the dedicated position, after every execution the ui. Blinking can be turned on.
+    ---@type function
+    ---@return bool, integer, integer
+    this.getCursorPos = nil
+
     ---@type parallelManager
     this.parallelManager = ui.parallelManager.new()
 
@@ -34,6 +39,16 @@ function new(x, y, w, h)
                     if eventName == "key" or eventName == "key_up" then
                         this.selectionManager.keyEvent(this._event)
                     end
+                end
+            end
+            if this.getCursorPos then
+                local blinking, posX, posY = this.getCursorPos()
+                if blinking == nil then
+                    this.getCursorPos = nil
+                    term.setCursorBlink(false)
+                else
+                    term.setCursorPos(posX, posY)
+                    term.setCursorBlink(blinking)
                 end
             end
         end

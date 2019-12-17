@@ -27,6 +27,9 @@ function new(parent, label, text, multiLine, onSubmit, style, x, y, w, h)
     end
     this.setText(text)
 
+    this._cursorX = 1
+    this._cursorY = 1
+
     this.recalculate = function()
         ---@type style.inputField.theme
         local theme = nil
@@ -36,19 +39,43 @@ function new(parent, label, text, multiLine, onSubmit, style, x, y, w, h)
         ---@type string
         local text
 
-        if this.mode == 1 then
+        if this.mode == 1 and false then
             theme = this.style.normalTheme
             labelTheme = this.style.label.normalTheme
             text = this.text
-        elseif this.mode == 2 then
+        elseif this.mode == 2 and false then
             theme = this.style.disabledTheme
             labelTheme = this.style.label.disabledTheme
             text = this.text
         else
+            this.getManager().getCursorPos = this.getCursorPos
             theme = this.style.selectedTheme
             labelTheme = this.style.label.selectedTheme
+            local width = this.getWidth()
+            local left = #theme.border[4]
+            local top = #theme.border[2]
+            local right = #theme.border[6]
+            local bottom = #theme.border[8]
+
+            local length = this.text:len()
+            local offset =
+                math.max(
+                0,
+                math.min(length - (width - left - right) - 1),
+                this.cursorOffset - (width - left - right) / 2
+            )
+
+            this._cursorX = this.buffer.rect.x + left + this.cursorOffset - offset
+            this._cursorY = this.buffer.rect.y + top
+
             text = this.text
         end
+
+        local width = this.getWidth()
+        local left = #theme.border[4]
+        local top = #theme.border[2]
+        local right = #theme.border[6]
+        local bottom = #theme.border[8]
 
         ui.buffer.borderBox(this.buffer, theme.border, theme.borderColor, theme.borderBackgroundColor)
         if this.label then
@@ -60,9 +87,9 @@ function new(parent, label, text, multiLine, onSubmit, style, x, y, w, h)
                 labelTheme.backgroundColor,
                 this.style.label.alignment,
                 nil,
-                #theme.border[4],
+                left,
                 yPos,
-                #theme.border[6],
+                right,
                 this.buffer.rect.h - yPos
             )
         end
@@ -73,13 +100,19 @@ function new(parent, label, text, multiLine, onSubmit, style, x, y, w, h)
             theme.textBackgroundColor,
             1,
             theme.border[5][1],
-            #theme.border[4],
-            #theme.border[2],
-            #theme.border[6],
-            #theme.border[8]
+            left,
+            top,
+            right,
+            bottom
         )
     end
     this.recalculate()
+
+    this.getCursorPos = function()
+        if this.mode == 3 or true then
+            return true, this._cursorX, this._cursorY
+        end
+    end
 
     ---@param event event
     this._doNormalEvent = function(event)
