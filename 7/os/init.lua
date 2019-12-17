@@ -1,11 +1,26 @@
 local width, height = term.getSize()
 
+local style = ui.style.new()
 ---@type uiManager
 local manager = ui.uiManager.new(1, 1, width, height)
+manager.recalculate = function()
+    local index
+    for i = 1, width * height do
+        if i <= width then
+            manager.buffer.text[i] = " "
+            manager.buffer.textColor[i] = colors.lime
+            manager.buffer.textBackgroundColor[i] = colors.lime
+        else
+            manager.buffer.text[i] = " "
+            manager.buffer.textColor[i] = colors.white
+            manager.buffer.textBackgroundColor[i] = colors.white
+        end
+    end
+end
+manager.recalculate()
 
-local style = ui.style.new()
-
-local inputField = ui.inputField.new(manager, "Input Field", "text", nil, style("inputField"), 15, 15, width - 15, 3)
+local inputField =
+    ui.inputField.new(manager, "Input Field", "text", false, nil, style("inputField"), 15, 15, width - 15, 3)
 
 local button1 = ui.button.new(manager, "button", nil, style("button"), 2, 15, 12, 3)
 -- local toggleButton1 =

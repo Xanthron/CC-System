@@ -1,20 +1,31 @@
 ---@param parent element
 ---@param label string
 ---@param text string
+---@param multiLine boolean
 ---@param onSubmit function
 ---@param style style.inputField
-function new(parent, label, text, onSubmit, style, x, y, w, h)
+function new(parent, label, text, multiLine, onSubmit, style, x, y, w, h)
     ---@class inputField:element
     local this = ui.element.new(parent, x, y, w, h)
 
     this.style = style
-    this.text = text
+    this.text = nil
     this.label = label
+    this.multiLine = multiLine
 
     this.cursorOffset = 0
-    if text then
-        this.cursorOffset = text:len()
+    this.setText = function(text, index)
+        this.text = text
+        if index == -1 then
+            index = this.cursorOffset
+        end
+        if index then
+            this.cursorOffset = math.max(0, math.min(text:len(), index))
+        else
+            this.cursorOffset = text:len()
+        end
     end
+    this.setText(text)
 
     this.recalculate = function()
         ---@type style.inputField.theme
@@ -72,11 +83,25 @@ function new(parent, label, text, onSubmit, style, x, y, w, h)
 
     ---@param event event
     this._doNormalEvent = function(event)
-        if this.mode == 3 then
+        if this.mode == 3 or true then
             if event.name == "char" then
-                return this
+                --return this
+                this.text = this.text:sub(1, this.cursorOffset) .. event.param1 .. this.text:sub(this.cursorOffset + 1)
+                this.cursorOffset = this.cursorOffset + 1
+                --TODO Only recalculate Text!!!
+                this.recalculate()
+                this.repaint("this")
             elseif event.name == "key" or event.name == "key_up" then
                 local key = keys.getName(event.param1)
+                if key == "backspace" then
+                    if this.cursorOffset > 0 then
+                        this.text = this.text:sub(1, this.cursorOffset - 1) .. this.text:sub(this.cursorOffset + 1)
+                        this.cursorOffset = this.cursorOffset - 1
+                        --TODO Only recalculate Text!!!
+                        this.recalculate()
+                        this.repaint("this")
+                    end
+                end
                 if key == " " or key:gsub("%g", "key") == "key" then
                     return this
                 end

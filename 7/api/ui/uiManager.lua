@@ -3,8 +3,6 @@ function new(x, y, w, h)
     ---@class uiManager:element
     local this = ui.element.new(nil, x, y, w, h)
 
-    ui.buffer.fillWithColor(this.buffer, " ", colors.black, colors.white)
-
     ---@type parallelManager
     this.parallelManager = ui.parallelManager.new()
 
