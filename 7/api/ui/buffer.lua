@@ -105,7 +105,7 @@ function labelBox(buffer, text, textColor, backgroundColor, alignment, space, le
     local totalWidth, totalHeight = buffer.rect.w, buffer.rect.h
     local width, height = totalWidth - left - right, totalHeight - top - bottom
     local textLines = {}
-    for line in string.gmatch(text, ".+[^\r\n]") do
+    for line in string.gmatch(text, ".*[^\r\n]") do
         table.insert(textLines, line)
     end
 

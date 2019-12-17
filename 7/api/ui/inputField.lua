@@ -101,8 +101,33 @@ function new(parent, label, text, multiLine, onSubmit, style, x, y, w, h)
                         this.recalculate()
                         this.repaint("this")
                     end
-                end
-                if key == " " or key:gsub("%g", "key") == "key" then
+                    return this
+                elseif key == "delete" then
+                    if this.cursorOffset < this.text:len() then
+                        this.text = this.text:sub(1, this.cursorOffset) .. this.text:sub(this.cursorOffset + 2)
+                        --TODO Only recalculate Text!!!
+                        this.recalculate()
+                        this.repaint("this")
+                    end
+                elseif key == "end" then
+                    this.cursorOffset = this.text:len()
+                    --TODO Only recalculate Text!!!
+                    this.recalculate()
+                    this.repaint("this")
+                    return this
+                elseif key == "left" then
+                    this.cursorOffset = math.max(0, this.cursorOffset - 1)
+                    --TODO Only recalculate Text!!!
+                    this.recalculate()
+                    this.repaint("this")
+                    return this
+                elseif key == "right" then
+                    this.cursorOffset = math.min(this.text:len(), this.cursorOffset + 1)
+                    --TODO Only recalculate Text!!!
+                    this.recalculate()
+                    this.repaint("this")
+                    return this
+                elseif key == " " or key:gsub("%g", "key") == "key" then
                     return this
                 end
             end
