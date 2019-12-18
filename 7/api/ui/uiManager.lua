@@ -27,6 +27,7 @@ function new(x, y, w, h)
     this._execute = function()
         while true do
             this._event.pull()
+            term.setCursorBlink(false)
             local eventName = this._event.name
             if
                 eventName == "mouse_click" or eventName == "mouse_up" or eventName == "mouse_drag" or
@@ -42,13 +43,15 @@ function new(x, y, w, h)
                 end
             end
             if this.getCursorPos then
-                local blinking, posX, posY = this.getCursorPos()
+                local blinking, posX, posY, textColor = this.getCursorPos()
                 if blinking == nil then
                     this.getCursorPos = nil
-                    term.setCursorBlink(false)
                 else
                     term.setCursorPos(posX, posY)
                     term.setCursorBlink(blinking)
+                    if textColor and term.isColor() then
+                        term.setTextColor(textColor)
+                    end
                 end
             end
         end

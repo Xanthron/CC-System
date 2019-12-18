@@ -555,7 +555,7 @@ function new(path)
     ---@type style.inputField.theme
     local inputField_selected = {
         textColor = colors.yellow,
-        textBackgroundColor = colors.green,
+        textBackgroundColor = colors.black,
         spaceColor = colors.white,
         borderColor = colors.lime,
         borderBackgroundColor = colors.green,

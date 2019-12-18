@@ -43,16 +43,19 @@ local selectionGroup = ui.selectionGroup.new()
 manager.selectionManager.addSelectionGroup(selectionGroup)
 
 local button1_selection = ui.selectionElement.new(button1)
+local inputField1_selection = ui.selectionElement.new(inputField)
+
 -- local toggleButton1_selection = ui.selectionElement.new(toggleButton1)
 
--- button1_selection.left = toggleButton1_selection
--- button1_selection.right = toggleButton1_selection
--- toggleButton1_selection.left = button1_selection
--- toggleButton1_selection.right = button1_selection
+button1_selection.left = inputField1_selection
+button1_selection.right = inputField1_selection
+inputField1_selection.left = button1_selection
+inputField1_selection.right = button1_selection
 
 selectionGroup.addSelectionElement(button1_selection)
+selectionGroup.addSelectionElement(inputField1_selection)
 -- selectionGroup.addSelectionElement(toggleButton1_selection)
-selectionGroup.currentSelectionElement = button1_selection
+selectionGroup.currentSelectionElement = inputField1_selection
 
 ---@type textBox
 local textBox =
@@ -117,7 +120,7 @@ selectionGroup.previous = textBox.selectionGroup
 
 manager.selectionManager.addSelectionGroup(textBox.selectionGroup)
 manager.selectionManager.addSelectionGroup(scrollView.selectionGroup)
-manager.selectionManager.setCurrentSelectionGroup(textBox.selectionGroup)
+manager.selectionManager.setCurrentSelectionGroup(selectionGroup)
 
 manager.draw()
 manager.execute()

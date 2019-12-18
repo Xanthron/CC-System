@@ -47,10 +47,10 @@ function new(parent, text, func, style, x, y, w, h)
             if event.param2 >= x and event.param2 < x + w and event.param3 >= y and event.param3 < y + h then
                 this.mode = 4
                 if this._inAnimation == false then
-                    this._inAnimation = true
+                    --this._inAnimation = true
                     this.recalculate()
                     this.repaint("this", x, y, w, h)
-                    this.getManager().parallelManager.addFunction(this._pressAnimation, {os.clock()})
+                --this.getManager().parallelManager.addFunction(this._pressAnimation, {os.clock()})
                 end
                 return this
             end
