@@ -10,7 +10,7 @@ function new(previous, next, listener)
     ---@type selectionElement
     this.currentSelectionElement = nil
     ---@type selectionElement[]
-    this.selectionsElement = {}
+    this.selectionElements = {}
 
     --- Create a new `selectionElement` and add it to the group.
     ---@param element element
@@ -20,21 +20,21 @@ function new(previous, next, listener)
     ---@param down selectionElement
     this.addNewSelectionElement = function(element, left, up, right, down)
         local selectionElement = ui.selectionElement.new(element, left, up, right, down)
-        table.insert(this.selectionsElement, selectionElement)
+        table.insert(this.selectionElements, selectionElement)
         return selectionElement
     end
 
     --- Add an existing `selectionElement` to the group
     ---@param selectionElement selectionElement
     this.addSelectionElement = function(selectionElement)
-        table.insert(this.selectionsElement, selectionElement)
+        table.insert(this.selectionElements, selectionElement)
     end
 
     ---@param selectionElement selectionElement
     this.removeSelectionElement = function(selectionElement)
-        for index, value in ipairs(this.selectionsElement) do
+        for index, value in ipairs(this.selectionElements) do
             if value == selectionElement then
-                table.remove(this.selectionsElement, index)
+                table.remove(this.selectionElements, index)
                 return
             end
         end
@@ -42,7 +42,7 @@ function new(previous, next, listener)
 
     ---@param selectionElement selectionElement
     this.containsSelectionElement = function(selectionElement)
-        for index, value in ipairs(this.selectionsElement) do
+        for index, value in ipairs(this.selectionElements) do
             if value == selectionElement then
                 return true
             end
@@ -53,7 +53,7 @@ function new(previous, next, listener)
     ---@param element element
     ---@return boolean, element
     this.manageElement = function(element)
-        for index, value in ipairs(this.selectionsElement) do
+        for index, value in ipairs(this.selectionElements) do
             if value.element == element then
                 return true, value
             end

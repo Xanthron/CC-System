@@ -29,10 +29,7 @@ function new(parent, text, func, style, x, y, w, h)
         end
         this._inAnimation = false
         this.recalculate()
-        local x, y, w, h, possible = this.getCompleteMaskRect()
-        if possible == true then
-            this.repaint("this", x, y, w, h)
-        end
+        this.repaint("this")
         return false
     end
     ---@param event event
@@ -47,10 +44,10 @@ function new(parent, text, func, style, x, y, w, h)
             if event.param2 >= x and event.param2 < x + w and event.param3 >= y and event.param3 < y + h then
                 this.mode = 4
                 if this._inAnimation == false then
-                    --this._inAnimation = true
+                    this._inAnimation = true
                     this.recalculate()
                     this.repaint("this", x, y, w, h)
-                --this.getManager().parallelManager.addFunction(this._pressAnimation, {os.clock()})
+                    this.getManager().parallelManager.addFunction(this._pressAnimation, {os.clock()})
                 end
                 return this
             end

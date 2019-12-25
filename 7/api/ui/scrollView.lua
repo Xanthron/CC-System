@@ -18,7 +18,7 @@ function new(parent, label, vertical, horizontal, style, x, y, w, h)
     )
     this._elements[1] = ui.element.new(this, this.stylePadding.getPaddedRect(this.buffer.rect.getUnpacked()))
     this._elements[1]._elements[1] =
-        ui.element.new(this, this.stylePadding.getPaddedRect(this.buffer.rect.getUnpacked()))
+        ui.element.new(this._elements[1], this.stylePadding.getPaddedRect(this.buffer.rect.getUnpacked()))
 
     ---@return element
     this.getContainer = function()
@@ -137,12 +137,11 @@ function new(parent, label, vertical, horizontal, style, x, y, w, h)
                     0,
                     math.min(
                         valueX,
-                        container.getLocalPosX() + container.getWidth() -
-                            (this.getWidth() - this.stylePadding.right + 1)
+                        container.getLocalPosX() + container.getWidth() - (this.getWidth() - this.stylePadding.right)
                     )
                 )
             elseif valueX < 0 then -- Up
-                maxMoveX = math.min(0, math.max(valueX, container.getLocalPosX() - this.stylePadding.left - 1))
+                maxMoveX = math.min(0, math.max(valueX, container.getLocalPosX() - this.stylePadding.left))
             end
         end
 
@@ -154,12 +153,11 @@ function new(parent, label, vertical, horizontal, style, x, y, w, h)
                     0,
                     math.min(
                         valueY,
-                        container.getLocalPosY() + container.getHeight() -
-                            (this.getHeight() - this.stylePadding.bottom + 1)
+                        container.getLocalPosY() + container.getHeight() - (this.getHeight() - this.stylePadding.bottom)
                     )
                 )
             elseif valueY < 0 then -- Up
-                maxMoveY = math.min(0, math.max(valueY, container.getLocalPosY() - this.stylePadding.top - 1))
+                maxMoveY = math.min(0, math.max(valueY, container.getLocalPosY() - this.stylePadding.top))
             end
         end
 
@@ -257,6 +255,31 @@ function new(parent, label, vertical, horizontal, style, x, y, w, h)
                 this.repaint("this")
             end
         elseif eventName == "selection_get_focus" then
+            if this.selectionGroup.currentSelectionElement == nil then
+                local index = 0
+                if this._elements[2] then
+                    index = index + 1
+                end
+                if this._elements[3] then
+                    index = index + 1
+                end
+                if #this.selectionGroup.selectionElements > index then
+                    local selectionElement = this.selectionGroup.selectionElements[index + 1]
+                    local element = selectionElement.element
+                    this.selectionGroup.currentSelectionElement = selectionElement
+                    if this.selectionGroup.listener("selection_get_focus", "key", nil, element) ~= false then
+                        if element and element.mode ~= 3 then
+                            element.mode = 3
+                            if not element._inAnimation then
+                                element.recalculate()
+                                element.repaint("this")
+                            end
+                        end
+                        return false
+                    end
+                end
+            end
+
             local currentElement, newElement = ...
             if newElement and (source == "key" or source == "code") then
                 this.focusElement(newElement)
@@ -267,9 +290,20 @@ function new(parent, label, vertical, horizontal, style, x, y, w, h)
             if source == "mouse" then
                 return false
             end
+        elseif eventName == "selection_reselect" then
+            if source == "key" then
+                local element = ...
+                this.focusElement(element)
+            end
         elseif eventName == "selection_change" then
+            ---@type element
             local currentElement, newElement = ...
-            if newElement == this or newElement == this._elements[2] then
+            if newElement == this or newElement == this._elements[2] or newElement == this._elements[3] then
+                if currentElement and currentElement.mode == 3 then
+                    currentElement.mode = 1
+                    currentElement.recalculate()
+                    currentElement.repaint("this")
+                end
                 return false
             elseif newElement and (source == "key" or source == "code") then
                 this.focusElement(newElement)

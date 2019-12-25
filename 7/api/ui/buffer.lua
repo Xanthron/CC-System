@@ -31,6 +31,21 @@ function new(x, y, w, h, text, textColor, textBackgroundColor)
         end
 
         if possible then
+            local index = maskX - thisX + (maskY - thisY) * thisW
+
+            -- for j = 1, maskH do
+            --     for i = 1, maskW do
+            --         index = index + 1
+            --         if term.isColor() then
+            --             term.setTextColor(this.textColor[index])
+            --             term.setBackgroundColor(this.textBackgroundColor[index])
+            --         end
+            --         term.setCursorPos(maskX + i - 1, maskY + j - 1)
+            --         term.write(this.text[index])
+            --     end
+            --     index = index + maskW - thisW
+            -- end
+
             for j = 1, maskH do
                 for i = 1, maskW do
                     local index = maskX - thisX + i + (maskY - thisY + j - 1) * thisW

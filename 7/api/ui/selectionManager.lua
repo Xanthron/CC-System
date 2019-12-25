@@ -1,12 +1,10 @@
 ---@return selectionManager
 function new()
-    --- selection_focus_key
-    --- selection_change_key
-    --- selection_change_mouse
-    --- selection_lose_focus_mouse
-    --- selection_lose_focus_code
-    --- selection_get_focus_mouse
-    --- selection_get_focus_code
+    --- selection_lose_focus
+    --- selection_get_focus
+    --- selection_change
+    --- selection_refocus
+    --- key
     ---@class selectionManager
     local this = {}
 
@@ -108,7 +106,7 @@ function new()
                     if
                         not this._currentSelectionGroup.listener or
                             this._currentSelectionGroup.listener(
-                                "selection_focus",
+                                "selection_reselect",
                                 "key",
                                 currentSelectionElement.element
                             ) ~= false
@@ -236,7 +234,7 @@ function new()
     return this
 end
 
---- Select an item in a group by direction. If the current focused item is not selected it gets reselected.
+--- Select an item in a group by direction.
 ---@param selectionGroup selectionGroup
 ---@param direction string
 function _select(selectionGroup, direction, source)

@@ -579,10 +579,7 @@ function new(path)
 
     ---@return style.any
     this.getStyle = function(elementType, arguments)
-        local copiedStyle = {}
-        for k, v in pairs(this[elementType]) do
-            copiedStyle[k] = v
-        end
+        local copiedStyle = assets.extension.copyTable(this[elementType])
 
         if type(arguments) == "table" then
             for k, v in pairs(arguments) do

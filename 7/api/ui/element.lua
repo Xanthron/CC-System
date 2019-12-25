@@ -190,10 +190,10 @@ function new(parent, x, y, w, h)
     ---@param w integer
     ---@param h integer
     ---@return integer, integer, integer, integer, boolean
-    this.getCompleteMaskRect = function(x, y, w, h)
+    this.getCompleteMaskRect = function(x, y, w, h, db)
         local possible = true
         if this._parent then
-            x, y, w, h, possible = this._parent.getCompleteMaskRect(x, y, w, h)
+            x, y, w, h, possible = this._parent.getCompleteMaskRect(x, y, w, h, db)
             if possible == false then
                 return x, y, w, h, possible
             end
@@ -271,7 +271,14 @@ function new(parent, x, y, w, h)
     ---@param h integer
     this.repaint = function(mode, x, y, w, h)
         if mode == "this" then
-            --x, y, w, h = this.getCompleteMaskRect(x, y, w, h)
+            --sleep(1)
+            if x and false then
+                x = x + 1
+                y = y + 1
+                w = w - 2
+                h = h - 2
+            end
+            x, y, w, h = this.getCompleteMaskRect(x, y, w, h)
             local manager = this.getManager()
             this.doDraw(manager.buffer, x, y, w, h)
             manager.buffer.draw(x, y, w, h)

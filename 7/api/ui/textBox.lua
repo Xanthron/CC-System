@@ -1,4 +1,3 @@
---TODO Should work as single group
 ---@param parent element
 ---@param label string
 ---@param text string

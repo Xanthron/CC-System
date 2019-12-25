@@ -49,14 +49,18 @@ function new(parent, label, text, multiLine, onSubmit, style, x, y, w, h)
         local right = #theme.border[6]
         local bottom = #theme.border[8]
         local width = this.getWidth()
+        local length = this.text:len()
 
         local text
         if this.mode <= 2 then
-            text = this.text:sub(1, width - left - right)
+            if length > width then
+                text = this.text:sub(1, width - left - right - 3) .. "..."
+            else
+                text = this.text
+            end
         else
             this.getManager().getCursorPos = this.getCursorPos
 
-            local length = this.text:len()
             local offset = length - (width - left - right) + 1
             local offset = math.max(0, math.min(offset, this.cursorOffset - width + left + right + 1))
 
