@@ -397,8 +397,8 @@ function text(buffer, text, textColor, backgroundColor, alignment, scaleW, scale
     local width, height = totalWidth - left - right, totalHeight - top - bottom
 
     local words = {}
-    for line in string.gmatch(text, "[^\r\n]+") do
-        for word in string.gmatch(line, "[^\t ]+") do
+    for line in text:gmatch(".[^\r\n]*") do
+        for word in line:gmatch("[^%s]+") do
             table.insert(words, word)
         end
         table.insert(words, "\n")

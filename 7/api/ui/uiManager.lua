@@ -60,11 +60,28 @@ function new(x, y, w, h)
             end
         end
     end
+
     this.parallelManager.addFunction(this._execute)
+
+    this.callFunction = function(func)
+        this.parallelManager.stop()
+        this._callFunction = func
+    end
+    this._callFunction = nil
+    this.exit = function()
+        this.parallelManager.stop()
+        this._exit = true
+    end
+    this._exit = false
     this.execute = function()
-        while true do
+        while this._exit == false do
             this.parallelManager.init()
+            if this._callFunction then
+                this._callFunction()
+                this._callFunction = nil
+            end
         end
+        this.exit = false
     end
 
     return this

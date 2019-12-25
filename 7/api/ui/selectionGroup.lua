@@ -18,6 +18,7 @@ function new(previous, next, listener)
     ---@param up selectionElement
     ---@param right selectionElement
     ---@param down selectionElement
+    ---@return selectionElement
     this.addNewSelectionElement = function(element, left, up, right, down)
         local selectionElement = ui.selectionElement.new(element, left, up, right, down)
         table.insert(this.selectionElements, selectionElement)

@@ -1,9 +1,10 @@
+--FIXME Wenn die Borderseiten nicht deffiniert sind, dann ist das Scrollen verschoben
+
 ---@param parent element
 ---@param label string
----@param vertical boolean
----@param horizontal boolean
+---@param mode "1: vertical and horizontal"|"2: none"|"3: vertical"|"4: horizontal"
 ---@param style style.scrollView
-function new(parent, label, vertical, horizontal, style, x, y, w, h)
+function new(parent, label, mode, style, x, y, w, h)
     ---@class scrollView:element
     local this = ui.element.new(parent, x, y, w, h)
 
@@ -25,7 +26,7 @@ function new(parent, label, vertical, horizontal, style, x, y, w, h)
         return this._elements[1]._elements[1]
     end
 
-    if vertical == true then
+    if mode == 1 or mode == 3 then
         local slideWidth = #style.sliderVertical.normal.handle
         this._elements[2] =
             ui.slider.new(
@@ -42,7 +43,7 @@ function new(parent, label, vertical, horizontal, style, x, y, w, h)
             h - this.stylePadding.top - this.stylePadding.bottom
         )
     end
-    if horizontal == true then
+    if mode == 1 or mode == 4 then
         local slideHeight = #style.sliderVertical.normal.handle
         this._elements[3] =
             ui.slider.new(
@@ -137,11 +138,12 @@ function new(parent, label, vertical, horizontal, style, x, y, w, h)
                     0,
                     math.min(
                         valueX,
-                        container.getLocalPosX() + container.getWidth() - (this.getWidth() - this.stylePadding.right)
+                        container.getLocalPosX() + container.getWidth() -
+                            (this.getWidth() - this.stylePadding.right + 1)
                     )
                 )
             elseif valueX < 0 then -- Up
-                maxMoveX = math.min(0, math.max(valueX, container.getLocalPosX() - this.stylePadding.left))
+                maxMoveX = math.min(0, math.max(valueX, container.getLocalPosX() + this.stylePadding.left - 1))
             end
         end
 
@@ -153,11 +155,12 @@ function new(parent, label, vertical, horizontal, style, x, y, w, h)
                     0,
                     math.min(
                         valueY,
-                        container.getLocalPosY() + container.getHeight() - (this.getHeight() - this.stylePadding.bottom)
+                        container.getLocalPosY() + container.getHeight() -
+                            (this.getHeight() - this.stylePadding.bottom + 1)
                     )
                 )
             elseif valueY < 0 then -- Up
-                maxMoveY = math.min(0, math.max(valueY, container.getLocalPosY() - this.stylePadding.top))
+                maxMoveY = math.min(0, math.max(valueY, container.getLocalPosY() + this.stylePadding.top - 1))
             end
         end
 
@@ -221,7 +224,7 @@ function new(parent, label, vertical, horizontal, style, x, y, w, h)
             theme = this.style.selectedTheme
         end
 
-        ui.buffer.fillWithColor(this.buffer, " ", theme.spaceColor, theme.spaceColor)
+        ui.buffer.fillWithColor(this.buffer, theme.border[5][1], theme.spaceTextColor, theme.spaceBackgroundColor)
         ui.buffer.borderBox(this.buffer, theme.border, theme.borderColor, theme.borderBackgroundColor)
         if this.label then
             local labelText = this.label

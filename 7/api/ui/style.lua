@@ -443,7 +443,8 @@ function new(path)
     local scrollView_normal = {
         textColor = colors.lime,
         textBackgroundColor = colors.green,
-        spaceColor = colors.white,
+        spaceTextColor = colors.white,
+        spaceBackgroundColor = colors.white,
         borderColor = colors.lime,
         borderBackgroundColor = colors.green,
         ---@type border
@@ -463,7 +464,8 @@ function new(path)
     local scrollView_disabled = {
         textColor = colors.lightGray,
         textBackgroundColor = colors.gray,
-        spaceColor = colors.white,
+        spaceTextColor = colors.white,
+        spaceBackgroundColor = colors.white,
         borderColor = colors.lightGray,
         borderBackgroundColor = colors.gray,
         ---@type border
@@ -483,7 +485,8 @@ function new(path)
     local scrollView_selected = {
         textColor = colors.yellow,
         textBackgroundColor = colors.green,
-        spaceColor = colors.white,
+        spaceTextColor = colors.white,
+        spaceBackgroundColor = colors.white,
         borderColor = colors.lime,
         borderBackgroundColor = colors.green,
         ---@type border

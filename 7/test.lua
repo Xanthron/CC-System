@@ -1,9 +1,6 @@
-print(("testing"):gsub("%g", "."))
-while true do
-    local event, par1 = os.pullEvent("key_up")
-    print(par1)
-    local key = keys.getName(par1)
-    print(key)
-    print(key:match("g"))
-    print(string.char(par1))
-end
+local testText = "testTextOderSo.lua:1234:Was auch immer"
+
+local startIndex, endIndex = testText:find(":[1-9]+:")
+print(testText:sub(0, startIndex - 1))
+print(testText:sub(startIndex + 1, endIndex - 1))
+print(testText:sub(endIndex + 1))

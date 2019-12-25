@@ -4,18 +4,24 @@ local style = ui.style.new()
 ---@type uiManager
 local manager = ui.uiManager.new(1, 1, width, height)
 manager.recalculate = function()
-    local index
-    for i = 1, width * height do
-        if i <= width then
-            manager.buffer.text[i] = " "
-            manager.buffer.textColor[i] = colors.lime
-            manager.buffer.textBackgroundColor[i] = colors.lime
-        else
-            manager.buffer.text[i] = " "
-            manager.buffer.textColor[i] = colors.white
-            manager.buffer.textBackgroundColor[i] = colors.white
-        end
+end
+local index
+for i = 1, width * height do
+    if i <= width then
+        manager.buffer.text[i] = " "
+        manager.buffer.textColor[i] = colors.lime
+        manager.buffer.textBackgroundColor[i] = colors.lime
+    else
+        manager.buffer.text[i] = " "
+        manager.buffer.textColor[i] = colors.white
+        manager.buffer.textBackgroundColor[i] = colors.white
     end
+end
+for i = 1, height do
+    local index = (i - 1) * width + width - 4
+    manager.buffer.text[index] = "|"
+    manager.buffer.textColor[index] = colors.black
+    manager.buffer.textBackgroundColor[index] = colors.white
 end
 manager.recalculate()
 

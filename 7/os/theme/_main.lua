@@ -48,10 +48,10 @@ menuButton.normalTheme.textColor = colors.white
 menuButton.normalTheme.textBackgroundColor = colors.green
 menuButton.normalTheme.borderColor = colors.white
 menuButton.normalTheme.borderBackgroundColor = colors.green
-menuButton.pressedTheme.textColor = colors.white
-menuButton.pressedTheme.textBackgroundColor = colors.lime
-menuButton.pressedTheme.borderColor = colors.white
-menuButton.pressedTheme.borderBackgroundColor = colors.lime
+menuButton.pressedTheme.textColor = colors.orange
+menuButton.pressedTheme.textBackgroundColor = colors.green
+menuButton.pressedTheme.borderColor = colors.orange
+menuButton.pressedTheme.borderBackgroundColor = colors.green
 menuButton.selectedTheme.textColor = colors.yellow
 menuButton.selectedTheme.textBackgroundColor = colors.green
 menuButton.selectedTheme.borderColor = colors.yellow
@@ -63,11 +63,103 @@ menuButton.disabledTheme.borderBackgroundColor = colors.grey
 
 ---@type style.scrollView
 local listView = style("scrollView")
-listView.assets.variables.save(
+listView.normalTheme.border = {{}, {}, {}, {}, {" "}, {" "}, {}, {}, {}}
+listView.selectedTheme.border = {{}, {}, {}, {}, {" "}, {" "}, {}, {}, {}}
+listView.disabledTheme.border = {{}, {}, {}, {}, {" "}, {" "}, {}, {}, {}}
+
+---@type style.button
+local listButton = style("button")
+listButton.alignment = 1
+listButton.normalTheme.border = {{}, {}, {}, {" "}, {" "}, {}, {}, {}, {}}
+listButton.pressedTheme.border = {{}, {}, {}, {"\16"}, {" "}, {}, {}, {}, {}}
+listButton.selectedTheme.border = {{}, {}, {}, {">"}, {" "}, {}, {}, {}, {}}
+listButton.disabledTheme.border = {{}, {}, {}, {"*"}, {" "}, {}, {}, {}, {}}
+listButton.normalTheme.textColor = colors.black
+listButton.normalTheme.textBackgroundColor = colors.white
+listButton.normalTheme.borderColor = colors.black
+listButton.normalTheme.borderBackgroundColor = colors.white
+listButton.pressedTheme.textColor = colors.orange
+listButton.pressedTheme.textBackgroundColor = colors.white
+listButton.pressedTheme.borderColor = colors.orange
+listButton.pressedTheme.borderBackgroundColor = colors.white
+listButton.selectedTheme.textColor = colors.orange
+listButton.selectedTheme.textBackgroundColor = colors.white
+listButton.selectedTheme.borderColor = colors.orange
+listButton.selectedTheme.borderBackgroundColor = colors.white
+listButton.disabledTheme.textColor = colors.grey
+listButton.disabledTheme.textBackgroundColor = colors.white
+listButton.disabledTheme.borderColor = colors.grey
+listButton.disabledTheme.borderBackgroundColor = colors.white
+
+---@type style.button
+local deactivatedButton = style("button")
+if term.isColor() then
+    deactivatedButton.normalTheme.border = {{}, {}, {}, {" "}, {" "}, {" "}, {}, {}, {}}
+    deactivatedButton.pressedTheme.border = {{}, {}, {}, {" "}, {" "}, {" "}, {}, {}, {}}
+    deactivatedButton.selectedTheme.border = {{}, {}, {}, {" "}, {" "}, {" "}, {}, {}, {}}
+    deactivatedButton.disabledTheme.border = {{}, {}, {}, {" "}, {" "}, {" "}, {}, {}, {}}
+else
+    deactivatedButton.normalTheme.border = {{}, {}, {}, {" "}, {" "}, {" "}, {}, {}, {}}
+    deactivatedButton.pressedTheme.border = {{}, {}, {}, {"["}, {" "}, {"]"}, {}, {}, {}}
+    deactivatedButton.selectedTheme.border = {{}, {}, {}, {"["}, {" "}, {"]"}, {}, {}, {}}
+    deactivatedButton.disabledTheme.border = {{}, {}, {}, {"*"}, {" "}, {"*"}, {}, {}, {}}
+end
+deactivatedButton.normalTheme.textColor = colors.white
+deactivatedButton.normalTheme.textBackgroundColor = colors.lime
+deactivatedButton.normalTheme.borderColor = colors.white
+deactivatedButton.normalTheme.borderBackgroundColor = colors.lime
+deactivatedButton.pressedTheme.textColor = colors.orange
+deactivatedButton.pressedTheme.textBackgroundColor = colors.lime
+deactivatedButton.pressedTheme.borderColor = colors.orange
+deactivatedButton.pressedTheme.borderBackgroundColor = colors.lime
+deactivatedButton.selectedTheme.textColor = colors.yellow
+deactivatedButton.selectedTheme.textBackgroundColor = colors.lime
+deactivatedButton.selectedTheme.borderColor = colors.yellow
+deactivatedButton.selectedTheme.borderBackgroundColor = colors.lime
+deactivatedButton.disabledTheme.textColor = colors.lightGrey
+deactivatedButton.disabledTheme.textBackgroundColor = colors.grey
+deactivatedButton.disabledTheme.borderColor = colors.lightGrey
+deactivatedButton.disabledTheme.borderBackgroundColor = colors.grey
+local activatedButton = style("button")
+if term.isColor() then
+    activatedButton.normalTheme.border = {{}, {}, {}, {" "}, {" "}, {" "}, {}, {}, {}}
+    activatedButton.pressedTheme.border = {{}, {}, {}, {" "}, {" "}, {" "}, {}, {}, {}}
+    activatedButton.selectedTheme.border = {{}, {}, {}, {" "}, {" "}, {" "}, {}, {}, {}}
+    activatedButton.disabledTheme.border = {{}, {}, {}, {" "}, {" "}, {" "}, {}, {}, {}}
+else
+    activatedButton.normalTheme.border = {{}, {}, {}, {" "}, {" "}, {" "}, {}, {}, {}}
+    activatedButton.pressedTheme.border = {{}, {}, {}, {"["}, {" "}, {"]"}, {}, {}, {}}
+    activatedButton.selectedTheme.border = {{}, {}, {}, {"["}, {" "}, {"]"}, {}, {}, {}}
+    activatedButton.disabledTheme.border = {{}, {}, {}, {"*"}, {" "}, {"*"}, {}, {}, {}}
+end
+activatedButton.normalTheme.textColor = colors.white
+activatedButton.normalTheme.textBackgroundColor = colors.orange
+activatedButton.normalTheme.borderColor = colors.white
+activatedButton.normalTheme.borderBackgroundColor = colors.orange
+activatedButton.pressedTheme.textColor = colors.red
+activatedButton.pressedTheme.textBackgroundColor = colors.orange
+activatedButton.pressedTheme.borderColor = colors.red
+activatedButton.pressedTheme.borderBackgroundColor = colors.orange
+activatedButton.selectedTheme.textColor = colors.yellow
+activatedButton.selectedTheme.textBackgroundColor = colors.orange
+activatedButton.selectedTheme.borderColor = colors.yellow
+activatedButton.selectedTheme.borderBackgroundColor = colors.orange
+activatedButton.disabledTheme.textColor = colors.lightGrey
+activatedButton.disabledTheme.textBackgroundColor = colors.grey
+activatedButton.disabledTheme.borderColor = colors.lightGrey
+activatedButton.disabledTheme.borderBackgroundColor = colors.grey
+
+local textBox = style("textBox")
+
+assets.variables.save(
     "os/theme/main.lua",
     {
         exitButton = exitButton,
         menuButton = menuButton,
-        listView = listView
+        listView = listView,
+        listButton = listButton,
+        activatedButton = activatedButton,
+        deactivatedButton = deactivatedButton,
+        textBox = textBox
     }
 )
