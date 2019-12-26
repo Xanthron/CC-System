@@ -26,10 +26,10 @@ exitButton.selectedTheme.textColor = colors.orange
 exitButton.selectedTheme.textBackgroundColor = colors.red
 exitButton.selectedTheme.borderColor = colors.orange
 exitButton.selectedTheme.borderBackgroundColor = colors.red
-exitButton.disabledTheme.textColor = colors.lightGrey
-exitButton.disabledTheme.textBackgroundColor = colors.grey
-exitButton.disabledTheme.borderColor = colors.lightGrey
-exitButton.disabledTheme.borderBackgroundColor = colors.grey
+exitButton.disabledTheme.textColor = colors.lightGray
+exitButton.disabledTheme.textBackgroundColor = colors.gray
+exitButton.disabledTheme.borderColor = colors.lightGray
+exitButton.disabledTheme.borderBackgroundColor = colors.gray
 
 ---@type style.button
 local menuButton = style("button")
@@ -56,16 +56,79 @@ menuButton.selectedTheme.textColor = colors.yellow
 menuButton.selectedTheme.textBackgroundColor = colors.green
 menuButton.selectedTheme.borderColor = colors.yellow
 menuButton.selectedTheme.borderBackgroundColor = colors.green
-menuButton.disabledTheme.textColor = colors.lightGrey
-menuButton.disabledTheme.textBackgroundColor = colors.grey
-menuButton.disabledTheme.borderColor = colors.lightGrey
-menuButton.disabledTheme.borderBackgroundColor = colors.grey
+menuButton.disabledTheme.textColor = colors.gray
+menuButton.disabledTheme.textBackgroundColor = colors.green
+menuButton.disabledTheme.borderColor = colors.gray
+menuButton.disabledTheme.borderBackgroundColor = colors.green
 
 ---@type style.scrollView
 local listView = style("scrollView")
 listView.normalTheme.border = {{}, {}, {}, {}, {" "}, {" "}, {}, {}, {}}
 listView.selectedTheme.border = {{}, {}, {}, {}, {" "}, {" "}, {}, {}, {}}
 listView.disabledTheme.border = {{}, {}, {}, {}, {" "}, {" "}, {}, {}, {}}
+---@type style.scrollView
+local listBox = style("scrollView")
+listBox.label.alignment = 1
+listBox.label.normalTheme.textColor = colors.black
+listBox.label.selectedTheme.textColor = colors.black
+listBox.label.disabledTheme.textColor = colors.black
+listBox.normalTheme.spaceTextColor = colors.black
+listBox.normalTheme.borderColor = colors.black
+listBox.normalTheme.spaceBackgroundColor = colors.white
+listBox.normalTheme.borderBackgroundColor = colors.white
+listBox.selectedTheme.spaceTextColor = colors.black
+listBox.selectedTheme.spaceTextColor = colors.black
+listBox.selectedTheme.borderColor = colors.black
+listBox.selectedTheme.borderColor = colors.black
+listBox.disabledTheme.spaceBackgroundColor = colors.white
+listBox.disabledTheme.spaceBackgroundColor = colors.white
+listBox.disabledTheme.borderBackgroundColor = colors.white
+listBox.disabledTheme.borderBackgroundColor = colors.white
+
+listBox.sliderHorizontal.normal.buttonNegative.normal.backgroundColor = {colors.white}
+listBox.sliderHorizontal.normal.buttonNegative.normal.color = {colors.black}
+listBox.sliderHorizontal.normal.buttonNegative.disabled.backgroundColor = {colors.white}
+listBox.sliderHorizontal.normal.buttonNegative.disabled.color = {colors.gray}
+listBox.sliderHorizontal.normal.buttonNegative.selected.backgroundColor = {colors.white}
+listBox.sliderHorizontal.normal.buttonNegative.selected.color = {colors.orange}
+listBox.sliderHorizontal.disabled.buttonNegative.disabled.backgroundColor = {colors.white}
+listBox.sliderHorizontal.disabled.buttonNegative.disabled.color = {colors.gray}
+
+listBox.sliderHorizontal.normal.buttonPositive.normal.backgroundColor = {colors.white}
+listBox.sliderHorizontal.normal.buttonPositive.normal.color = {colors.black}
+listBox.sliderHorizontal.normal.buttonPositive.disabled.backgroundColor = {colors.white}
+listBox.sliderHorizontal.normal.buttonPositive.disabled.color = {colors.gray}
+listBox.sliderHorizontal.normal.buttonPositive.selected.backgroundColor = {colors.white}
+listBox.sliderHorizontal.normal.buttonPositive.selected.color = {colors.orange}
+listBox.sliderHorizontal.disabled.buttonPositive.disabled.backgroundColor = {colors.white}
+listBox.sliderHorizontal.disabled.buttonPositive.disabled.color = {colors.gray}
+
+listBox.sliderVertical.normal.buttonNegative.normal.backgroundColor = {colors.white}
+listBox.sliderVertical.normal.buttonNegative.normal.color = {colors.black}
+listBox.sliderVertical.normal.buttonNegative.disabled.backgroundColor = {colors.white}
+listBox.sliderVertical.normal.buttonNegative.disabled.color = {colors.gray}
+listBox.sliderVertical.normal.buttonNegative.selected.backgroundColor = {colors.white}
+listBox.sliderVertical.normal.buttonNegative.selected.color = {colors.orange}
+listBox.sliderVertical.disabled.buttonNegative.disabled.backgroundColor = {colors.white}
+listBox.sliderVertical.disabled.buttonNegative.disabled.color = {colors.gray}
+
+listBox.sliderVertical.normal.buttonPositive.normal.backgroundColor = {colors.white}
+listBox.sliderVertical.normal.buttonPositive.normal.color = {colors.black}
+listBox.sliderVertical.normal.buttonPositive.disabled.backgroundColor = {colors.white}
+listBox.sliderVertical.normal.buttonPositive.disabled.color = {colors.gray}
+listBox.sliderVertical.normal.buttonPositive.selected.backgroundColor = {colors.white}
+listBox.sliderVertical.normal.buttonPositive.selected.color = {colors.orange}
+listBox.sliderVertical.disabled.buttonPositive.disabled.backgroundColor = {colors.white}
+listBox.sliderVertical.disabled.buttonPositive.disabled.color = {colors.gray}
+
+listBox.sliderHorizontal.normal.handleBackgroundColor = {colors.white}
+listBox.sliderHorizontal.normal.handleColor = {colors.gray}
+listBox.sliderHorizontal.normal.sliderBackgroundColor = {colors.white}
+listBox.sliderHorizontal.normal.sliderColor = {colors.black}
+listBox.sliderVertical.normal.handleBackgroundColor = {colors.white}
+listBox.sliderVertical.normal.handleColor = {colors.gray}
+listBox.sliderVertical.normal.sliderBackgroundColor = {colors.white}
+listBox.sliderVertical.normal.sliderColor = {colors.black}
 
 ---@type style.button
 local listButton = style("button")
@@ -86,9 +149,9 @@ listButton.selectedTheme.textColor = colors.orange
 listButton.selectedTheme.textBackgroundColor = colors.white
 listButton.selectedTheme.borderColor = colors.orange
 listButton.selectedTheme.borderBackgroundColor = colors.white
-listButton.disabledTheme.textColor = colors.grey
+listButton.disabledTheme.textColor = colors.gray
 listButton.disabledTheme.textBackgroundColor = colors.white
-listButton.disabledTheme.borderColor = colors.grey
+listButton.disabledTheme.borderColor = colors.gray
 listButton.disabledTheme.borderBackgroundColor = colors.white
 
 ---@type style.button
@@ -116,10 +179,10 @@ deactivatedButton.selectedTheme.textColor = colors.yellow
 deactivatedButton.selectedTheme.textBackgroundColor = colors.lime
 deactivatedButton.selectedTheme.borderColor = colors.yellow
 deactivatedButton.selectedTheme.borderBackgroundColor = colors.lime
-deactivatedButton.disabledTheme.textColor = colors.lightGrey
-deactivatedButton.disabledTheme.textBackgroundColor = colors.grey
-deactivatedButton.disabledTheme.borderColor = colors.lightGrey
-deactivatedButton.disabledTheme.borderBackgroundColor = colors.grey
+deactivatedButton.disabledTheme.textColor = colors.lightGray
+deactivatedButton.disabledTheme.textBackgroundColor = colors.gray
+deactivatedButton.disabledTheme.borderColor = colors.lightGray
+deactivatedButton.disabledTheme.borderBackgroundColor = colors.gray
 local activatedButton = style("button")
 if term.isColor() then
     activatedButton.normalTheme.border = {{}, {}, {}, {" "}, {" "}, {" "}, {}, {}, {}}
@@ -144,10 +207,10 @@ activatedButton.selectedTheme.textColor = colors.yellow
 activatedButton.selectedTheme.textBackgroundColor = colors.orange
 activatedButton.selectedTheme.borderColor = colors.yellow
 activatedButton.selectedTheme.borderBackgroundColor = colors.orange
-activatedButton.disabledTheme.textColor = colors.lightGrey
-activatedButton.disabledTheme.textBackgroundColor = colors.grey
-activatedButton.disabledTheme.borderColor = colors.lightGrey
-activatedButton.disabledTheme.borderBackgroundColor = colors.grey
+activatedButton.disabledTheme.textColor = colors.lightGray
+activatedButton.disabledTheme.textBackgroundColor = colors.gray
+activatedButton.disabledTheme.borderColor = colors.lightGray
+activatedButton.disabledTheme.borderBackgroundColor = colors.gray
 
 local textBox = style("textBox")
 
@@ -167,6 +230,7 @@ assets.variables.save(
         activatedButton = activatedButton,
         deactivatedButton = deactivatedButton,
         textBox = textBox,
-        pathLabel = pathLabel
+        pathLabel = pathLabel,
+        listBox = listBox
     }
 )

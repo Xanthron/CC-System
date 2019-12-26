@@ -17,7 +17,6 @@ local button1 = args.button1
 local button2 = args.button2
 
 local textBoxTheme = args.theme or theme.textBox
-print(theme.textBox)
 
 ---@type uiManager
 local manager = ui.uiManager.new(x, y, w, h)

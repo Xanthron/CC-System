@@ -10,16 +10,22 @@ function new(path)
     label.alignment = 1
     ---@class style.label.theme
     local label_normal = {
+        prefix = "",
+        suffix = "",
         textColor = colors.black,
         backgroundColor = colors.white
     }
     ---@type style.label.theme
     local label_disabled = {
+        prefix = "",
+        suffix = "",
         textColor = colors.gray,
         backgroundColor = colors.white
     }
     ---@type style.label.theme
     local label_selected = {
+        prefix = "",
+        suffix = "",
         textColor = colors.black,
         backgroundColor = colors.orange
     }
@@ -251,6 +257,16 @@ function new(path)
     local textBox = {}
     ---@type style.label
     textBox.label = assets.extension.copyTable(this.label)
+    textBox.label.normalTheme.backgroundColor = colors.green
+    textBox.label.normalTheme.textColor = colors.lime
+    textBox.label.disabledTheme.backgroundColor = colors.gray
+    textBox.label.disabledTheme.textColor = colors.lightGray
+    textBox.label.disabledTheme.prefix = "*"
+    textBox.label.disabledTheme.suffix = "*"
+    textBox.label.selectedTheme.backgroundColor = colors.green
+    textBox.label.selectedTheme.textColor = colors.yellow
+    textBox.label.selectedTheme.prefix = "*"
+    textBox.label.selectedTheme.suffix = "*"
     ---@type style.slider
     textBox.slider = assets.extension.copyTable(this.slider)
     textBox.slider.normal.buttonPositive.normal.text = {string.char(30)}
@@ -293,8 +309,6 @@ function new(path)
 
     ---@class style.textBox.theme
     local textBox_normal = {
-        textColor = colors.lime,
-        textBackgroundColor = colors.green,
         spaceColor = colors.white,
         borderColor = colors.lime,
         borderBackgroundColor = colors.green,
@@ -313,8 +327,6 @@ function new(path)
     }
     ---@type style.textBox.theme
     local textBox_disabled = {
-        textColor = colors.lightGray,
-        textBackgroundColor = colors.gray,
         spaceColor = colors.white,
         borderColor = colors.lightGray,
         borderBackgroundColor = colors.gray,
@@ -333,8 +345,6 @@ function new(path)
     }
     ---@type style.textBox.theme
     local textBox_selected = {
-        textColor = colors.yellow,
-        textBackgroundColor = colors.green,
         spaceColor = colors.white,
         borderColor = colors.lime,
         borderBackgroundColor = colors.green,

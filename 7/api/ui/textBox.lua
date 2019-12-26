@@ -77,29 +77,24 @@ function new(parent, label, text, style, x, y, w, h)
 
     this.recalculate = function()
         ---@type style.textBox.theme
-        local theme = nil
+        local theme
+        ---@type style.label.theme
+        local labelTheme
         if this.mode == 1 then
             theme = this.style.normalTheme
+            labelTheme = this.style.label.normalTheme
         elseif this.mode == 2 then
             theme = this.style.disabledTheme
+            labelTheme = this.style.label.disabledTheme
         else
             theme = this.style.selectedTheme
+            labelTheme = this.style.label.selectedTheme
         end
 
         ui.buffer.fillWithColor(this.buffer, " ", theme.spaceColor, theme.spaceColor)
         ui.buffer.borderBox(this.buffer, theme.border, theme.borderColor, theme.borderBackgroundColor)
         if this.label then
-            local labelText = this.label
-            local labelTheme
-            if this.mode == 1 then
-                labelTheme = this.style.label.normalTheme
-            elseif this.mode == 2 then
-                labelTheme = this.style.label.disabledTheme
-            else
-                labelText = ">" .. labelText .. "<"
-                labelTheme = this.style.label.normalTheme
-            end
-            ui.buffer.labelBox(this.buffer, labelText, theme.textColor, theme.textBackgroundColor, 5, nil, this.stylePadding.left, 0, this.stylePadding.right, this.buffer.rect.h - this.stylePadding.top)
+            ui.buffer.labelBox(this.buffer, labelTheme.prefix .. this.label .. labelTheme.suffix, labelTheme.textColor, labelTheme.backgroundColor, 5, nil, this.stylePadding.left, 0, this.stylePadding.right, this.buffer.rect.h - this.stylePadding.top)
         end
     end
     this.recalculate()

@@ -72,7 +72,7 @@ function new(parent, text, func, style, x, y, w, h)
                     this.recalculate()
                     this.repaint("this", x, y, w, h)
                 end
-                this._onClick()
+                this._onClick(event)
                 return this
             elseif this.mode == 3 and (event.param2 < x or event.param2 >= x + w or event.param3 < y or event.param3 >= y + h) then
                 this.mode = 1
@@ -102,7 +102,7 @@ function new(parent, text, func, style, x, y, w, h)
                 this.recalculate()
                 this.repaint("this", this.getCompleteMaskRect())
             end
-            this._onClick()
+            this._onClick(event)
             return true
         end
     end

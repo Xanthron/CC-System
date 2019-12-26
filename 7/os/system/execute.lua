@@ -1,4 +1,5 @@
 local args = {...}
+
 local file = args[1]
 
 local function getFilesWithName(path, name, tab)
@@ -37,7 +38,6 @@ local function errorHandler(text)
             text = text .. "Multiple files could be found:\n" .. table.concat(possibleFiles, "\n")
         end
     end
-
     assert(loadfile("os/system/infoBox.lua"))(
         {
             label = "Error",

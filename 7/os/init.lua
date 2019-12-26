@@ -3,6 +3,9 @@ local width, height = term.getSize()
 local success
 success, _G.theme = ui.theme.load("main.lua")
 
+--Necessary, so that it is possible to use the shell command after starting a script with assert
+_G.shell = shell
+
 ---@type uiManager
 local manager = ui.uiManager.new(1, 1, width, height)
 local index
@@ -39,7 +42,8 @@ local explorerButton =
     function()
         manager.callFunction(
             function()
-                assert(loadfile("os/system/execute.lua"))("os/system/explorer/explorer.lua")
+                --assert(loadfile("os/system/execute.lua"))("os/system/explorer/explorer.lua")
+                shell.run("os/system/execute.lua", "os/system/explorer/explorer.lua")
                 manager.draw()
             end
         )
@@ -129,7 +133,8 @@ local function updateListView()
             startFunction = function()
                 manager.callFunction(
                     function()
-                        assert(loadfile("os/system/execute.lua"))("os/programs/" .. value)
+                        --assert(loadfile("os/system/execute.lua"))("os/programs/" .. value)
+                        shell.run("os/system/execute.lua", "os/programs/" .. value)
                         manager.draw()
                     end
                 )

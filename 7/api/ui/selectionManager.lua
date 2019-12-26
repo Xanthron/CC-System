@@ -81,7 +81,7 @@ function new()
             end
 
             if currentSelectionElement then
-                if currentElement.mode == 3 then
+                if currentElement.mode == 3 or currentElement.mode == 2 then
                     if event.param1 == 15 or event.param1 == 18 then
                         if this._currentSelectionGroup.next then
                             _switch(this, this._currentSelectionGroup.next, "key", event.param1)
@@ -130,7 +130,7 @@ function new()
     ---@param event event
     ---@param element element
     this.mouseEvent = function(event, element)
-        if event.name ~= "mouse_click" then
+        if (this._currentSelectionGroup.listener and this._currentSelectionGroup.listener("mouse", "mouse", event) == false) or event.name ~= "mouse_click" then
             return
         end
 
@@ -211,10 +211,16 @@ function new()
             if isManaging then
                 if value == this._currentSelectionGroup then
                     if currentElement == element then
-                        return
-                    end
-
-                    if not value.listener or value.listener("selection_change", "code", currentElement, element) ~= false then
+                        if not value.listener or value.listener("selection_reselect", "code", currentElement, element) ~= false then
+                            if element.mode == 1 then
+                                element.mode = 3
+                                if not element._inAnimation then
+                                    element.recalculate()
+                                    element.repaint("this")
+                                end
+                            end
+                        end
+                    elseif not value.listener or value.listener("selection_change", "code", currentElement, element) ~= false then
                         if currentElement and currentElement.mode == 3 then
                             currentElement.mode = 1
                             if not currentElement._inAnimation then
@@ -223,6 +229,15 @@ function new()
                             end
                         end
                         value.currentSelectionElement = managedSelectionElement
+                        if not value.listener or value.listener("selection_change", "code", currentElement, element) ~= false then
+                            if element.mode == 1 then
+                                element.mode = 3
+                                if not element._inAnimation then
+                                    element.recalculate()
+                                    element.repaint("this")
+                                end
+                            end
+                        end
                     end
                 elseif not this._currentSelectionGroup.listener or this._currentSelectionGroup.listener("selection_lose_focus", "code", currentElement, element) ~= false then
                     if currentElement and currentElement.mode == 3 then
@@ -267,12 +282,17 @@ end
 function _select(selectionGroup, direction, source)
     local currentSelectionElement = selectionGroup.currentSelectionElement
     local newSelection = currentSelectionElement[direction]
+    while newSelection and newSelection.element.mode == 2 do
+        newSelection = newSelection[direction]
+    end
     if newSelection then
         if not selectionGroup.listener or selectionGroup.listener("selection_change", source, currentSelectionElement.element, newSelection.element) ~= false then
-            currentSelectionElement.element.mode = 1
-            if not currentSelectionElement.element._inAnimation then
-                currentSelectionElement.element.recalculate()
-                currentSelectionElement.element.repaint("this")
+            if currentSelectionElement.element.mode > 2 then
+                currentSelectionElement.element.mode = 1
+                if not currentSelectionElement.element._inAnimation then
+                    currentSelectionElement.element.recalculate()
+                    currentSelectionElement.element.repaint("this")
+                end
             end
             newSelection.element.mode = 3
             if not newSelection.element._inAnimation then
@@ -302,7 +322,7 @@ function _switch(selectionManager, selectionGroup, source, ...)
     end
 
     if selectionManager._currentSelectionGroup and (not selectionManager._currentSelectionGroup.listener or selectionManager._currentSelectionGroup.listener("selection_lose_focus", source, currentElement, newElement, ...) ~= false) then
-        if currentElement and currentElement.mode ~= 1 then
+        if currentElement and currentElement.mode > 2 then
             currentElement.mode = 1
             if not currentElement._inAnimation then
                 currentElement.recalculate()
@@ -312,7 +332,7 @@ function _switch(selectionManager, selectionGroup, source, ...)
     end
 
     if not selectionGroup.listener or selectionGroup.listener("selection_get_focus", source, currentElement, newElement, ...) ~= false then
-        if newElement and newElement.mode ~= 3 then
+        if newElement and (newElement.mode == 1 or newElement.mode == 4) then
             newElement.mode = 3
             if not newElement._inAnimation then
                 newElement.recalculate()

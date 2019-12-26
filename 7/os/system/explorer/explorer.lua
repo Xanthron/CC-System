@@ -6,9 +6,10 @@ local settings = {
     showIcons = true,
     showHiddenFiles = false,
     showFiles = true,
-    showExtension = false,
+    showExtension = true,
     selectMode = false,
-    neatNames = false
+    neatNames = true,
+    pathSaveSize = 20
 }
 if args[2] then
     for key, value in pairs(args[2]) do
@@ -17,33 +18,44 @@ if args[2] then
 end
 
 local extensions = dofile("os/system/explorer/extensions.lua")
-
 local width, height = term.getSize()
+local updateListView, updatePath, updateButton
+local pathSaveIndex = 1
+local pathSaves = {startPath or ""}
 
-local updateListView, updatePath, getName, getList
+local function getCurrentDir()
+    return pathSaves[pathSaveIndex] or ""
+end
 
-getName = function(name)
+local function getName(name)
     local startI, endI = name:find("%.[^%.]*$")
     local extension = nil
     if endI then
         extension = name:sub(startI + 1, endI)
-        if settings.showExtension == false then
-            name = name:sub(1, startI - 1)
-        end
+        --if settings.showExtension == false then
+        name = name:sub(1, startI - 1)
+    --end
     end
     if settings.neatNames == true then
+        name =
+            name:gsub(
+            "[._]+.",
+            function(text)
+                return text:sub(text:len()):upper()
+            end
+        )
         name =
             (name:sub(1, 1):upper() .. name:sub(2)):gsub(
             "%l%u",
             function(text)
-                return text:sub(1, 1):upper() .. " " .. text:sub(2, 2)
+                return text:sub(1, 1) .. " " .. text:sub(2, 2)
             end
         )
     end
     return name, extension
 end
 
-getList = function(path, dir, file)
+local function getList(path, dir, file)
     local paths = fs.list(path)
     local index = 1
     for i = 1, #paths do
@@ -57,17 +69,17 @@ getList = function(path, dir, file)
             end
         end
         if excluded == false then
-            local newName, extension = getName(name)
             if fs.isDir(newPath) then
+                local newName, extension = getName(name)
                 table.insert(dir, newPath)
-                table.insert(dir, newName)
-                table.insert(dir, "folder")
+                table.insert(dir, "/" .. newName)
             else
                 if settings.showFiles then
                     if settings.showHiddenFiles == true or name:sub(1, 1) ~= "." then
+                        local newName, extension = getName(name)
                         table.insert(file, newPath)
                         table.insert(file, newName)
-                        table.insert(file, extension or "file")
+                        table.insert(file, extension or "")
                     end
                 end
             end
@@ -94,45 +106,34 @@ for i = 1, width * height do
     end
 end
 
-local fileButton =
-    ui.button.new(
-    manager,
-    "File",
-    function()
-    end,
-    theme.menuButton,
-    1,
-    1,
-    6,
-    1
-)
-local upButton =
-    ui.button.new(
-    manager,
-    "^",
-    function()
-    end,
-    theme.menuButton,
-    8,
-    1,
-    3,
-    1
-)
-local backButton =
-    ui.button.new(
-    manager,
-    "<",
-    function()
-    end,
-    theme.menuButton,
-    11,
-    1,
-    3,
-    1
-)
-local forwardButton = ui.button.new(manager, ">", nil, theme.menuButton, 14, 1, 3, 1)
-forwardButton._onClick = function()
+local fileButton = ui.button.new(manager, "File", nil, theme.menuButton, 1, 1, 6, 1)
+fileButton._onClick = function()
+    manager.callFunction(
+        function()
+            assert(loadfile("os/system/listBox.lua"))(
+                {
+                    x = 1,
+                    y = 1,
+                    manager = manager,
+                    label = "File",
+                    func = function()
+                    end,
+                    buttons = {"test", {name = "and more", "Was", {name = "auch", "und", "noch", {name = "mehr", "Jetzt", {name = "aber", "ok", "jetzt", "muss", "ich", "aber", "noch", "mehr", "schreiben", "langer Text"}}}, "immer"}, "Test"}
+                }
+            )
+            print("jo")
+            sleep(1)
+            manager.draw()
+        end
+    )
 end
+local upButton = ui.button.new(manager, "^", nil, theme.menuButton, 8, 1, 3, 1)
+
+---@type button
+local backButton = ui.button.new(manager, "<", nil, theme.menuButton, 11, 1, 3, 1)
+
+local forwardButton = ui.button.new(manager, ">", nil, theme.menuButton, 14, 1, 3, 1)
+
 local exitButton = ui.button.new(manager, "<", nil, theme.exitButton, width - 2, 1, 3, 1)
 exitButton._onClick = function()
     term.setCursorPos(1, 1)
@@ -143,6 +144,89 @@ exitButton._onClick = function()
     term.clear()
     manager.exit()
 end
+
+local updateButton = function()
+    if pathSaveIndex == 1 then
+        if backButton.mode ~= 2 then
+            backButton.mode = 2
+            if not backButton._inAnimation then
+                backButton.repaint("this")
+                backButton.recalculate("this")
+            end
+        end
+    else
+        if backButton.mode == 2 then
+            backButton.mode = 1
+            if not backButton._inAnimation then
+                backButton.repaint("this")
+                backButton.recalculate("this")
+            end
+        end
+    end
+    if pathSaveIndex >= #pathSaves then
+        if forwardButton.mode ~= 2 then
+            forwardButton.mode = 2
+            if not forwardButton._inAnimation then
+                forwardButton.repaint("this")
+                forwardButton.recalculate("this")
+            end
+        end
+    else
+        if forwardButton.mode == 2 then
+            forwardButton.mode = 1
+            if not forwardButton._inAnimation then
+                forwardButton.repaint("this")
+                forwardButton.recalculate("this")
+            end
+        end
+    end
+    if fs.getDir(getCurrentDir()) == ".." then
+        if upButton.mode ~= 2 then
+            upButton.mode = 2
+            if not upButton._inAnimation then
+                upButton.repaint("this")
+                upButton.recalculate("this")
+            end
+        end
+    else
+        if upButton.mode == 2 then
+            upButton.mode = 1
+            if not upButton._inAnimation then
+                upButton.repaint("this")
+                upButton.recalculate("this")
+            end
+        end
+    end
+end
+updateButton()
+upButton._onClick = function()
+    local path = fs.getDir(getCurrentDir())
+    for _ = pathSaveIndex + 1, #pathSaves do
+        table.remove(pathSaves, pathSaveIndex + 1)
+    end
+    while #pathSaves >= settings.pathSaveSize do
+        table.remove(pathSaves, 1)
+    end
+    table.insert(pathSaves, path)
+    pathSaveIndex = math.min(pathSaveIndex + 1, settings.pathSaveSize)
+
+    updateButton()
+    updatePath()
+    manager.draw()
+end
+backButton._onClick = function()
+    pathSaveIndex = pathSaveIndex - 1
+    updateButton()
+    updatePath()
+    manager.draw()
+end
+forwardButton._onClick = function()
+    pathSaveIndex = pathSaveIndex + 1
+    updateButton()
+    updatePath()
+    manager.draw()
+end
+
 local menuSelectionGroup = manager.selectionManager.addNewSelectionGroup()
 local fileButton_selection = menuSelectionGroup.addNewSelectionElement(fileButton)
 local upButton_selection = menuSelectionGroup.addNewSelectionElement(upButton)
@@ -167,11 +251,13 @@ local listView = ui.scrollView.new(manager, nil, 3, theme.listView, 1, 3, width,
 local backgroundListView = listView._elements[1]
 local backgroundListViewBuffer = backgroundListView.buffer
 for i = 1, height - 1 do
-    index = (i - 1) * (width - 1) + 4
-    backgroundListViewBuffer.text[index] = "|"
-    backgroundListViewBuffer.textColor[index] = colors.black
-    backgroundListViewBuffer.textBackgroundColor[index] = colors.white
-    index = index + width - 5
+    if settings.showIcons == true then
+        index = (i - 1) * (width - 1) + 4
+        backgroundListViewBuffer.text[index] = "|"
+        backgroundListViewBuffer.textColor[index] = colors.black
+        backgroundListViewBuffer.textBackgroundColor[index] = colors.white
+    end
+    index = (i - 1) * (width - 1) + width - 1
     backgroundListViewBuffer.text[index] = "|"
     backgroundListViewBuffer.textColor[index] = colors.black
     backgroundListViewBuffer.textBackgroundColor[index] = colors.white
@@ -200,19 +286,39 @@ updateListView = function(path)
     index = 1
     ---@type selectionElement[]
     local selectionElements = {}
-    for i = 1, #dir, 3 do
+    for i = 1, #dir, 2 do
         local path = dir[i]
         local name = dir[i + 1]
-        local ext = extensions["folder"]
-        local image = ui.element.new(container, 1, index + 2, 3, 1)
-        image.buffer.text = ext[1]
-        image.buffer.textColor = ext[2]
-        image.buffer.textBackgroundColor = ext[3]
-        local button = ui.button.new(container, name, nil, theme.listButton, 5, index + 2, width - 10, 1)
-        button._onClick = function()
+
+        local newX = 1
+        local newW = width - 14
+        if settings.showIcons == true then
+            local ext = extensions["folder"]
+            local image = ui.element.new(container, 1, index + 2, 3, 1)
+            image.buffer.text = ext[1]
+            image.buffer.textColor = ext[2]
+            image.buffer.textBackgroundColor = ext[3]
+            newX = 5
+            newW = width - 10
+        end
+        local button = ui.button.new(container, name, nil, theme.listButton, newX, index + 2, newW, 1)
+        button._onClick = function(event)
             manager.parallelManager.removeFunction(button._pressAnimation)
-            updatePath(path)
-            manager.selectionManager.focusGroup(listView.selectionGroup)
+
+            for _ = pathSaveIndex + 1, #pathSaves do
+                table.remove(pathSaves, pathSaveIndex + 1)
+            end
+            while #pathSaves >= settings.pathSaveSize do
+                table.remove(pathSaves, 1)
+            end
+            table.insert(pathSaves, path)
+            pathSaveIndex = math.min(pathSaveIndex + 1, settings.pathSaveSize)
+
+            updateButton()
+            updatePath()
+            if event.name ~= "mouse_up" then
+                manager.selectionManager.select(listView.selectionGroup.selectionElements[1].element)
+            end
             manager.draw()
         end
         table.insert(selectionElements, listView.selectionGroup.addNewSelectionElement(button))
@@ -221,17 +327,33 @@ updateListView = function(path)
     for i = 1, #file, 3 do
         local path = file[i]
         local name = file[i + 1]
-        local ext = extensions[file[i + 2]]
-        if ext then
-            ---@type element
+        if settings.showExtension and file[i + 2] ~= "" then
+            name = name .. "." .. file[i + 2]
+        end
+
+        local ext = extensions[file[i + 2]] or extensions["file"]
+        local program = ext[4]
+        local args = ext[5]
+        local newX = 1
+        local newW = width - 14
+        if settings.showIcons == true then
             local image = ui.element.new(container, 1, index + 2, 3, 1)
             image.buffer.text = ext[1]
             image.buffer.textColor = ext[2]
             image.buffer.textBackgroundColor = ext[3]
+            newX = 5
+            newW = width - 10
         end
         local buttonFunc = function()
+            manager.callFunction(
+                function()
+                    shell.run("os/system/execute.lua", program, path)
+
+                    manager.draw()
+                end
+            )
         end
-        local button = ui.button.new(container, name, buttonFunc, theme.listButton, 5, index + 2, width - 10, 1)
+        local button = ui.button.new(container, name, buttonFunc, theme.listButton, newX, index + 2, newW, 1)
         table.insert(selectionElements, listView.selectionGroup.addNewSelectionElement(button))
         index = index + 1
     end
@@ -239,12 +361,13 @@ updateListView = function(path)
         selectionElements[i].up = selectionElements[i - 1]
         selectionElements[i].down = selectionElements[i + 1]
     end
-    listView.selectionGroup.currentSelectionElement = listView.selectionGroup.selectionElements[2]
+    listView.selectionGroup.currentSelectionElement = listView.selectionGroup.selectionElements[1]
     listView.recalculate()
     listView.resetLayout()
 end
 
-updatePath = function(path)
+updatePath = function()
+    local path = getCurrentDir()
     updateListView(path)
     if path == "" then
         pathLabel.text = "root"
@@ -254,7 +377,11 @@ updatePath = function(path)
     pathLabel.recalculate()
 end
 
-updatePath("")
-manager.selectionManager.setCurrentSelectionGroup(listView.selectionGroup)
+updatePath()
+if term.isColor() then
+    manager.selectionManager._currentSelectionGroup = listView.selectionGroup
+else
+    manager.selectionManager.setCurrentSelectionGroup(listView.selectionGroup)
+end
 manager.draw()
 manager.execute()

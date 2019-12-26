@@ -305,7 +305,9 @@ function new(parent, x, y, w, h)
                 end
             end
         end
-        return this._doPointerEvent(event, x, y, w, h)
+        if this.mode ~= 2 then
+            return this._doPointerEvent(event, x, y, w, h)
+        end
     end
 
     ---
@@ -319,7 +321,9 @@ function new(parent, x, y, w, h)
                 return element
             end
         end
-        return this._doNormalEvent(event)
+        if this.mode ~= 2 then
+            return this._doNormalEvent(event)
+        end
     end
 
     --- Intern function of an `element` handling all events in a `rect` mask that are *mouse_click*, *mouse_down*, *mouse_drag*. Return the `element` if it is effected else it returns `nil`.
@@ -339,19 +343,6 @@ function new(parent, x, y, w, h)
 
     --- Recalculate its `buffer` data.
     this.recalculate = function()
-    end
-
-    this.delete = function()
-        if this._parent then
-            for i, value in ipairs(this._parent._elements) do
-                if value == this then
-                    this._parent._elements[i] = nil
-                end
-            end
-        end
-        for key, value in pairs(this) do
-            this[key] = nil
-        end
     end
 
     return this
