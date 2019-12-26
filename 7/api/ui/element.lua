@@ -341,5 +341,18 @@ function new(parent, x, y, w, h)
     this.recalculate = function()
     end
 
+    this.delete = function()
+        if this._parent then
+            for i, value in ipairs(this._parent._elements) do
+                if value == this then
+                    this._parent._elements[i] = nil
+                end
+            end
+        end
+        for key, value in pairs(this) do
+            this[key] = nil
+        end
+    end
+
     return this
 end

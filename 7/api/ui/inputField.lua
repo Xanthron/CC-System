@@ -70,18 +70,7 @@ function new(parent, label, text, multiLine, onSubmit, style, x, y, w, h)
             text = this.text:sub(offset + 1, math.min(offset + width - left - right, length))
         end
 
-        ui.buffer.labelBox(
-            this.buffer,
-            text,
-            theme.textColor,
-            theme.textBackgroundColor,
-            1,
-            theme.border[5][1],
-            left,
-            top,
-            right,
-            bottom
-        )
+        ui.buffer.labelBox(this.buffer, text, theme.textColor, theme.textBackgroundColor, 1, theme.border[5][1], left, top, right, bottom)
     end
     this.recalculate = function()
         ---@type style.inputField.theme
@@ -103,18 +92,7 @@ function new(parent, label, text, multiLine, onSubmit, style, x, y, w, h)
         ui.buffer.borderBox(this.buffer, theme.border, theme.borderColor, theme.borderBackgroundColor)
         if this.label then
             local yPos = math.max(0, math.floor((#theme.border[2] - 1) / 2))
-            ui.buffer.labelBox(
-                this.buffer,
-                this.label,
-                labelTheme.textColor,
-                labelTheme.backgroundColor,
-                this.style.label.alignment,
-                nil,
-                #theme.border[4],
-                yPos,
-                #theme.border[6],
-                this.buffer.rect.h - yPos
-            )
+            ui.buffer.labelBox(this.buffer, this.label, labelTheme.textColor, labelTheme.backgroundColor, this.style.label.alignment, nil, #theme.border[4], yPos, #theme.border[6], this.buffer.rect.h - yPos)
         end
         this.recalculateText()
     end
@@ -253,31 +231,19 @@ function new(parent, label, text, multiLine, onSubmit, style, x, y, w, h)
                 return this
             end
         elseif event.name == "mouse_drag" then
-            if
-                this.mode == 4 and event.param2 >= x and event.param2 < x + w and event.param3 >= y and
-                    event.param3 < y + h
-             then
+            if this.mode == 4 and event.param2 >= x and event.param2 < x + w and event.param3 >= y and event.param3 < y + h then
                 this.mode = 3
                 this.recalculate()
                 this.repaint("this", x, y, w, h)
-            elseif
-                this.mode == 3 and
-                    (event.param2 < x or event.param2 >= x + w or event.param3 < y or event.param3 >= y + h)
-             then
+            elseif this.mode == 3 and (event.param2 < x or event.param2 >= x + w or event.param3 < y or event.param3 >= y + h) then
                 this.mode = 4
                 this.recalculate()
                 this.repaint("this", x, y, w, h)
             end
         elseif event.name == "mouse_up" then
-            if
-                this.mode == 3 and event.param2 >= x and event.param2 < x + w and event.param3 >= y and
-                    event.param3 < y + h
-             then
+            if this.mode == 3 and event.param2 >= x and event.param2 < x + w and event.param3 >= y and event.param3 < y + h then
                 return this
-            elseif
-                this.mode == 4 and
-                    (event.param2 < x or event.param2 >= x + w or event.param3 < y or event.param3 >= y + h)
-             then
+            elseif this.mode == 4 and (event.param2 < x or event.param2 >= x + w or event.param3 < y or event.param3 >= y + h) then
                 this.mode = 1
                 this.recalculate()
                 this.repaint("this", x, y, w, h)

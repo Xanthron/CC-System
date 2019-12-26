@@ -151,6 +151,12 @@ activatedButton.disabledTheme.borderBackgroundColor = colors.grey
 
 local textBox = style("textBox")
 
+---@type style.label
+local pathLabel = style("label")
+pathLabel.alignment = 1
+pathLabel.normalTheme.backgroundColor = colors.lime
+pathLabel.normalTheme.textColor = colors.black
+
 assets.variables.save(
     "os/theme/main.lua",
     {
@@ -160,6 +166,7 @@ assets.variables.save(
         listButton = listButton,
         activatedButton = activatedButton,
         deactivatedButton = deactivatedButton,
-        textBox = textBox
+        textBox = textBox,
+        pathLabel = pathLabel
     }
 )

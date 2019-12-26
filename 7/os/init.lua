@@ -2,7 +2,6 @@ local width, height = term.getSize()
 
 local success
 success, _G.theme = ui.theme.load("main.lua")
-local exitFunction
 
 ---@type uiManager
 local manager = ui.uiManager.new(1, 1, width, height)
@@ -18,7 +17,6 @@ for i = 1, width * height do
         manager.buffer.textBackgroundColor[i] = colors.white
     end
 end
-manager.recalculate()
 
 ---@type style.button
 
@@ -39,6 +37,12 @@ local explorerButton =
     manager,
     "Explorer",
     function()
+        manager.callFunction(
+            function()
+                assert(loadfile("os/system/execute.lua"))("os/system/explorer/explorer.lua")
+                manager.draw()
+            end
+        )
     end,
     theme.menuButton,
     11,

@@ -53,19 +53,13 @@ function new(parent, text, checked, func, style, x, y, w, h)
                 return this
             end
         elseif event.name == "mouse_drag" then
-            if
-                this.mode == 3 and event.param2 >= x and event.param2 < x + w and event.param3 >= y and
-                    event.param3 < y + h
-             then
+            if this.mode == 3 and event.param2 >= x and event.param2 < x + w and event.param3 >= y and event.param3 < y + h then
                 this.mode = 4
                 if this._inAnimation == false then
                     this.recalculate()
                     this.repaint("this", x, y, w, h)
                 end
-            elseif
-                this.mode == 4 and
-                    (event.param2 < x or event.param2 >= x + w or event.param3 < y or event.param3 >= y + h)
-             then
+            elseif this.mode == 4 and (event.param2 < x or event.param2 >= x + w or event.param3 < y or event.param3 >= y + h) then
                 this.mode = 3
                 if this._inAnimation == false then
                     this.recalculate()
@@ -73,10 +67,7 @@ function new(parent, text, checked, func, style, x, y, w, h)
                 end
             end
         elseif event.name == "mouse_up" then
-            if
-                this.mode == 4 and event.param2 >= x and event.param2 < x + w and event.param3 >= y and
-                    event.param3 < y + h
-             then
+            if this.mode == 4 and event.param2 >= x and event.param2 < x + w and event.param3 >= y and event.param3 < y + h then
                 this._checked = this._checked == false
                 this.mode = 1
                 if this._inAnimation == false then
@@ -85,10 +76,7 @@ function new(parent, text, checked, func, style, x, y, w, h)
                 end
                 this._onToggle(this._checked)
                 return this
-            elseif
-                this.mode == 3 and
-                    (event.param2 < x or event.param2 >= x + w or event.param3 < y or event.param3 >= y + h)
-             then
+            elseif this.mode == 3 and (event.param2 < x or event.param2 >= x + w or event.param3 < y or event.param3 >= y + h) then
                 this.mode = 1
                 if this._inAnimation == false then
                     this.recalculate()
@@ -153,18 +141,7 @@ function new(parent, text, checked, func, style, x, y, w, h)
         local buffer = this.buffer
         local alignment = this.style.alignment
 
-        ui.buffer.labelBox(
-            buffer,
-            this.text,
-            theme.textColor,
-            theme.backgroundColor,
-            alignment,
-            " ",
-            #checkbox,
-            0,
-            0,
-            0
-        )
+        ui.buffer.labelBox(buffer, this.text, theme.textColor, theme.backgroundColor, alignment, " ", #checkbox, 0, 0, 0)
 
         local topPadding = 0
 

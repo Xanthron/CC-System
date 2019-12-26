@@ -10,38 +10,14 @@ function new(parent, label, text, style, x, y, w, h)
     ---@class textBox:element
     local this = ui.element.new(parent, x, y, w, h)
 
-    this.stylePadding =
-        ui.padding.new(
-        #style.normalTheme.border[4],
-        #style.normalTheme.border[2],
-        #style.normalTheme.border[5],
-        #style.normalTheme.border[7]
-    )
+    this.stylePadding = ui.padding.new(#style.normalTheme.border[4], #style.normalTheme.border[2], #style.normalTheme.border[5], #style.normalTheme.border[7])
     this._elements[1] = ui.element.new(this, this.stylePadding.getPaddedRect(this.buffer.rect.getUnpacked()))
     this._elements[1]._elements[1] = ui.label.new(this, text, style.label, this._elements[1].getGlobalRect())
     local slideWidth = #style.slider.normal.handle
-    this._elements[2] =
-        ui.slider.new(
-        this,
-        nil,
-        1,
-        0,
-        this._elements[1]._elements[1].getHeight(),
-        this._elements[1].getHeight(),
-        style.slider,
-        x + w - math.max(math.ceil((this.stylePadding.right + slideWidth) / 2), slideWidth),
-        y + this.stylePadding.top,
-        slideWidth,
-        h - this.stylePadding.top - this.stylePadding.bottom
-    )
+    this._elements[2] = ui.slider.new(this, nil, 1, 0, this._elements[1]._elements[1].getHeight(), this._elements[1].getHeight(), style.slider, x + w - math.max(math.ceil((this.stylePadding.right + slideWidth) / 2), slideWidth), y + this.stylePadding.top, slideWidth, h - this.stylePadding.top - this.stylePadding.bottom)
     this.label = label
     this.resetLayout = function()
-        this.stylePadding.set(
-            #this.style.normalTheme.border[4],
-            #this.style.normalTheme.border[2],
-            #this.style.normalTheme.border[5],
-            #this.style.normalTheme.border[7]
-        )
+        this.stylePadding.set(#this.style.normalTheme.border[4], #this.style.normalTheme.border[2], #this.style.normalTheme.border[5], #this.style.normalTheme.border[7])
         local x, y, w, h = this.getGlobalRect()
         local container = this._elements[1]
         container.setGlobalRect(this.stylePadding.getPaddedRect(this.buffer.rect.getUnpacked()))
@@ -54,12 +30,7 @@ function new(parent, label, text, style, x, y, w, h)
         local slider = this._elements[2]
         slider.style = this.style.slider
         local slideWidth = #this.style.slider.normal.handle
-        slider.setLocalRect(
-            x + w - math.max(math.ceil((this.stylePadding.right + slideWidth) / 2), slideWidth),
-            y + this.stylePadding.top,
-            slideWidth,
-            h - this.stylePadding.top - this.stylePadding.bottom
-        )
+        slider.setLocalRect(x + w - math.max(math.ceil((this.stylePadding.right + slideWidth) / 2), slideWidth), y + this.stylePadding.top, slideWidth, h - this.stylePadding.top - this.stylePadding.bottom)
         slider.startValue = 0
         slider.endValue = h
         slider.size = label.getHeight()
@@ -73,14 +44,7 @@ function new(parent, label, text, style, x, y, w, h)
         local maxMove = 0
         local label = this._elements[1]._elements[1]
         if change > 0 then -- Down
-            maxMove =
-                math.max(
-                0,
-                math.min(
-                    change,
-                    label.getLocalPosY() + label.getHeight() - (this.getHeight() - this.stylePadding.bottom + 1)
-                )
-            )
+            maxMove = math.max(0, math.min(change, label.getLocalPosY() + label.getHeight() - (this.getHeight() - this.stylePadding.bottom + 1)))
         elseif change < 0 then -- Up
             maxMove = math.min(0, math.max(change, label.getLocalPosY() - this.stylePadding.top - 1))
         end
@@ -135,18 +99,7 @@ function new(parent, label, text, style, x, y, w, h)
                 labelText = ">" .. labelText .. "<"
                 labelTheme = this.style.label.normalTheme
             end
-            ui.buffer.labelBox(
-                this.buffer,
-                labelText,
-                theme.textColor,
-                theme.textBackgroundColor,
-                5,
-                nil,
-                this.stylePadding.left,
-                0,
-                this.stylePadding.right,
-                this.buffer.rect.h - this.stylePadding.top
-            )
+            ui.buffer.labelBox(this.buffer, labelText, theme.textColor, theme.textBackgroundColor, 5, nil, this.stylePadding.left, 0, this.stylePadding.right, this.buffer.rect.h - this.stylePadding.top)
         end
     end
     this.recalculate()

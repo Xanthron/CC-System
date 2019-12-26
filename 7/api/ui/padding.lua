@@ -6,8 +6,7 @@ _padding_metatable = {
         return "(" .. self.left .. ", " .. self.top .. ", " .. self.right .. ", " .. self.bottom .. ")"
     end,
     __eq = function(self, padding)
-        return (self.left == padding.left and self.top == padding.top and self.right == padding.right and
-            self.bottom == padding.bottom)
+        return (self.left == padding.left and self.top == padding.top and self.right == padding.right and self.bottom == padding.bottom)
     end,
     __metatable = false
 }

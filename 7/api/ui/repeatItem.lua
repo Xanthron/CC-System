@@ -19,8 +19,7 @@ function new(startRepeatSpeed, endRepeatSpeed, repeatSpeedIncrement)
             this._lastPressTime = os.clock()
         else
             if os.clock() - this._lastPressTime > this._currentRepeatSpeed then
-                this._currentRepeatSpeed =
-                    math.max(this._currentRepeatSpeed * this.repeatSpeedIncrement, this.endRepeatSpeed)
+                this._currentRepeatSpeed = math.max(this._currentRepeatSpeed * this.repeatSpeedIncrement, this.endRepeatSpeed)
                 this._lastPressTime = os.clock()
             else
                 return false

@@ -10,16 +10,9 @@ function new(parent, label, mode, style, x, y, w, h)
 
     this.label = label
 
-    this.stylePadding =
-        ui.padding.new(
-        #style.normalTheme.border[4],
-        #style.normalTheme.border[2],
-        #style.normalTheme.border[5],
-        #style.normalTheme.border[7]
-    )
+    this.stylePadding = ui.padding.new(#style.normalTheme.border[4], #style.normalTheme.border[2], #style.normalTheme.border[5], #style.normalTheme.border[7])
     this._elements[1] = ui.element.new(this, this.stylePadding.getPaddedRect(this.buffer.rect.getUnpacked()))
-    this._elements[1]._elements[1] =
-        ui.element.new(this._elements[1], this.stylePadding.getPaddedRect(this.buffer.rect.getUnpacked()))
+    this._elements[1]._elements[1] = ui.element.new(this._elements[1], this.stylePadding.getPaddedRect(this.buffer.rect.getUnpacked()))
 
     ---@return element
     this.getContainer = function()
@@ -28,37 +21,11 @@ function new(parent, label, mode, style, x, y, w, h)
 
     if mode == 1 or mode == 3 then
         local slideWidth = #style.sliderVertical.normal.handle
-        this._elements[2] =
-            ui.slider.new(
-            this,
-            nil,
-            1,
-            0,
-            this._elements[1].getHeight(),
-            this.getContainer().getHeight(),
-            style.sliderVertical,
-            x + w - math.max(math.ceil((this.stylePadding.right + slideWidth) / 2), slideWidth),
-            y + this.stylePadding.top,
-            slideWidth,
-            h - this.stylePadding.top - this.stylePadding.bottom
-        )
+        this._elements[2] = ui.slider.new(this, nil, 1, 0, this._elements[1].getHeight(), this.getContainer().getHeight(), style.sliderVertical, x + w - math.max(math.ceil((this.stylePadding.right + slideWidth) / 2), slideWidth), y + this.stylePadding.top, slideWidth, h - this.stylePadding.top - this.stylePadding.bottom)
     end
     if mode == 1 or mode == 4 then
         local slideHeight = #style.sliderVertical.normal.handle
-        this._elements[3] =
-            ui.slider.new(
-            this,
-            nil,
-            2,
-            0,
-            this._elements[1].getWidth(),
-            this.getContainer().getWidth(),
-            style.sliderHorizontal,
-            x + this.stylePadding.left,
-            y + h - math.max(math.ceil((this.stylePadding.bottom + slideHeight) / 2), slideHeight),
-            w - this.stylePadding.left - this.stylePadding.right,
-            slideHeight
-        )
+        this._elements[3] = ui.slider.new(this, nil, 2, 0, this._elements[1].getWidth(), this.getContainer().getWidth(), style.sliderHorizontal, x + this.stylePadding.left, y + h - math.max(math.ceil((this.stylePadding.bottom + slideHeight) / 2), slideHeight), w - this.stylePadding.left - this.stylePadding.right, slideHeight)
     end
     this.resizeContainer = function()
         local minX, minY, maxX, maxY = math.maxinteger, math.maxinteger, 0, 0
@@ -76,12 +43,7 @@ function new(parent, label, mode, style, x, y, w, h)
     end
 
     this.resetLayout = function()
-        this.stylePadding.set(
-            #this.style.normalTheme.border[4],
-            #this.style.normalTheme.border[2],
-            #this.style.normalTheme.border[5],
-            #this.style.normalTheme.border[7]
-        )
+        this.stylePadding.set(#this.style.normalTheme.border[4], #this.style.normalTheme.border[2], #this.style.normalTheme.border[5], #this.style.normalTheme.border[7])
         local x, y, w, h = this.getGlobalRect()
         local sX, sY, sW, sH = this.stylePadding.getPaddedRect(this.buffer.rect.getUnpacked())
         this._elements[1].setGlobalRect(sX, sY, sW, sH)
@@ -95,12 +57,7 @@ function new(parent, label, mode, style, x, y, w, h)
         if sliderVertical then
             sliderVertical.style = this.style.sliderVertical
             local slideWidth = #this.style.sliderVertical.normal.handle
-            sliderVertical.setGlobalRect(
-                x + w - math.max(math.ceil((this.stylePadding.right + slideWidth) / 2), slideWidth),
-                sY,
-                slideWidth,
-                sH
-            )
+            sliderVertical.setGlobalRect(x + w - math.max(math.ceil((this.stylePadding.right + slideWidth) / 2), slideWidth), sY, slideWidth, sH)
             sliderVertical.startValue = cY
             sliderVertical.endValue = cH
             sliderVertical.size = sH
@@ -111,12 +68,7 @@ function new(parent, label, mode, style, x, y, w, h)
         if sliderHorizontal then
             sliderHorizontal.style = this.style.sliderHorizontal
             local slideHeight = #this.style.sliderHorizontal.normal.handle
-            sliderHorizontal.setGlobalRect(
-                x + this.stylePadding.left,
-                y + h - math.max(math.ceil((this.stylePadding.bottom + slideHeight) / 2), slideHeight),
-                sW,
-                slideHeight
-            )
+            sliderHorizontal.setGlobalRect(x + this.stylePadding.left, y + h - math.max(math.ceil((this.stylePadding.bottom + slideHeight) / 2), slideHeight), sW, slideHeight)
             sliderHorizontal.startValue = cX
             sliderHorizontal.endValue = cW
             sliderHorizontal.size = sW
@@ -133,15 +85,7 @@ function new(parent, label, mode, style, x, y, w, h)
         local maxMoveX = 0
         if valueX then
             if valueX > 0 then -- Down
-                maxMoveX =
-                    math.max(
-                    0,
-                    math.min(
-                        valueX,
-                        container.getLocalPosX() + container.getWidth() -
-                            (this.getWidth() - this.stylePadding.right + 1)
-                    )
-                )
+                maxMoveX = math.max(0, math.min(valueX, container.getLocalPosX() + container.getWidth() - (this.getWidth() - this.stylePadding.right + 1)))
             elseif valueX < 0 then -- Up
                 maxMoveX = math.min(0, math.max(valueX, container.getLocalPosX() + this.stylePadding.left - 1))
             end
@@ -150,15 +94,7 @@ function new(parent, label, mode, style, x, y, w, h)
         local maxMoveY = 0
         if valueY then
             if valueY > 0 then -- Down
-                maxMoveY =
-                    math.max(
-                    0,
-                    math.min(
-                        valueY,
-                        container.getLocalPosY() + container.getHeight() -
-                            (this.getHeight() - this.stylePadding.bottom + 1)
-                    )
-                )
+                maxMoveY = math.max(0, math.min(valueY, container.getLocalPosY() + container.getHeight() - (this.getHeight() - this.stylePadding.bottom + 1)))
             elseif valueY < 0 then -- Up
                 maxMoveY = math.min(0, math.max(valueY, container.getLocalPosY() + this.stylePadding.top - 1))
             end
@@ -231,18 +167,7 @@ function new(parent, label, mode, style, x, y, w, h)
             if this.mode == 3 then
                 labelText = ">" .. labelText .. "<"
             end
-            ui.buffer.labelBox(
-                this.buffer,
-                labelText,
-                theme.textColor,
-                theme.textBackgroundColor,
-                5,
-                nil,
-                this.stylePadding.left,
-                0,
-                this.stylePadding.right,
-                this.buffer.rect.h - this.stylePadding.top
-            )
+            ui.buffer.labelBox(this.buffer, labelText, theme.textColor, theme.textBackgroundColor, 5, nil, this.stylePadding.left, 0, this.stylePadding.right, this.buffer.rect.h - this.stylePadding.top)
         end
     end
     this.recalculate()

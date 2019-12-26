@@ -19,12 +19,12 @@ end
 local function errorHandler(text)
     local w, h = term.getSize()
 
-    local startIndex, endIndex = text:find(":[1-9]+:")
+    local startI, endI = text:find(":[0-9]+:")
 
-    if endIndex then
-        local file = text:sub(0, startIndex - 1)
-        local line = text:sub(startIndex + 1, endIndex - 1)
-        local message = text:sub(endIndex + 1)
+    if endI then
+        local file = text:sub(0, startI - 1)
+        local line = text:sub(startI + 1, endI - 1)
+        local message = text:sub(endI + 1)
         local possibleFiles = {}
         getFilesWithName("", file, possibleFiles)
         text = string.format("%s\n\n%s\n%s\n\n", message, file, line)

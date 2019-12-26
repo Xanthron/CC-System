@@ -52,19 +52,13 @@ function new(parent, text, func, style, x, y, w, h)
                 return this
             end
         elseif event.name == "mouse_drag" then
-            if
-                this.mode == 3 and event.param2 >= x and event.param2 < x + w and event.param3 >= y and
-                    event.param3 < y + h
-             then
+            if this.mode == 3 and event.param2 >= x and event.param2 < x + w and event.param3 >= y and event.param3 < y + h then
                 this.mode = 4
                 if this._inAnimation == false then
                     this.recalculate()
                     this.repaint("this", x, y, w, h)
                 end
-            elseif
-                this.mode == 4 and
-                    (event.param2 < x or event.param2 >= x + w or event.param3 < y or event.param3 >= y + h)
-             then
+            elseif this.mode == 4 and (event.param2 < x or event.param2 >= x + w or event.param3 < y or event.param3 >= y + h) then
                 this.mode = 3
                 if this._inAnimation == false then
                     this.recalculate()
@@ -72,10 +66,7 @@ function new(parent, text, func, style, x, y, w, h)
                 end
             end
         elseif event.name == "mouse_up" then
-            if
-                this.mode == 4 and event.param2 >= x and event.param2 < x + w and event.param3 >= y and
-                    event.param3 < y + h
-             then
+            if this.mode == 4 and event.param2 >= x and event.param2 < x + w and event.param3 >= y and event.param3 < y + h then
                 this.mode = 1
                 if this._inAnimation == false then
                     this.recalculate()
@@ -83,10 +74,7 @@ function new(parent, text, func, style, x, y, w, h)
                 end
                 this._onClick()
                 return this
-            elseif
-                this.mode == 3 and
-                    (event.param2 < x or event.param2 >= x + w or event.param3 < y or event.param3 >= y + h)
-             then
+            elseif this.mode == 3 and (event.param2 < x or event.param2 >= x + w or event.param3 < y or event.param3 >= y + h) then
                 this.mode = 1
                 if this._inAnimation == false then
                     this.recalculate()
@@ -135,16 +123,7 @@ function new(parent, text, func, style, x, y, w, h)
         elseif mode == 4 then
             theme = this.style.pressedTheme
         end
-        ui.buffer.borderLabelBox(
-            this.buffer,
-            this.text,
-            theme.textColor,
-            theme.textBackgroundColor,
-            theme.border,
-            theme.borderColor,
-            theme.borderBackgroundColor,
-            this.style.alignment
-        )
+        ui.buffer.borderLabelBox(this.buffer, this.text, theme.textColor, theme.textBackgroundColor, theme.border, theme.borderColor, theme.borderBackgroundColor, this.style.alignment)
     end
     this.recalculate()
 

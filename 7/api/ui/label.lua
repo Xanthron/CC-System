@@ -16,16 +16,7 @@ function new(parent, text, style, x, y, w, h)
         else
             theme = this.style.normalTheme
         end
-        ui.buffer.text(
-            this.buffer,
-            this.text,
-            theme.textColor,
-            theme.backgroundColor,
-            this.style.alignment,
-            false,
-            true,
-            false
-        )
+        ui.buffer.text(this.buffer, this.text, theme.textColor, theme.backgroundColor, this.style.alignment, false, true, false)
     end
 
     this.recalculate()

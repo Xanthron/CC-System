@@ -318,19 +318,7 @@ end
 ---@param top integer
 ---@param right integer
 ---@param bottom integer
-function borderLabelBox(
-    buffer,
-    text,
-    textColor,
-    backgroundColor,
-    border,
-    borderColor,
-    borderBackgroundColor,
-    alignment,
-    left,
-    top,
-    right,
-    bottom)
+function borderLabelBox(buffer, text, textColor, backgroundColor, border, borderColor, borderBackgroundColor, alignment, left, top, right, bottom)
     local totalWidth, totalHeight = buffer.rect.w, buffer.rect.h
     left, top, right, bottom = left or 0, top or 0, right or 0, bottom or 0
     local width, height = totalWidth - left - right, totalHeight - top - bottom
@@ -339,18 +327,7 @@ function borderLabelBox(
     local topPadding = #border[2]
     local bottomPadding = #border[8]
 
-    labelBox(
-        buffer,
-        text,
-        textColor,
-        backgroundColor,
-        alignment,
-        " ",
-        left + leftPadding,
-        top + topPadding,
-        right + rightPadding,
-        bottom + bottomPadding
-    )
+    labelBox(buffer, text, textColor, backgroundColor, alignment, " ", left + leftPadding, top + topPadding, right + rightPadding, bottom + bottomPadding)
 
     borderBox(buffer, border, borderColor, borderBackgroundColor, left, top, right, bottom)
 end

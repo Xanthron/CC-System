@@ -29,10 +29,7 @@ function new(x, y, w, h)
             this._event.pull()
             term.setCursorBlink(false)
             local eventName = this._event.name
-            if
-                eventName == "mouse_click" or eventName == "mouse_up" or eventName == "mouse_drag" or
-                    eventName == "monitor_touch"
-             then
+            if eventName == "mouse_click" or eventName == "mouse_up" or eventName == "mouse_drag" or eventName == "monitor_touch" then
                 local element = this.doPointerEvent(this._event, this.getSimpleMaskRect())
                 if #this.selectionManager.selectionGroups > 0 then
                     this.selectionManager.mouseEvent(this._event, element)
