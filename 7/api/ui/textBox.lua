@@ -12,7 +12,7 @@ function new(parent, label, text, style, x, y, w, h)
 
     this.stylePadding = ui.padding.new(#style.normalTheme.border[4], #style.normalTheme.border[2], #style.normalTheme.border[5], #style.normalTheme.border[7])
     this._elements[1] = ui.element.new(this, this.stylePadding.getPaddedRect(this.buffer.rect.getUnpacked()))
-    this._elements[1]._elements[1] = ui.label.new(this, text, style.label, this._elements[1].getGlobalRect())
+    this._elements[1]._elements[1] = ui.label.new(this, text, style.text, this._elements[1].getGlobalRect())
     local slideWidth = #style.slider.normal.handle
     this._elements[2] = ui.slider.new(this, nil, 1, 0, this._elements[1]._elements[1].getHeight(), this._elements[1].getHeight(), style.slider, x + w - math.max(math.ceil((this.stylePadding.right + slideWidth) / 2), slideWidth), y + this.stylePadding.top, slideWidth, h - this.stylePadding.top - this.stylePadding.bottom)
     this.label = label

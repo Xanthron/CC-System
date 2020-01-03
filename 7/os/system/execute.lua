@@ -1,5 +1,6 @@
 local args = {...}
 
+---TODO Edit so settings could be insert. E.g. extra arguments
 local file = args[1]
 
 local function getFilesWithName(path, name, tab)
@@ -17,31 +18,73 @@ local function getFilesWithName(path, name, tab)
     end
 end
 
+local function getErrorText(text)
+    local startI, endI = text:find(":[0-9]+:")
+
+    local file, message, line, possibleFiles = "", text, "", {}
+    if endI then
+        file = text:sub(0, startI - 1)
+        line = text:sub(startI + 1, endI - 1)
+        message = text:sub(endI + 1)
+    end
+    return message, file, line, possibleFiles
+end
+
+local function getFallBackInfo()
+    local _, message, file, line
+    _, message =
+        pcall(
+        function()
+            error(" ", 5)
+        end
+    )
+    message, file, line = getErrorText(message)
+    if file == "bios.lua" then
+        _, message =
+            pcall(
+            function()
+                error(" ", 9)
+            end
+        )
+        message, file, line = getErrorText(message)
+    end
+    return file, line
+end
+
+local _file, _line, errorLevel = getFallBackInfo()
+
 local function errorHandler(text)
     local w, h = term.getSize()
 
-    local startI, endI = text:find(":[0-9]+:")
+    local possibleFiles = {}
+    local message, file, line = getErrorText(text)
 
-    if endI then
-        local file = text:sub(0, startI - 1)
-        local line = text:sub(startI + 1, endI - 1)
-        local message = text:sub(endI + 1)
+    print(file)
+    if file ~= "" and file == "execute.lua" then
+        file = _file
+        line = _line
+    end
+
+    if file ~= "" then
+        message = string.format("%s\n\n%s\n%s\n\n", message, file, line)
+
         local possibleFiles = {}
         getFilesWithName("", file, possibleFiles)
-        text = string.format("%s\n\n%s\n%s\n\n", message, file, line)
-
         if #possibleFiles == 0 then
-            text = text .. "File could not be found."
+            message = message .. "File could not be found."
         elseif #possibleFiles == 1 then
-            text = text .. "Full path:\n" .. possibleFiles[1]
+            message = message .. "Full path:\n" .. possibleFiles[1]
         else
-            text = text .. "Multiple files could be found:\n" .. table.concat(possibleFiles, "\n")
+            message = message .. "Multiple files could be found:\n" .. table.concat(possibleFiles, "\n")
         end
+
+        message = message .. "\n\n\n" .. debug.traceback()
     end
+
     assert(loadfile("os/system/infoBox.lua"))(
         {
             label = "Error",
-            text = text,
+            text = message,
             x = 3,
             y = 3,
             w = w - 4,

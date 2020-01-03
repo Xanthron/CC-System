@@ -132,11 +132,18 @@ listBox.sliderVertical.normal.sliderColor = {colors.black}
 
 ---@type style.button
 local listButton = style("button")
+if term.isColor() then
+    listButton.normalTheme.border = {{}, {}, {}, {" "}, {" "}, {}, {}, {}, {}}
+    listButton.pressedTheme.border = {{}, {}, {}, {"\16"}, {" "}, {}, {}, {}, {}}
+    listButton.selectedTheme.border = {{}, {}, {}, {">"}, {" "}, {}, {}, {}, {}}
+    listButton.disabledTheme.border = {{}, {}, {}, {" "}, {" "}, {}, {}, {}, {}}
+else
+    listButton.normalTheme.border = {{}, {}, {}, {" "}, {" "}, {}, {}, {}, {}}
+    listButton.pressedTheme.border = {{}, {}, {}, {"\16"}, {" "}, {}, {}, {}, {}}
+    listButton.selectedTheme.border = {{}, {}, {}, {">"}, {" "}, {}, {}, {}, {}}
+    listButton.disabledTheme.border = {{}, {}, {}, {"*"}, {" "}, {}, {}, {}, {}}
+end
 listButton.alignment = 1
-listButton.normalTheme.border = {{}, {}, {}, {" "}, {" "}, {}, {}, {}, {}}
-listButton.pressedTheme.border = {{}, {}, {}, {"\16"}, {" "}, {}, {}, {}, {}}
-listButton.selectedTheme.border = {{}, {}, {}, {">"}, {" "}, {}, {}, {}, {}}
-listButton.disabledTheme.border = {{}, {}, {}, {"*"}, {" "}, {}, {}, {}, {}}
 listButton.normalTheme.textColor = colors.black
 listButton.normalTheme.textBackgroundColor = colors.white
 listButton.normalTheme.borderColor = colors.black
@@ -149,9 +156,9 @@ listButton.selectedTheme.textColor = colors.orange
 listButton.selectedTheme.textBackgroundColor = colors.white
 listButton.selectedTheme.borderColor = colors.orange
 listButton.selectedTheme.borderBackgroundColor = colors.white
-listButton.disabledTheme.textColor = colors.gray
+listButton.disabledTheme.textColor = colors.lightGray
 listButton.disabledTheme.textBackgroundColor = colors.white
-listButton.disabledTheme.borderColor = colors.gray
+listButton.disabledTheme.borderColor = colors.lightGray
 listButton.disabledTheme.borderBackgroundColor = colors.white
 
 ---@type style.button

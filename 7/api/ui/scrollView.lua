@@ -28,7 +28,7 @@ function new(parent, label, mode, style, x, y, w, h)
         this._elements[3] = ui.slider.new(this, nil, 2, 0, this._elements[1].getWidth(), this.getContainer().getWidth(), style.sliderHorizontal, x + this.stylePadding.left, y + h - math.max(math.ceil((this.stylePadding.bottom + slideHeight) / 2), slideHeight), w - this.stylePadding.left - this.stylePadding.right, slideHeight)
     end
     this.resizeContainer = function()
-        local minX, minY, maxX, maxY = math.maxinteger, math.maxinteger, 0, 0
+        local minX, minY, maxX, maxY = 10 ^ 10 ^ 10, 10 ^ 10 ^ 10, 0, 0
         for index, value in ipairs(this.getContainer()._elements) do
             if value.isVisible == true then
                 x, y, w, h = value.getGlobalRect()

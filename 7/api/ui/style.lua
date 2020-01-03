@@ -265,8 +265,16 @@ function new(path)
     textBox.label.disabledTheme.suffix = "*"
     textBox.label.selectedTheme.backgroundColor = colors.green
     textBox.label.selectedTheme.textColor = colors.yellow
-    textBox.label.selectedTheme.prefix = "*"
-    textBox.label.selectedTheme.suffix = "*"
+    textBox.label.selectedTheme.prefix = ">"
+    textBox.label.selectedTheme.suffix = "<"
+
+    textBox.text = assets.extension.copyTable(this.label)
+    textBox.text.normalTheme.backgroundColor = colors.white
+    textBox.text.normalTheme.textColor = colors.black
+    textBox.text.disabledTheme.backgroundColor = colors.white
+    textBox.text.disabledTheme.textColor = colors.black
+    textBox.text.selectedTheme.backgroundColor = colors.white
+    textBox.text.selectedTheme.textColor = colors.black
     ---@type style.slider
     textBox.slider = assets.extension.copyTable(this.slider)
     textBox.slider.normal.buttonPositive.normal.text = {string.char(30)}

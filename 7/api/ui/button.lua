@@ -120,7 +120,7 @@ function new(parent, text, func, style, x, y, w, h)
             theme = this.style.disabledTheme
         elseif mode == 3 then
             theme = this.style.selectedTheme
-        elseif mode == 4 then
+        else
             theme = this.style.pressedTheme
         end
         ui.buffer.borderLabelBox(this.buffer, this.text, theme.textColor, theme.textBackgroundColor, theme.border, theme.borderColor, theme.borderBackgroundColor, this.style.alignment)

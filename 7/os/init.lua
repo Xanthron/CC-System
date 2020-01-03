@@ -42,8 +42,8 @@ local explorerButton =
     function()
         manager.callFunction(
             function()
-                --assert(loadfile("os/system/execute.lua"))("os/system/explorer/explorer.lua")
-                shell.run("os/system/execute.lua", "os/system/explorer/explorer.lua")
+                assert(loadfile("os/system/execute.lua"))("os/system/explorer/explorer.lua", {select = true})
+                --shell.run("os/system/execute.lua", "os/system/explorer/explorer.lua")
                 manager.draw()
             end
         )
@@ -133,8 +133,8 @@ local function updateListView()
             startFunction = function()
                 manager.callFunction(
                     function()
-                        --assert(loadfile("os/system/execute.lua"))("os/programs/" .. value)
-                        shell.run("os/system/execute.lua", "os/programs/" .. value)
+                        assert(loadfile("os/system/execute.lua"))("os/programs/" .. value)
+                        --shell.run("os/system/execute.lua", "os/programs/" .. value)
                         manager.draw()
                     end
                 )
