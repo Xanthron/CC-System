@@ -281,9 +281,9 @@ end
 ---@param direction string
 function _select(selectionGroup, direction, source)
     local currentSelectionElement = selectionGroup.currentSelectionElement
-    local newSelection = currentSelectionElement[direction]
+    local newSelection = currentSelectionElement[direction].currentSelectionElement or currentSelectionElement[direction]
     while newSelection and newSelection.element.mode == 2 do
-        newSelection = newSelection[direction]
+        newSelection = newSelection[direction].currentSelectionElement or newSelection[direction]
     end
     if newSelection then
         if not selectionGroup.listener or selectionGroup.listener("selection_change", source, currentSelectionElement.element, newSelection.element) ~= false then

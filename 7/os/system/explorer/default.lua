@@ -3,5 +3,6 @@ return {
     showHidden = false,
     showExtensions = true,
     neatNames = false,
-    pathSaveSize = 20
+    pathSaveSize = 20,
+    showType = ""
 }

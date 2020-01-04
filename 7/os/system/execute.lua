@@ -59,7 +59,6 @@ local function errorHandler(text)
     local possibleFiles = {}
     local message, file, line = getErrorText(text)
 
-    print(file)
     if file ~= "" and file == "execute.lua" then
         file = _file
         line = _line

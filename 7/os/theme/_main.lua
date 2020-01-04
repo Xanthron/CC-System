@@ -221,6 +221,16 @@ activatedButton.disabledTheme.borderBackgroundColor = colors.gray
 
 local textBox = style("textBox")
 
+---@type style.inputField
+local inputField = style("inputField")
+inputField.normalTheme.border = {{}, {}, {}, {}, {" "}, {}, {}, {}, {}}
+inputField.normalTheme.spaceColor = colors.lime
+inputField.normalTheme.textColor = colors.black
+inputField.normalTheme.textBackgroundColor = colors.lime
+
+inputField.disabledTheme.border = {{}, {}, {}, {}, {" "}, {}, {}, {}, {}}
+inputField.selectedTheme.border = {{}, {}, {}, {}, {" "}, {}, {}, {}, {}}
+
 ---@type style.label
 local pathLabel = style("label")
 pathLabel.alignment = 1
@@ -238,6 +248,7 @@ assets.variables.save(
         deactivatedButton = deactivatedButton,
         textBox = textBox,
         pathLabel = pathLabel,
-        listBox = listBox
+        listBox = listBox,
+        inputField = inputField
     }
 )

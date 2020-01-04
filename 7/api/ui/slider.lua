@@ -21,7 +21,7 @@ function new(parent, onValueChange, orientation, startValue, endValue, size, sty
     this.orientation = orientation
     this.pressedButton = 0
     ---@type repeatItem
-    this.repeatItem = ui.repeatItem.new(0.8, 0.1, 0.8)
+    this.repeatItem = ui.repeatItem.new(0.8, 0.05, 0.7)
 
     this.startValue = startValue
     this.endValue = endValue

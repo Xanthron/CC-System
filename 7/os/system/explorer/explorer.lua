@@ -25,6 +25,7 @@ checkType("showHidden", "boolean")
 checkType("showExtensions", "boolean")
 checkType("neatNames", "boolean")
 checkType("pathSaveSize", "number")
+checkType("showType", "string")
 
 set.showFiles = set.showFiles or true
 checkType("showFiles", "boolean")
@@ -76,21 +77,21 @@ end
 ---@param manager uiManager
 local function updateButton(manager)
     ---@type button
-    local upButton, backButton, forwardButton = table.unpack(manager._elements, 2, 4)
+    local upButton, backButton, forwardButton, inputField = table.unpack(manager._elements, 3, 6)
     if pathsIndex == 1 then
         if backButton.mode ~= 2 then
             backButton.mode = 2
             if not backButton._inAnimation then
+                backButton.recalculate()
                 backButton.repaint("this")
-                backButton.recalculate("this")
             end
         end
     else
         if backButton.mode == 2 then
             backButton.mode = 1
             if not backButton._inAnimation then
+                backButton.recalculate()
                 backButton.repaint("this")
-                backButton.recalculate("this")
             end
         end
     end
@@ -98,16 +99,16 @@ local function updateButton(manager)
         if forwardButton.mode ~= 2 then
             forwardButton.mode = 2
             if not forwardButton._inAnimation then
+                forwardButton.recalculate()
                 forwardButton.repaint("this")
-                forwardButton.recalculate("this")
             end
         end
     else
         if forwardButton.mode == 2 then
             forwardButton.mode = 1
             if not forwardButton._inAnimation then
+                forwardButton.recalculate()
                 forwardButton.repaint("this")
-                forwardButton.recalculate("this")
             end
         end
     end
@@ -115,19 +116,27 @@ local function updateButton(manager)
         if upButton.mode ~= 2 then
             upButton.mode = 2
             if not upButton._inAnimation then
+                upButton.recalculate()
                 upButton.repaint("this")
-                upButton.recalculate("this")
             end
         end
     else
         if upButton.mode == 2 then
             upButton.mode = 1
             if not upButton._inAnimation then
+                upButton.recalculate()
                 upButton.repaint("this")
-                upButton.recalculate("this")
             end
         end
     end
+    local path = getCurrentPath()
+    if path == "" then
+        path = "root"
+    end
+    inputField.text = path
+    ---@type inputField
+    inputField.cursorOffset = path:len()
+    inputField.recalculate("this")
 end
 
 local function clearListView(listView)
@@ -192,12 +201,14 @@ local function getPathElements(folder)
         else
             if set.showFiles == true and (set.showHidden == true or path:sub(1, 1) ~= ".") then
                 local name, ext = getNameAndIconKeyExtension(path)
-                if set.showExtension then
+                if set.showExtensions and ext then
                     name = name .. "." .. ext
                 end
-                table.insert(files, fullPath)
-                table.insert(files, name)
-                table.insert(files, ext or "file")
+                if set.showType == "" or set.showType == ext then
+                    table.insert(files, fullPath)
+                    table.insert(files, name)
+                    table.insert(files, ext or "file")
+                end
             end
         end
     end
@@ -262,12 +273,12 @@ local function updateListView(manager, listView)
         ---@type button
         local button = ui.button.new(container, files[i + 1], nil, theme.listButton, x, y, w, 1)
         button._onClick = function(event)
-            manager.parallelManager.removeFunction(button._pressAnimation)
+            --manager.parallelManager.removeFunction(button._pressAnimation)
             --TODO Change by exploring type
             manager.callFunction(
                 function()
                     --If an Error occurs here you may be looking in "os/system/explorer/extensions" for wrong file calling or
-                    assert(loadfile("os/system/execute.lua"), ext[4] or "rom/programs/edit.lua", files[i]) --TODO Add argument support!!!
+                    assert(loadfile("os/system/execute.lua"))(ext[4] or "rom/programs/edit.lua", files[i]) --TODO Add argument support!!!
                     manager.draw()
                 end
             )
@@ -279,6 +290,7 @@ local function updateListView(manager, listView)
         selectionElements[i].up = selectionElements[i - 1]
         selectionElements[i].down = selectionElements[i + 1]
     end
+    selectionElements[1].up = manager.selectionManager.selectionGroups[1]
 
     listView.selectionGroup.currentSelectionElement = selectionElements[1]
     listView.recalculate()
@@ -306,11 +318,13 @@ for i = 1, _w * _h do
 end
 
 local fileButton = ui.button.new(manager, "File", nil, theme.menuButton, 1, 1, 6, 1)
+local exitButton = ui.button.new(manager, "<", nil, theme.exitButton, _w - 2, 1, 3, 1)
 local upButton = ui.button.new(manager, "^", nil, theme.menuButton, 8, 1, 3, 1)
 local backButton = ui.button.new(manager, "<", nil, theme.menuButton, 11, 1, 3, 1)
 local forwardButton = ui.button.new(manager, ">", nil, theme.menuButton, 14, 1, 3, 1)
-local exitButton = ui.button.new(manager, "<", nil, theme.exitButton, _w - 2, 1, 3, 1)
+local pathField = ui.inputField.new(manager, "", getCurrentPath(), false, nil, theme.inputField, 1, 2, _w, 1)
 local listView = ui.scrollView.new(manager, nil, 3, theme.listView, 1, 3, _w, _h - 2)
+
 local backgroundListView = listView._elements[1]
 local backgroundListViewBuffer = backgroundListView.buffer
 for i = 1, _h - 1 do
@@ -325,7 +339,6 @@ for i = 1, _h - 1 do
     backgroundListViewBuffer.textColor[index] = colors.black
     backgroundListViewBuffer.textBackgroundColor[index] = colors.white
 end
-
 fileButton._onClick = function(event)
     local select = true
     if event.name == "mouse_up" then
@@ -335,7 +348,8 @@ fileButton._onClick = function(event)
     end
     manager.callFunction(
         function()
-            local options =
+            local options = {"New Folder", "New File"}
+            local option =
                 assert(loadfile("os/system/listBox.lua"))(
                 {
                     x = 1,
@@ -343,10 +357,12 @@ fileButton._onClick = function(event)
                     manager = manager,
                     label = "File",
                     select = select,
-                    buttons = {"New Folder", "-", "*Test", "-", "New File"}
+                    buttons = options
                 }
             )
-            error("Not implemented yet")
+            if #option > 0 then
+                error(options[option[1]] .. " not implemented yet")
+            end
             manager.draw()
         end
     )
@@ -379,12 +395,15 @@ exitButton._onClick = function()
     manager.exit()
 end
 
+manager.selectionManager.addSelectionGroup(listView.selectionGroup)
+
 local menuSelectionGroup = manager.selectionManager.addNewSelectionGroup()
 local fileButton_selection = menuSelectionGroup.addNewSelectionElement(fileButton)
 local upButton_selection = menuSelectionGroup.addNewSelectionElement(upButton)
 local backButton_selection = menuSelectionGroup.addNewSelectionElement(backButton)
 local forwardButton_selection = menuSelectionGroup.addNewSelectionElement(forwardButton)
 local exitButton_selection = menuSelectionGroup.addNewSelectionElement(exitButton)
+local pathField_selection = menuSelectionGroup.addNewSelectionElement(pathField)
 fileButton_selection.right = upButton_selection
 upButton_selection.right = backButton_selection
 backButton_selection.right = forwardButton_selection
@@ -394,12 +413,18 @@ forwardButton_selection.left = backButton_selection
 backButton_selection.left = upButton_selection
 upButton_selection.left = fileButton_selection
 menuSelectionGroup.currentSelectionElement = fileButton_selection
+fileButton_selection.down = pathField_selection
+upButton_selection.down = pathField_selection
+backButton_selection.down = pathField_selection
+forwardButton_selection.down = pathField_selection
+exitButton_selection.down = pathField_selection
+pathField_selection.up = fileButton_selection
+pathField_selection.down = listView.selectionGroup
 
 menuSelectionGroup.next = listView.selectionGroup
 menuSelectionGroup.previous = listView.selectionGroup
 listView.selectionGroup.next = menuSelectionGroup
 listView.selectionGroup.previous = menuSelectionGroup
-manager.selectionManager.addSelectionGroup(listView.selectionGroup)
 
 updateButton(manager)
 updateListView(manager, listView)
