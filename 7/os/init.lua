@@ -42,7 +42,7 @@ local explorerButton =
     function()
         manager.callFunction(
             function()
-                assert(loadfile("os/system/execute.lua"))("os/system/explorer/explorer.lua", {select = true})
+                assert(loadfile("os/system/execute.lua"))("os/system/explorer/explorer.lua", {select = true, selectMode = "save"})
                 --shell.run("os/system/execute.lua", "os/system/explorer/explorer.lua")
                 manager.draw()
             end

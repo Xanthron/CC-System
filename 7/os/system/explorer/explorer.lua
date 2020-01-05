@@ -31,7 +31,7 @@ set.showFiles = set.showFiles or true
 checkType("showFiles", "boolean")
 set.showFolders = set.showFolders or true
 checkType("showFolders", "boolean")
-set.selectMode = set.selectMode or "browse" -- handle fallback!
+set.selectMode = set.selectMode or "browse" -- handle fallback! modes: select_one,select_many
 checkType("selectMode", "string")
 set.path = set.path or ""
 checkType("path", "string")
@@ -50,13 +50,52 @@ local exPath = dofile("os/system/explorer/excludedPaths.lua")
 local ext = dofile("os/system/explorer/extensions.lua")
 
 local _x, _y, _w, _h
--- if set.manager then
---     _x, _y, _w, _h = set.manager.getGlobalRect()
--- else
-_x, _y, _w, _h = 1, 1, term.getSize()
---end
+if set.manager then
+    _x, _y, _w, _h = set.manager.getGlobalRect()
+else
+    _x, _y, _w, _h = 1, 1, term.getSize()
+end
+
+local isSelected
+local addSelection
+local removeSelection
+local updateSelectionLabel
+if set.selectMode == "save" then
+    set.saveName = set.saveName or ""
+    checkType("saveName", "string")
+elseif set.selectMode == "select_many" then
+    set.selections = set.selections or {}
+    checkType("selections", "table")
+    isSelected = function(name)
+        for _, s in ipairs(set.selections) do
+            if s == name then
+                return true
+            end
+        end
+        return false
+    end
+    addSelection = function(name)
+        table.insert(set.selections, name)
+    end
+    removeSelection = function(name)
+        for i, s in ipairs(set.selections) do
+            if s == name then
+                table.remove(set.selections, i)
+                return
+            end
+        end
+    end
+    updateSelectionLabel = function(manager)
+        local element = manager._elements[8]
+        element.text = tostring(#set.selections)
+        element.recalculate()
+        element.repaint("this")
+    end
+end
 
 local pathsIndex, paths = 1, {set.path}
+
+local ret = {}
 
 --- Functions
 local function getCurrentPath()
@@ -132,10 +171,12 @@ local function updateButton(manager)
     local path = getCurrentPath()
     if path == "" then
         path = "root"
+    else
+        path = path .. "/"
     end
-    inputField.text = path
-    ---@type inputField
-    inputField.cursorOffset = path:len()
+    inputField.setText(path)
+    -- ---@type inputField
+    -- inputField.cursorOffset = path:len()
     inputField.recalculate("this")
 end
 
@@ -252,15 +293,73 @@ local function updateListView(manager, listView)
         ---@type button
         local button = ui.button.new(container, dirs[i + 1], nil, theme.listButton, x, y, w, 1)
         button._onClick = function(event)
-            manager.parallelManager.removeFunction(button._pressAnimation)
-            addPath(dirs[i])
-            updateListView(manager, listView)
+            if (event.name == "mouse_up" and event.param1 == 2) or (event.name == "key_up" and event.param1 == 100) then --TODO right key
+                manager.callFunction(
+                    function()
+                        local options = {"Open"}
 
-            updateButton(manager)
-            if event.name ~= "mouse_up" then
-                manager.selectionManager.select(listView.selectionGroup.selectionElements[1].element)
+                        local select = true
+                        if event.name == "mouse_up" then
+                            select = false
+                        end
+
+                        if set.selectMode == "select_many" then
+                            table.insert(options, "-")
+                            table.insert(options, "Select All")
+                            table.insert(options, "Remove All")
+                        end
+
+                        if set.selectMode == "save" then
+                            table.insert(options, "Select")
+                        end
+
+                        local y = button.getGlobalPosY() + 1
+                        if y + #options + 3 > _h + _y then
+                            y = y - 3 - #options
+                        end
+
+                        local name =
+                            assert(loadfile("os/system/listBox.lua"))(
+                            {
+                                x = button.getGlobalPosX(),
+                                y = y,
+                                manager = manager,
+                                label = "File",
+                                select = select,
+                                buttons = options
+                            }
+                        )
+                        if name then
+                            if name == "Open" then
+                            elseif name == "Rename" then
+                            elseif name == "Select All" then
+                                for _, p in ipairs(assets.extension.getAllFilePaths(dirs[i])) do
+                                    if isSelected(p) == false then
+                                        addSelection(p)
+                                    end
+                                end
+                            elseif name == "Remove All" then
+                                for _, p in ipairs(assets.extension.getAllFilePaths(dirs[i])) do
+                                    removeSelection(p)
+                                end
+                            end
+                            updateSelectionLabel(manager)
+                        end
+
+                        manager.draw()
+                    end
+                )
+            else
+                manager.parallelManager.removeFunction(button._pressAnimation)
+                addPath(dirs[i])
+                updateListView(manager, listView)
+
+                updateButton(manager)
+                if event.name ~= "mouse_up" then
+                    manager.selectionManager.select(listView.selectionGroup.selectionElements[1].element)
+                end
+                manager.draw()
             end
-            manager.draw()
         end
         table.insert(selectionElements, listView.selectionGroup.addNewSelectionElement(button))
         y = y + 1
@@ -270,18 +369,41 @@ local function updateListView(manager, listView)
         if set.showIcons then
             extensionIcon(container, ext, x - 4, y)
         end
+
+        local buttonTheme = theme.listButton
+        if set.selectMode == "select_many" and isSelected(files[i]) then
+            buttonTheme = theme.selectedListButton
+        end
+
         ---@type button
-        local button = ui.button.new(container, files[i + 1], nil, theme.listButton, x, y, w, 1)
-        button._onClick = function(event)
-            --manager.parallelManager.removeFunction(button._pressAnimation)
-            --TODO Change by exploring type
-            manager.callFunction(
-                function()
-                    --If an Error occurs here you may be looking in "os/system/explorer/extensions" for wrong file calling or
-                    assert(loadfile("os/system/execute.lua"))(ext[4] or "rom/programs/edit.lua", files[i]) --TODO Add argument support!!!
-                    manager.draw()
+        local button = ui.button.new(container, files[i + 1], nil, buttonTheme, x, y, w, 1)
+        if set.selectMode == "select_many" then
+            button._onClick = function(event)
+                if isSelected(files[i]) then
+                    button.style = theme.listButton
+                    removeSelection(files[i])
+                else
+                    button.style = theme.selectedListButton
+                    addSelection(files[i])
                 end
-            )
+                updateSelectionLabel(manager)
+                if not button._inAnimation then
+                    button.recalculate()
+                    button.repaint("this")
+                end
+            end
+        else
+            button._onClick = function(event)
+                --manager.parallelManager.removeFunction(button._pressAnimation)
+                --TODO Change by exploring type
+                manager.callFunction(
+                    function()
+                        --If an Error occurs here you may be looking in "os/system/explorer/extensions" for wrong file calling or
+                        assert(loadfile("os/system/execute.lua"))(ext[4] or "rom/programs/edit.lua", files[i]) --TODO Add argument support!!!
+                        manager.draw()
+                    end
+                )
+            end
         end
         table.insert(selectionElements, listView.selectionGroup.addNewSelectionElement(button))
         y = y + 1
@@ -290,7 +412,7 @@ local function updateListView(manager, listView)
         selectionElements[i].up = selectionElements[i - 1]
         selectionElements[i].down = selectionElements[i + 1]
     end
-    selectionElements[1].up = manager.selectionManager.selectionGroups[1]
+    --selectionElements[1].up = manager.selectionManager.selectionGroups[1]
 
     listView.selectionGroup.currentSelectionElement = selectionElements[1]
     listView.recalculate()
@@ -322,7 +444,9 @@ local exitButton = ui.button.new(manager, "<", nil, theme.exitButton, _w - 2, 1,
 local upButton = ui.button.new(manager, "^", nil, theme.menuButton, 8, 1, 3, 1)
 local backButton = ui.button.new(manager, "<", nil, theme.menuButton, 11, 1, 3, 1)
 local forwardButton = ui.button.new(manager, ">", nil, theme.menuButton, 14, 1, 3, 1)
-local pathField = ui.inputField.new(manager, "", getCurrentPath(), false, nil, theme.inputField, 1, 2, _w, 1)
+---@type inputField
+local pathField = ui.inputField.new(manager, "", getCurrentPath(), false, nil, theme.pathField, 1, 2, _w, 1)
+---@type scrollView
 local listView = ui.scrollView.new(manager, nil, 3, theme.listView, 1, 3, _w, _h - 2)
 
 local backgroundListView = listView._elements[1]
@@ -338,6 +462,47 @@ for i = 1, _h - 1 do
     backgroundListViewBuffer.text[index] = "|"
     backgroundListViewBuffer.textColor[index] = colors.black
     backgroundListViewBuffer.textBackgroundColor[index] = colors.white
+end
+pathField.onSuggestCompletion = function(text, offset)
+    if text:len() == offset then
+        local startI, endI = text:match("%/.*$")
+        if startI == nil or endI == nil then
+            return fs.complete(text, "", false, false)
+        else
+            print(startI, endI)
+            return fs.complete(text:sub(endI), text:sub(1, startI), false, true)
+        end
+    else
+        return {}
+    end
+end
+pathField.onAutoCompletion = function(text, offset, completion)
+    if offset == text:len() then
+        return true, text .. completion, text:len() + completion:len()
+    else
+        return false
+    end
+end
+pathField._onSubmit = function(event, text)
+    if text == "root" then
+        text = ""
+    end
+    local currentPath = getCurrentPath()
+    if currentPath == ".." then
+        currentPath = ""
+    end
+    if fs.isDir(text) and text ~= currentPath then
+        if text:sub(text:len()) == "/" then
+            text = text:sub(1, text:len() - 1)
+        end
+        addPath(text)
+        updateButton(manager)
+        updateListView(manager, listView)
+    else
+        updateButton(manager)
+        updateListView(manager, listView)
+    end
+    manager.draw()
 end
 fileButton._onClick = function(event)
     local select = true
@@ -397,13 +562,13 @@ end
 
 manager.selectionManager.addSelectionGroup(listView.selectionGroup)
 
-local menuSelectionGroup = manager.selectionManager.addNewSelectionGroup()
-local fileButton_selection = menuSelectionGroup.addNewSelectionElement(fileButton)
-local upButton_selection = menuSelectionGroup.addNewSelectionElement(upButton)
-local backButton_selection = menuSelectionGroup.addNewSelectionElement(backButton)
-local forwardButton_selection = menuSelectionGroup.addNewSelectionElement(forwardButton)
-local exitButton_selection = menuSelectionGroup.addNewSelectionElement(exitButton)
-local pathField_selection = menuSelectionGroup.addNewSelectionElement(pathField)
+local menuGroup = manager.selectionManager.addNewSelectionGroup()
+local fileButton_selection = menuGroup.addNewSelectionElement(fileButton)
+local upButton_selection = menuGroup.addNewSelectionElement(upButton)
+local backButton_selection = menuGroup.addNewSelectionElement(backButton)
+local forwardButton_selection = menuGroup.addNewSelectionElement(forwardButton)
+local exitButton_selection = menuGroup.addNewSelectionElement(exitButton)
+local pathField_selection = menuGroup.addNewSelectionElement(pathField)
 fileButton_selection.right = upButton_selection
 upButton_selection.right = backButton_selection
 backButton_selection.right = forwardButton_selection
@@ -412,19 +577,87 @@ exitButton_selection.left = forwardButton_selection
 forwardButton_selection.left = backButton_selection
 backButton_selection.left = upButton_selection
 upButton_selection.left = fileButton_selection
-menuSelectionGroup.currentSelectionElement = fileButton_selection
+menuGroup.currentSelectionElement = fileButton_selection
 fileButton_selection.down = pathField_selection
 upButton_selection.down = pathField_selection
 backButton_selection.down = pathField_selection
 forwardButton_selection.down = pathField_selection
 exitButton_selection.down = pathField_selection
 pathField_selection.up = fileButton_selection
-pathField_selection.down = listView.selectionGroup
+--pathField_selection.down = listView.selectionGroup
 
-menuSelectionGroup.next = listView.selectionGroup
-menuSelectionGroup.previous = listView.selectionGroup
-listView.selectionGroup.next = menuSelectionGroup
-listView.selectionGroup.previous = menuSelectionGroup
+menuGroup.next = listView.selectionGroup
+menuGroup.previous = listView.selectionGroup
+listView.selectionGroup.next = menuGroup
+listView.selectionGroup.previous = menuGroup
+
+if set.selectMode == "save" then
+    listView.setGlobalRect(nil, nil, nil, listView.getHeight() - 1)
+    listView.resetLayout()
+
+    ---@type label
+    local saveField = ui.inputField.new(manager, set.saveName, set.saveName, false, nil, theme.inputField, 1, _h, _w - 6, 1)
+    saveField._onSubmit = function(event, text)
+        --TODO File Already exist function!!!
+        if saveField ~= "" then
+            table.insert(ret, getCurrentPath() .. "/" .. text)
+        end
+        saveField.mode = 1
+        manager.exit()
+    end
+    local saveButton = ui.button.new(manager, "Save", nil, theme.menuButton, _w - 5, _h, 6, 1)
+    saveButton._onClick = function(event)
+        saveField._onSubmit(event, saveField.text)
+    end
+
+    local saveMenuGroup = manager.selectionManager.addNewSelectionGroup()
+    local saveField_selection = saveMenuGroup.addNewSelectionElement(saveField)
+    local saveButton_selection = saveMenuGroup.addNewSelectionElement(saveButton)
+
+    saveField_selection.right = saveButton_selection
+    saveButton_selection.left = saveField_selection
+
+    saveMenuGroup.currentSelectionElement = saveField_selection
+
+    saveMenuGroup.previous = listView.selectionGroup
+    saveMenuGroup.next = menuGroup
+    menuGroup.previous = saveMenuGroup
+    listView.selectionGroup.next = saveMenuGroup
+elseif set.selectMode == "select_many" then
+    listView.setGlobalRect(nil, nil, nil, listView.getHeight() - 1)
+    listView.resetLayout()
+
+    ---@type label
+    local selectedLabel = ui.label.new(manager, tostring(#set.selections), theme.selectedLabel, 1, _h, _w - 15, 1)
+    local clearSelectionButton = ui.button.new(manager, "Clear", nil, theme.menuButton, _w - 14, _h, 7, 1)
+    clearSelectionButton._onClick = function(event)
+        while #set.selections > 0 do
+            table.remove(set.selections)
+        end
+        updateSelectionLabel(manager)
+        updateListView(manager, listView)
+        manager.draw()
+    end
+    local selectSelectionButton = ui.button.new(manager, "Select", nil, theme.menuButton, _w - 7, _h, 8, 1)
+    selectSelectionButton._onClick = function()
+        table.insert(ret, set.selections)
+        manager.exit()
+    end
+
+    local selectionMenuGroup = manager.selectionManager.addNewSelectionGroup()
+    local clearSelectionButton_selection = selectionMenuGroup.addNewSelectionElement(clearSelectionButton)
+    local selectSelectionButton_selection = selectionMenuGroup.addNewSelectionElement(selectSelectionButton)
+
+    clearSelectionButton_selection.right = selectSelectionButton_selection
+    selectSelectionButton_selection.left = clearSelectionButton_selection
+
+    selectionMenuGroup.currentSelectionElement = selectSelectionButton_selection
+
+    selectionMenuGroup.previous = listView.selectionGroup
+    selectionMenuGroup.next = menuGroup
+    menuGroup.previous = selectionMenuGroup
+    listView.selectionGroup.next = selectionMenuGroup
+end
 
 updateButton(manager)
 updateListView(manager, listView)
@@ -436,4 +669,6 @@ else
 end
 manager.draw()
 manager.execute()
+
+return table.unpack(ret)
 --error("End not implemented")

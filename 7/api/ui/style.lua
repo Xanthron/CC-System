@@ -527,6 +527,7 @@ function new(path)
 
     ---@class  style.inputField
     local inputField = {}
+    inputField.alignment = 1
     ---@type style.label
     inputField.label = assets.extension.copyTable(this.label)
     inputField.label.normalTheme.textColor = colors.lime
@@ -577,6 +578,8 @@ function new(path)
     local inputField_selected = {
         textColor = colors.yellow,
         textBackgroundColor = colors.black,
+        completionTextColor = colors.yellow,
+        completionBackgroundColor = colors.gray,
         spaceColor = colors.white,
         borderColor = colors.lime,
         borderBackgroundColor = colors.green,

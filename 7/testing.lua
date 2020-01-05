@@ -1,3 +1,0 @@
-local a, b = ...
-print(a + b)
-error("lol")

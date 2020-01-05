@@ -162,6 +162,37 @@ listButton.disabledTheme.borderColor = colors.lightGray
 listButton.disabledTheme.borderBackgroundColor = colors.white
 
 ---@type style.button
+local selectedListButton = style("button")
+if term.isColor() then
+    selectedListButton.normalTheme.border = {{}, {}, {}, {" "}, {" "}, {}, {}, {}, {}}
+    selectedListButton.pressedTheme.border = {{}, {}, {}, {"\16"}, {" "}, {}, {}, {}, {}}
+    selectedListButton.selectedTheme.border = {{}, {}, {}, {">"}, {" "}, {}, {}, {}, {}}
+    selectedListButton.disabledTheme.border = {{}, {}, {}, {" "}, {" "}, {}, {}, {}, {}}
+else
+    selectedListButton.normalTheme.border = {{}, {}, {}, {"x"}, {" "}, {}, {}, {}, {}}
+    selectedListButton.pressedTheme.border = {{}, {}, {}, {"\16"}, {" "}, {}, {}, {}, {}}
+    selectedListButton.selectedTheme.border = {{}, {}, {}, {">"}, {" "}, {}, {}, {}, {}}
+    selectedListButton.disabledTheme.border = {{}, {}, {}, {"*"}, {" "}, {}, {}, {}, {}}
+end
+selectedListButton.alignment = 1
+selectedListButton.normalTheme.textColor = colors.blue
+selectedListButton.normalTheme.textBackgroundColor = colors.white
+selectedListButton.normalTheme.borderColor = colors.blue
+selectedListButton.normalTheme.borderBackgroundColor = colors.white
+selectedListButton.pressedTheme.textColor = colors.red
+selectedListButton.pressedTheme.textBackgroundColor = colors.white
+selectedListButton.pressedTheme.borderColor = colors.red
+selectedListButton.pressedTheme.borderBackgroundColor = colors.white
+selectedListButton.selectedTheme.textColor = colors.red
+selectedListButton.selectedTheme.textBackgroundColor = colors.white
+selectedListButton.selectedTheme.borderColor = colors.red
+selectedListButton.selectedTheme.borderBackgroundColor = colors.white
+selectedListButton.disabledTheme.textColor = colors.lightGray
+selectedListButton.disabledTheme.textBackgroundColor = colors.white
+selectedListButton.disabledTheme.borderColor = colors.lightGray
+selectedListButton.disabledTheme.borderBackgroundColor = colors.white
+
+---@type style.button
 local deactivatedButton = style("button")
 if term.isColor() then
     deactivatedButton.normalTheme.border = {{}, {}, {}, {" "}, {" "}, {" "}, {}, {}, {}}
@@ -221,21 +252,26 @@ activatedButton.disabledTheme.borderBackgroundColor = colors.gray
 
 local textBox = style("textBox")
 
----@type style.inputField
 local inputField = style("inputField")
 inputField.normalTheme.border = {{}, {}, {}, {}, {" "}, {}, {}, {}, {}}
-inputField.normalTheme.spaceColor = colors.lime
-inputField.normalTheme.textColor = colors.black
-inputField.normalTheme.textBackgroundColor = colors.lime
-
 inputField.disabledTheme.border = {{}, {}, {}, {}, {" "}, {}, {}, {}, {}}
 inputField.selectedTheme.border = {{}, {}, {}, {}, {" "}, {}, {}, {}, {}}
+---@type style.inputField
+local pathField = style("inputField")
+pathField.alignment = 3
+pathField.normalTheme.border = {{}, {}, {}, {}, {" "}, {}, {}, {}, {}}
+pathField.normalTheme.spaceColor = colors.lime
+pathField.normalTheme.textColor = colors.black
+pathField.normalTheme.textBackgroundColor = colors.lime
+
+pathField.disabledTheme.border = {{}, {}, {}, {}, {" "}, {}, {}, {}, {}}
+pathField.selectedTheme.border = {{}, {}, {}, {}, {" "}, {}, {}, {}, {}}
 
 ---@type style.label
-local pathLabel = style("label")
-pathLabel.alignment = 1
-pathLabel.normalTheme.backgroundColor = colors.lime
-pathLabel.normalTheme.textColor = colors.black
+local selectedLabel = style("label")
+selectedLabel.alignment = 1
+selectedLabel.normalTheme.backgroundColor = colors.green
+selectedLabel.normalTheme.textColor = colors.black
 
 assets.variables.save(
     "os/theme/main.lua",
@@ -244,11 +280,13 @@ assets.variables.save(
         menuButton = menuButton,
         listView = listView,
         listButton = listButton,
+        selectedListButton = selectedListButton,
         activatedButton = activatedButton,
         deactivatedButton = deactivatedButton,
         textBox = textBox,
-        pathLabel = pathLabel,
+        selectedLabel = selectedLabel,
         listBox = listBox,
+        pathField = pathField,
         inputField = inputField
     }
 )

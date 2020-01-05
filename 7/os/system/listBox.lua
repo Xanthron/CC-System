@@ -227,4 +227,10 @@ end
 
 manager.draw()
 manager.execute()
-return indexes
+
+local name = args.buttons[indexes[1]]
+for i = 2, #indexes do
+    name = name[indexes[i]]
+end
+
+return name, indexes

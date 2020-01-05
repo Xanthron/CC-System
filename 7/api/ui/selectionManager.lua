@@ -280,10 +280,12 @@ end
 ---@param selectionGroup selectionGroup
 ---@param direction string
 function _select(selectionGroup, direction, source)
+    --local isGroup = false
+    --TODO Make it possible to select a group. E.g. select the group down but when press up the last selected item gets selected.
     local currentSelectionElement = selectionGroup.currentSelectionElement
-    local newSelection = currentSelectionElement[direction].currentSelectionElement or currentSelectionElement[direction]
+    local newSelection = currentSelectionElement[direction]
     while newSelection and newSelection.element.mode == 2 do
-        newSelection = newSelection[direction].currentSelectionElement or newSelection[direction]
+        newSelection = newSelection[direction]
     end
     if newSelection then
         if not selectionGroup.listener or selectionGroup.listener("selection_change", source, currentSelectionElement.element, newSelection.element) ~= false then

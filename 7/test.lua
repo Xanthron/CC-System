@@ -1,8 +1,5 @@
-local function run(...)
-    shell.run("testing.lua", ...)
-end
+local test = {"lol", "was", "auch", "immer"}
 
-local function err(msg)
-    print(msg)
+for key, value in pairs(test) do
+    print(key, value)
 end
-xpcall(run, err, {1, 2})
