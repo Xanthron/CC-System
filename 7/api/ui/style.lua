@@ -1,51 +1,22 @@
----@param path string
----@return style
 function new(path)
-    ---@class style
     local this = {}
-
-    ---@class style.label
     local label = {}
-    ---@type alignment
-    label.alignment = 1
-    ---@class style.label.theme
-    local label_normal = {
-        prefix = "",
-        suffix = "",
-        textColor = colors.black,
-        backgroundColor = colors.white
-    }
-    ---@type style.label.theme
-    local label_disabled = {
-        prefix = "",
-        suffix = "",
-        textColor = colors.gray,
-        backgroundColor = colors.white
-    }
-    ---@type style.label.theme
-    local label_selected = {
-        prefix = "",
-        suffix = "",
-        textColor = colors.black,
-        backgroundColor = colors.orange
-    }
-    label.normalTheme = label_normal
-    label.disabledTheme = label_disabled
-    label.selectedTheme = label_selected
+    label.align = 1
+    local label_normal = {prefix = "", suffix = "", tC = colors.black, tBG = colors.white}
+    local label_disabled = {prefix = "", suffix = "", tC = colors.gray, tBG = colors.white}
+    local label_selected = {prefix = "", suffix = "", tC = colors.black, tBG = colors.orange}
+    label.nTheme = label_normal
+    label.dTheme = label_disabled
+    label.sTheme = label_selected
     this.label = label
-
-    ---@class style.button
     local button = {}
-    ---@type alignment
-    button.alignment = 5
-    ---@class style.button.theme
+    button.align = 5
     local button_normal = {
-        textColor = colors.lightBlue,
-        textBackgroundColor = colors.blue,
-        borderColor = colors.lightBlue,
-        borderBackgroundColor = colors.blue,
-        ---@type border
-        border = {
+        tC = colors.lightBlue,
+        tBG = colors.blue,
+        bC = colors.lightBlue,
+        bBG = colors.blue,
+        b = {
             {},
             {},
             {},
@@ -57,14 +28,12 @@ function new(path)
             {}
         }
     }
-    ---@class style.button.theme
     local button_disabled = {
-        textColor = colors.lightGray,
-        textBackgroundColor = colors.gray,
-        borderColor = colors.lightGray,
-        borderBackgroundColor = colors.gray,
-        ---@type border
-        border = {
+        tC = colors.lightGray,
+        tBG = colors.gray,
+        bC = colors.lightGray,
+        bBG = colors.gray,
+        b = {
             {},
             {},
             {},
@@ -76,14 +45,12 @@ function new(path)
             {}
         }
     }
-    ---@class style.button.theme
     local button_selected = {
-        textColor = colors.white,
-        textBackgroundColor = colors.blue,
-        borderColor = colors.white,
-        borderBackgroundColor = colors.blue,
-        ---@type border
-        border = {
+        tC = colors.white,
+        tBG = colors.blue,
+        bC = colors.white,
+        bBG = colors.blue,
+        b = {
             {},
             {},
             {},
@@ -95,14 +62,12 @@ function new(path)
             {}
         }
     }
-    ---@class style.button.theme
     local button_pressed = {
-        textColor = colors.white,
-        textBackgroundColor = colors.lightBlue,
-        borderColor = colors.white,
-        borderBackgroundColor = colors.lightBlue,
-        ---@type border
-        border = {
+        tC = colors.white,
+        tBG = colors.lightBlue,
+        bC = colors.white,
+        bBG = colors.lightBlue,
+        b = {
             {},
             {},
             {},
@@ -114,214 +79,185 @@ function new(path)
             {}
         }
     }
-    button.normalTheme = button_normal
-    button.disabledTheme = button_disabled
-    button.selectedTheme = button_selected
-    button.pressedTheme = button_pressed
+    button.nTheme = button_normal
+    button.dTheme = button_disabled
+    button.sTheme = button_selected
+    button.pTheme = button_pressed
     this.button = button
-
-    ---@class style.toggleButton
     local toggleButton = {}
-    ---@type alignment
-    toggleButton.alignment = 1
-    ---@class style.toggleButton.theme
+    toggleButton.align = 1
     local toggleButton_normal = {
-        textColor = colors.black,
-        backgroundColor = colors.white,
-        uncheckedCheckbox = {" ", "O", " "},
-        uncheckedCheckboxTextColor = {colors.white, colors.lightBlue, colors.white},
-        uncheckedCheckboxBackgroundColor = {colors.white, colors.blue, colors.white},
-        checkedCheckbox = {" ", "X", " "},
-        checkedCheckboxTextColor = {colors.white, colors.orange, colors.white},
-        checkedCheckboxBackgroundColor = {colors.white, colors.red, colors.white}
+        tC = colors.black,
+        tBG = colors.white,
+        uncheckedL = {" ", "O", " "},
+        uncheckedLC = {colors.white, colors.lightBlue, colors.white},
+        uncheckedLBG = {colors.white, colors.blue, colors.white},
+        checkedL = {" ", "X", " "},
+        checkedLC = {colors.white, colors.orange, colors.white},
+        checkedLBG = {colors.white, colors.red, colors.white}
     }
-    ---@type style.toggleButton.theme
     local toggleButton_disabled = {
-        textColor = colors.gray,
-        backgroundColor = colors.white,
-        uncheckedCheckbox = {"*", "O", "*"},
-        uncheckedCheckboxTextColor = {colors.white, colors.gray, colors.white},
-        uncheckedCheckboxBackgroundColor = {colors.gray, colors.lightGray, colors.gray},
-        checkedCheckbox = {"*", "X", "*"},
-        checkedCheckboxTextColor = {colors.white, colors.gray, colors.white},
-        checkedCheckboxBackgroundColor = {colors.gray, colors.lightGray, colors.gray}
+        tC = colors.gray,
+        tBG = colors.white,
+        uncheckedL = {"*", "O", "*"},
+        uncheckedLC = {colors.white, colors.gray, colors.white},
+        uncheckedLBG = {colors.gray, colors.lightGray, colors.gray},
+        checkedL = {"*", "X", "*"},
+        checkedLC = {colors.white, colors.gray, colors.white},
+        checkedLBG = {colors.gray, colors.lightGray, colors.gray}
     }
-    ---@type style.toggleButton.theme
     local toggleButton_selected = {
-        textColor = colors.orange,
-        backgroundColor = colors.white,
-        uncheckedCheckbox = {">", "O", "< "},
-        uncheckedCheckboxTextColor = {colors.orange, colors.white, colors.orange},
-        uncheckedCheckboxBackgroundColor = {colors.white, colors.blue, colors.white},
-        checkedCheckbox = {">", "X", "<"},
-        checkedCheckboxTextColor = {colors.orange, colors.white, colors.orange},
-        checkedCheckboxBackgroundColor = {colors.white, colors.red, colors.white}
+        tC = colors.orange,
+        tBG = colors.white,
+        uncheckedL = {">", "O", "< "},
+        uncheckedLC = {colors.orange, colors.white, colors.orange},
+        uncheckedLBG = {colors.white, colors.blue, colors.white},
+        checkedL = {">", "X", "<"},
+        checkedLC = {colors.orange, colors.white, colors.orange},
+        checkedLBG = {colors.white, colors.red, colors.white}
     }
-    ---@type style.toggleButton.theme
     local toggleButton_pressed = {
-        textColor = colors.orange,
-        backgroundColor = colors.white,
-        uncheckedCheckbox = {">", "X", "<"},
-        uncheckedCheckboxTextColor = {colors.orange, colors.white, colors.orange},
-        uncheckedCheckboxBackgroundColor = {colors.white, colors.orange, colors.white},
-        checkedCheckbox = {">", "O", "<"},
-        checkedCheckboxTextColor = {colors.orange, colors.white, colors.orange},
-        checkedCheckboxBackgroundColor = {colors.white, colors.lightBlue, colors.white}
+        tC = colors.orange,
+        tBG = colors.white,
+        uncheckedL = {">", "X", "<"},
+        uncheckedLC = {colors.orange, colors.white, colors.orange},
+        uncheckedLBG = {colors.white, colors.orange, colors.white},
+        checkedL = {">", "O", "<"},
+        checkedLC = {colors.orange, colors.white, colors.orange},
+        checkedLBG = {colors.white, colors.lightBlue, colors.white}
     }
-    toggleButton.normalTheme = toggleButton_normal
-    toggleButton.disabledTheme = toggleButton_disabled
-    toggleButton.selectedTheme = toggleButton_selected
-    toggleButton.pressedTheme = toggleButton_pressed
+    toggleButton.nTheme = toggleButton_normal
+    toggleButton.dTheme = toggleButton_disabled
+    toggleButton.sTheme = toggleButton_selected
+    toggleButton.pTheme = toggleButton_pressed
     this.toggleButton = toggleButton
-
-    ---@class style.slider
     local slider = {}
-    ---@class style.slider.theme
     local slider_normal = {
-        slider = {"|", "#", "|"},
-        sliderColor = {colors.lightGray, colors.lightGray, colors.lightGray},
-        sliderBackgroundColor = {colors.gray, colors.gray, colors.gray},
-        handle = {"|", "#", "|"},
-        handleColor = {colors.lightGray, colors.gray, colors.lightGray},
-        handleBackgroundColor = {colors.lightGray, colors.black, colors.lightGray}
+        sliderT = {"|", "#", "|"},
+        sliderTC = {colors.lightGray, colors.lightGray, colors.lightGray},
+        sliderTBG = {colors.gray, colors.gray, colors.gray},
+        handleL = {"|", "#", "|"},
+        handleLC = {colors.lightGray, colors.gray, colors.lightGray},
+        handleLBG = {colors.lightGray, colors.black, colors.lightGray}
     }
-    ---@class style.slider.button
     local slider_normal_buttonPositive = {}
-    ---@class style.slider.button.theme
     local slider_normal_buttonPositive_normal = {
-        text = {"[", "A", "]"},
-        color = {colors.lightBlue, colors.lightBlue, colors.lightBlue},
-        backgroundColor = {colors.blue, colors.blue, colors.blue}
+        t = {"[", "A", "]"},
+        tC = {colors.lightBlue, colors.lightBlue, colors.lightBlue},
+        tBG = {colors.blue, colors.blue, colors.blue}
     }
-    ---@type style.slider.button.theme
     local slider_normal_buttonPositive_disabled = {
-        text = {"[", "A", "]"},
-        color = {colors.lightGray, colors.lightGray, colors.lightGray},
-        backgroundColor = {colors.gray, colors.gray, colors.gray}
+        t = {"[", "A", "]"},
+        tC = {colors.lightGray, colors.lightGray, colors.lightGray},
+        tBG = {colors.gray, colors.gray, colors.gray}
     }
-    ---@type style.slider.button.theme
     local slider_normal_buttonPositive_selected = {
-        text = {"[", "A", "]"},
-        color = {colors.white, colors.white, colors.white},
-        backgroundColor = {colors.blue, colors.blue, colors.blue}
+        t = {"[", "A", "]"},
+        tC = {colors.white, colors.white, colors.white},
+        tBG = {colors.blue, colors.blue, colors.blue}
     }
-    slider_normal_buttonPositive.normal = slider_normal_buttonPositive_normal
-    slider_normal_buttonPositive.disabled = slider_normal_buttonPositive_disabled
-    slider_normal_buttonPositive.selected = slider_normal_buttonPositive_selected
-    ---@type style.slider.button
+    slider_normal_buttonPositive.nTheme = slider_normal_buttonPositive_normal
+    slider_normal_buttonPositive.dTheme = slider_normal_buttonPositive_disabled
+    slider_normal_buttonPositive.sTheme = slider_normal_buttonPositive_selected
     local slider_normal_buttonNegative = {}
-    ---@type style.slider.button.theme
     local slider_normal_buttonNegative_normal = {
-        text = {"[", "A", "]"},
-        color = {colors.lightBlue, colors.lightBlue, colors.lightBlue},
-        backgroundColor = {colors.blue, colors.blue, colors.blue}
+        t = {"[", "A", "]"},
+        tC = {colors.lightBlue, colors.lightBlue, colors.lightBlue},
+        tBG = {colors.blue, colors.blue, colors.blue}
     }
-    ---@type style.slider.button.theme
     local slider_normal_buttonNegative_disabled = {
-        text = {"[", "A", "]"},
-        color = {colors.lightGray, colors.lightGray, colors.lightGray},
-        backgroundColor = {colors.gray, colors.gray, colors.gray}
+        t = {"[", "A", "]"},
+        tC = {colors.lightGray, colors.lightGray, colors.lightGray},
+        tBG = {colors.gray, colors.gray, colors.gray}
     }
-    ---@type style.slider.button.theme
     local slider_normal_buttonNegative_selected = {
-        text = {"[", "A", "]"},
-        color = {colors.white, colors.white, colors.white},
-        backgroundColor = {colors.blue, colors.blue, colors.blue}
+        t = {"[", "A", "]"},
+        tC = {colors.white, colors.white, colors.white},
+        tBG = {colors.blue, colors.blue, colors.blue}
     }
-    slider_normal_buttonNegative.normal = slider_normal_buttonNegative_normal
-    slider_normal_buttonNegative.disabled = slider_normal_buttonNegative_disabled
-    slider_normal_buttonNegative.selected = slider_normal_buttonNegative_selected
-    slider_normal.buttonPositive = slider_normal_buttonPositive
-    slider_normal.buttonNegative = slider_normal_buttonNegative
+    slider_normal_buttonNegative.nTheme = slider_normal_buttonNegative_normal
+    slider_normal_buttonNegative.dTheme = slider_normal_buttonNegative_disabled
+    slider_normal_buttonNegative.sTheme = slider_normal_buttonNegative_selected
+    slider_normal.buttonP = slider_normal_buttonPositive
+    slider_normal.buttonN = slider_normal_buttonNegative
     local slider_disabled = {
-        slider = {"|", "#", "|"},
-        sliderColor = {colors.lightGray, colors.lightGray, colors.lightGray},
-        sliderBackgroundColor = {colors.gray, colors.gray, colors.gray},
-        handle = {"|", "#", "|"},
-        handleColor = {colors.lightGray, colors.gray, colors.lightGray},
-        handleBackgroundColor = {colors.lightGray, colors.black, colors.lightGray}
+        sliderT = {"|", "#", "|"},
+        sliderTC = {colors.lightGray, colors.lightGray, colors.lightGray},
+        sliderTBG = {colors.gray, colors.gray, colors.gray},
+        handleL = {"|", "#", "|"},
+        handleLC = {colors.lightGray, colors.gray, colors.lightGray},
+        handleLBG = {colors.lightGray, colors.black, colors.lightGray}
     }
-    ---@type style.style.slider.button
     local slider_disabled_buttonPositive = {}
-    ---@type style.style.slider.button
     local slider_disabled_buttonNegative = {}
-    slider_disabled_buttonPositive.disabled = slider_normal_buttonPositive_disabled
-    slider_disabled_buttonNegative.disabled = slider_normal_buttonNegative_disabled
-    slider_disabled.buttonPositive = slider_disabled_buttonPositive
-    slider_disabled.buttonNegative = slider_disabled_buttonNegative
-    slider.normal = slider_normal
-    slider.disabled = slider_disabled
+    slider_disabled_buttonPositive.dTheme = slider_normal_buttonPositive_disabled
+    slider_disabled_buttonNegative.dTheme = slider_normal_buttonNegative_disabled
+    slider_disabled.buttonP = slider_disabled_buttonPositive
+    slider_disabled.buttonN = slider_disabled_buttonNegative
+    slider.nTheme = slider_normal
+    slider.dTheme = slider_disabled
     this.slider = slider
-
-    ---@class style.textBox
     local textBox = {}
-    ---@type style.label
     textBox.label = assets.extension.copyTable(this.label)
-    textBox.label.normalTheme.backgroundColor = colors.green
-    textBox.label.normalTheme.textColor = colors.lime
-    textBox.label.disabledTheme.backgroundColor = colors.gray
-    textBox.label.disabledTheme.textColor = colors.lightGray
-    textBox.label.disabledTheme.prefix = "*"
-    textBox.label.disabledTheme.suffix = "*"
-    textBox.label.selectedTheme.backgroundColor = colors.green
-    textBox.label.selectedTheme.textColor = colors.yellow
-    textBox.label.selectedTheme.prefix = ">"
-    textBox.label.selectedTheme.suffix = "<"
-
+    textBox.label.nTheme.tBG = colors.green
+    textBox.label.nTheme.tC = colors.lime
+    textBox.label.dTheme.tBG = colors.gray
+    textBox.label.dTheme.tC = colors.lightGray
+    textBox.label.dTheme.prefix = "*"
+    textBox.label.dTheme.suffix = "*"
+    textBox.label.sTheme.tBG = colors.green
+    textBox.label.sTheme.tC = colors.yellow
+    textBox.label.sTheme.prefix = ">"
+    textBox.label.sTheme.suffix = "<"
     textBox.text = assets.extension.copyTable(this.label)
-    textBox.text.normalTheme.backgroundColor = colors.white
-    textBox.text.normalTheme.textColor = colors.black
-    textBox.text.disabledTheme.backgroundColor = colors.white
-    textBox.text.disabledTheme.textColor = colors.black
-    textBox.text.selectedTheme.backgroundColor = colors.white
-    textBox.text.selectedTheme.textColor = colors.black
-    ---@type style.slider
+    textBox.text.nTheme.tBG = colors.white
+    textBox.text.nTheme.tC = colors.black
+    textBox.text.dTheme.tBG = colors.white
+    textBox.text.dTheme.tC = colors.black
+    textBox.text.sTheme.tBG = colors.white
+    textBox.text.sTheme.tC = colors.black
     textBox.slider = assets.extension.copyTable(this.slider)
-    textBox.slider.normal.buttonPositive.normal.text = {string.char(30)}
-    textBox.slider.normal.buttonPositive.normal.color = {colors.white}
-    textBox.slider.normal.buttonPositive.normal.backgroundColor = {colors.lime}
-    textBox.slider.normal.buttonPositive.selected.text = {string.char(30)}
-    textBox.slider.normal.buttonPositive.selected.color = {colors.yellow}
-    textBox.slider.normal.buttonPositive.selected.backgroundColor = {colors.lime}
-    textBox.slider.normal.buttonPositive.disabled.text = {string.char(30)}
-    textBox.slider.normal.buttonPositive.disabled.color = {colors.gray}
-    textBox.slider.normal.buttonPositive.disabled.backgroundColor = {colors.lime}
-    textBox.slider.normal.buttonNegative.normal.text = {string.char(31)}
-    textBox.slider.normal.buttonNegative.normal.color = {colors.white}
-    textBox.slider.normal.buttonNegative.normal.backgroundColor = {colors.lime}
-    textBox.slider.normal.buttonNegative.selected.text = {string.char(31)}
-    textBox.slider.normal.buttonNegative.selected.color = {colors.yellow}
-    textBox.slider.normal.buttonNegative.selected.backgroundColor = {colors.lime}
-    textBox.slider.normal.buttonNegative.disabled.text = {string.char(31)}
-    textBox.slider.normal.buttonNegative.disabled.color = {colors.gray}
-    textBox.slider.normal.buttonNegative.disabled.backgroundColor = {colors.lime}
-    textBox.slider.normal.slider = {string.char(127)}
-    textBox.slider.normal.sliderColor = {colors.lightGray}
-    textBox.slider.normal.sliderBackgroundColor = {colors.lime}
-    textBox.slider.normal.handle = {"#"}
-    textBox.slider.normal.handleColor = {colors.gray}
-    textBox.slider.normal.handleBackgroundColor = {colors.green}
-
-    textBox.slider.disabled.buttonPositive.disabled.text = {string.char(30)}
-    textBox.slider.disabled.buttonPositive.disabled.color = {colors.lightGray}
-    textBox.slider.disabled.buttonPositive.disabled.backgroundColor = {colors.gray}
-    textBox.slider.disabled.buttonNegative.disabled.text = {string.char(31)}
-    textBox.slider.disabled.buttonNegative.disabled.color = {colors.lightGray}
-    textBox.slider.disabled.buttonNegative.disabled.backgroundColor = {colors.gray}
-    textBox.slider.disabled.slider = {string.char(127)}
-    textBox.slider.disabled.sliderColor = {colors.lightGray}
-    textBox.slider.disabled.sliderBackgroundColor = {colors.gray}
-    textBox.slider.disabled.handle = {"#"}
-    textBox.slider.disabled.handleColor = {colors.gray}
-    textBox.slider.disabled.handleBackgroundColor = {colors.gray}
-
-    ---@class style.textBox.theme
+    textBox.slider.nTheme.buttonP.nTheme.t = {string.char(30)}
+    textBox.slider.nTheme.buttonP.nTheme.tC = {colors.white}
+    textBox.slider.nTheme.buttonP.nTheme.tBG = {colors.lime}
+    textBox.slider.nTheme.buttonP.sTheme.t = {string.char(30)}
+    textBox.slider.nTheme.buttonP.sTheme.tC = {colors.yellow}
+    textBox.slider.nTheme.buttonP.sTheme.tBG = {colors.lime}
+    textBox.slider.nTheme.buttonP.dTheme.t = {string.char(30)}
+    textBox.slider.nTheme.buttonP.dTheme.tC = {colors.gray}
+    textBox.slider.nTheme.buttonP.dTheme.tBG = {colors.lime}
+    textBox.slider.nTheme.buttonN.nTheme.t = {string.char(31)}
+    textBox.slider.nTheme.buttonN.nTheme.tC = {colors.white}
+    textBox.slider.nTheme.buttonN.nTheme.tBG = {colors.lime}
+    textBox.slider.nTheme.buttonN.sTheme.t = {string.char(31)}
+    textBox.slider.nTheme.buttonN.sTheme.tC = {colors.yellow}
+    textBox.slider.nTheme.buttonN.sTheme.tBG = {colors.lime}
+    textBox.slider.nTheme.buttonN.dTheme.t = {string.char(31)}
+    textBox.slider.nTheme.buttonN.dTheme.tC = {colors.gray}
+    textBox.slider.nTheme.buttonN.dTheme.tBG = {colors.lime}
+    textBox.slider.nTheme.sliderT = {string.char(127)}
+    textBox.slider.nTheme.sliderTC = {colors.lightGray}
+    textBox.slider.nTheme.sliderTBG = {colors.lime}
+    textBox.slider.nTheme.handleL = {"#"}
+    textBox.slider.nTheme.handleLC = {colors.gray}
+    textBox.slider.nTheme.handleLBG = {colors.green}
+    textBox.slider.dTheme.buttonP.dTheme.t = {string.char(30)}
+    textBox.slider.dTheme.buttonP.dTheme.tC = {colors.lightGray}
+    textBox.slider.dTheme.buttonP.dTheme.tBG = {colors.gray}
+    textBox.slider.dTheme.buttonN.dTheme.t = {string.char(31)}
+    textBox.slider.dTheme.buttonN.dTheme.tC = {colors.lightGray}
+    textBox.slider.dTheme.buttonN.dTheme.tBG = {colors.gray}
+    textBox.slider.dTheme.sliderT = {string.char(127)}
+    textBox.slider.dTheme.sliderTC = {colors.lightGray}
+    textBox.slider.dTheme.sliderTBG = {colors.gray}
+    textBox.slider.dTheme.handleL = {"#"}
+    textBox.slider.dTheme.handleLC = {colors.gray}
+    textBox.slider.dTheme.handleLBG = {colors.gray}
     local textBox_normal = {
-        spaceColor = colors.white,
-        borderColor = colors.lime,
-        borderBackgroundColor = colors.green,
-        ---@type border
-        border = {
+        sTC = colors.white,
+        bC = colors.lime,
+        bBG = colors.green,
+        b = {
             {"+"},
             {"-"},
             {"+"},
@@ -333,13 +269,11 @@ function new(path)
             {"+", "|", "+"}
         }
     }
-    ---@type style.textBox.theme
     local textBox_disabled = {
-        spaceColor = colors.white,
-        borderColor = colors.lightGray,
-        borderBackgroundColor = colors.gray,
-        ---@type border
-        border = {
+        sTC = colors.white,
+        bC = colors.lightGray,
+        bBG = colors.gray,
+        b = {
             {"+"},
             {"-"},
             {"+"},
@@ -351,13 +285,11 @@ function new(path)
             {"+", "|", "+"}
         }
     }
-    ---@type style.textBox.theme
     local textBox_selected = {
-        spaceColor = colors.white,
-        borderColor = colors.lime,
-        borderBackgroundColor = colors.green,
-        ---@type border
-        border = {
+        sTC = colors.white,
+        bC = colors.lime,
+        bBG = colors.green,
+        b = {
             {"+"},
             {"-"},
             {"+"},
@@ -369,104 +301,94 @@ function new(path)
             {"+", "|", "+"}
         }
     }
-    textBox.normalTheme = textBox_normal
-    textBox.disabledTheme = textBox_disabled
-    textBox.selectedTheme = textBox_selected
+    textBox.nTheme = textBox_normal
+    textBox.dTheme = textBox_disabled
+    textBox.sTheme = textBox_selected
     this.textBox = textBox
-
-    ---@class style.scrollView
     local scrollView = {}
-    ---@type style.label
     scrollView.label = assets.extension.copyTable(this.label)
-    ---@type style.slider
-    scrollView.sliderVertical = assets.extension.copyTable(this.slider)
-    scrollView.sliderVertical.normal.buttonPositive.normal.text = {string.char(30)}
-    scrollView.sliderVertical.normal.buttonPositive.normal.color = {colors.white}
-    scrollView.sliderVertical.normal.buttonPositive.normal.backgroundColor = {colors.lime}
-    scrollView.sliderVertical.normal.buttonPositive.selected.text = {string.char(30)}
-    scrollView.sliderVertical.normal.buttonPositive.selected.color = {colors.yellow}
-    scrollView.sliderVertical.normal.buttonPositive.selected.backgroundColor = {colors.lime}
-    scrollView.sliderVertical.normal.buttonPositive.disabled.text = {string.char(30)}
-    scrollView.sliderVertical.normal.buttonPositive.disabled.color = {colors.gray}
-    scrollView.sliderVertical.normal.buttonPositive.disabled.backgroundColor = {colors.lime}
-    scrollView.sliderVertical.normal.buttonNegative.normal.text = {string.char(31)}
-    scrollView.sliderVertical.normal.buttonNegative.normal.color = {colors.white}
-    scrollView.sliderVertical.normal.buttonNegative.normal.backgroundColor = {colors.lime}
-    scrollView.sliderVertical.normal.buttonNegative.selected.text = {string.char(31)}
-    scrollView.sliderVertical.normal.buttonNegative.selected.color = {colors.yellow}
-    scrollView.sliderVertical.normal.buttonNegative.selected.backgroundColor = {colors.lime}
-    scrollView.sliderVertical.normal.buttonNegative.disabled.text = {string.char(31)}
-    scrollView.sliderVertical.normal.buttonNegative.disabled.color = {colors.gray}
-    scrollView.sliderVertical.normal.buttonNegative.disabled.backgroundColor = {colors.lime}
-    scrollView.sliderVertical.normal.slider = {string.char(127)}
-    scrollView.sliderVertical.normal.sliderColor = {colors.lightGray}
-    scrollView.sliderVertical.normal.sliderBackgroundColor = {colors.lime}
-    scrollView.sliderVertical.normal.handle = {"#"}
-    scrollView.sliderVertical.normal.handleColor = {colors.gray}
-    scrollView.sliderVertical.normal.handleBackgroundColor = {colors.green}
-
-    scrollView.sliderVertical.disabled.buttonPositive.disabled.text = {string.char(30)}
-    scrollView.sliderVertical.disabled.buttonPositive.disabled.color = {colors.lightGray}
-    scrollView.sliderVertical.disabled.buttonPositive.disabled.backgroundColor = {colors.gray}
-    scrollView.sliderVertical.disabled.buttonNegative.disabled.text = {string.char(31)}
-    scrollView.sliderVertical.disabled.buttonNegative.disabled.color = {colors.lightGray}
-    scrollView.sliderVertical.disabled.buttonNegative.disabled.backgroundColor = {colors.gray}
-    scrollView.sliderVertical.disabled.slider = {string.char(127)}
-    scrollView.sliderVertical.disabled.sliderColor = {colors.lightGray}
-    scrollView.sliderVertical.disabled.sliderBackgroundColor = {colors.gray}
-    scrollView.sliderVertical.disabled.handle = {"#"}
-    scrollView.sliderVertical.disabled.handleColor = {colors.gray}
-    scrollView.sliderVertical.disabled.handleBackgroundColor = {colors.gray}
-    ---@type style.slider
-    scrollView.sliderHorizontal = assets.extension.copyTable(this.slider)
-    scrollView.sliderHorizontal.normal.buttonPositive.normal.text = {string.char(17)}
-    scrollView.sliderHorizontal.normal.buttonPositive.normal.color = {colors.white}
-    scrollView.sliderHorizontal.normal.buttonPositive.normal.backgroundColor = {colors.lime}
-    scrollView.sliderHorizontal.normal.buttonPositive.selected.text = {string.char(17)}
-    scrollView.sliderHorizontal.normal.buttonPositive.selected.color = {colors.yellow}
-    scrollView.sliderHorizontal.normal.buttonPositive.selected.backgroundColor = {colors.lime}
-    scrollView.sliderHorizontal.normal.buttonPositive.disabled.text = {string.char(17)}
-    scrollView.sliderHorizontal.normal.buttonPositive.disabled.color = {colors.gray}
-    scrollView.sliderHorizontal.normal.buttonPositive.disabled.backgroundColor = {colors.lime}
-    scrollView.sliderHorizontal.normal.buttonNegative.normal.text = {string.char(16)}
-    scrollView.sliderHorizontal.normal.buttonNegative.normal.color = {colors.white}
-    scrollView.sliderHorizontal.normal.buttonNegative.normal.backgroundColor = {colors.lime}
-    scrollView.sliderHorizontal.normal.buttonNegative.selected.text = {string.char(16)}
-    scrollView.sliderHorizontal.normal.buttonNegative.selected.color = {colors.yellow}
-    scrollView.sliderHorizontal.normal.buttonNegative.selected.backgroundColor = {colors.lime}
-    scrollView.sliderHorizontal.normal.buttonNegative.disabled.text = {string.char(16)}
-    scrollView.sliderHorizontal.normal.buttonNegative.disabled.color = {colors.gray}
-    scrollView.sliderHorizontal.normal.buttonNegative.disabled.backgroundColor = {colors.lime}
-    scrollView.sliderHorizontal.normal.slider = {string.char(127)}
-    scrollView.sliderHorizontal.normal.sliderColor = {colors.lightGray}
-    scrollView.sliderHorizontal.normal.sliderBackgroundColor = {colors.lime}
-    scrollView.sliderHorizontal.normal.handle = {"#"}
-    scrollView.sliderHorizontal.normal.handleColor = {colors.gray}
-    scrollView.sliderHorizontal.normal.handleBackgroundColor = {colors.green}
-
-    scrollView.sliderHorizontal.disabled.buttonPositive.disabled.text = {string.char(17)}
-    scrollView.sliderHorizontal.disabled.buttonPositive.disabled.color = {colors.lightGray}
-    scrollView.sliderHorizontal.disabled.buttonPositive.disabled.backgroundColor = {colors.gray}
-    scrollView.sliderHorizontal.disabled.buttonNegative.disabled.text = {string.char(16)}
-    scrollView.sliderHorizontal.disabled.buttonNegative.disabled.color = {colors.lightGray}
-    scrollView.sliderHorizontal.disabled.buttonNegative.disabled.backgroundColor = {colors.gray}
-    scrollView.sliderHorizontal.disabled.slider = {string.char(127)}
-    scrollView.sliderHorizontal.disabled.sliderColor = {colors.lightGray}
-    scrollView.sliderHorizontal.disabled.sliderBackgroundColor = {colors.gray}
-    scrollView.sliderHorizontal.disabled.handle = {"#"}
-    scrollView.sliderHorizontal.disabled.handleColor = {colors.gray}
-    scrollView.sliderHorizontal.disabled.handleBackgroundColor = {colors.gray}
-
-    ---@class style.scrollView.theme
+    scrollView.sliderV = assets.extension.copyTable(this.slider)
+    scrollView.sliderV.nTheme.buttonP.nTheme.t = {string.char(30)}
+    scrollView.sliderV.nTheme.buttonP.nTheme.tC = {colors.white}
+    scrollView.sliderV.nTheme.buttonP.nTheme.tBG = {colors.lime}
+    scrollView.sliderV.nTheme.buttonP.sTheme.t = {string.char(30)}
+    scrollView.sliderV.nTheme.buttonP.sTheme.tC = {colors.yellow}
+    scrollView.sliderV.nTheme.buttonP.sTheme.tBG = {colors.lime}
+    scrollView.sliderV.nTheme.buttonP.dTheme.t = {string.char(30)}
+    scrollView.sliderV.nTheme.buttonP.dTheme.tC = {colors.gray}
+    scrollView.sliderV.nTheme.buttonP.dTheme.tBG = {colors.lime}
+    scrollView.sliderV.nTheme.buttonN.nTheme.t = {string.char(31)}
+    scrollView.sliderV.nTheme.buttonN.nTheme.tC = {colors.white}
+    scrollView.sliderV.nTheme.buttonN.nTheme.tBG = {colors.lime}
+    scrollView.sliderV.nTheme.buttonN.sTheme.t = {string.char(31)}
+    scrollView.sliderV.nTheme.buttonN.sTheme.tC = {colors.yellow}
+    scrollView.sliderV.nTheme.buttonN.sTheme.tBG = {colors.lime}
+    scrollView.sliderV.nTheme.buttonN.dTheme.t = {string.char(31)}
+    scrollView.sliderV.nTheme.buttonN.dTheme.tC = {colors.gray}
+    scrollView.sliderV.nTheme.buttonN.dTheme.tBG = {colors.lime}
+    scrollView.sliderV.nTheme.sliderT = {string.char(127)}
+    scrollView.sliderV.nTheme.sliderTC = {colors.lightGray}
+    scrollView.sliderV.nTheme.sliderTBG = {colors.lime}
+    scrollView.sliderV.nTheme.handleL = {"#"}
+    scrollView.sliderV.nTheme.handleLC = {colors.gray}
+    scrollView.sliderV.nTheme.handleLBG = {colors.green}
+    scrollView.sliderV.dTheme.buttonP.dTheme.t = {string.char(30)}
+    scrollView.sliderV.dTheme.buttonP.dTheme.tC = {colors.lightGray}
+    scrollView.sliderV.dTheme.buttonP.dTheme.tBG = {colors.gray}
+    scrollView.sliderV.dTheme.buttonN.dTheme.t = {string.char(31)}
+    scrollView.sliderV.dTheme.buttonN.dTheme.tC = {colors.lightGray}
+    scrollView.sliderV.dTheme.buttonN.dTheme.tBG = {colors.gray}
+    scrollView.sliderV.dTheme.sliderT = {string.char(127)}
+    scrollView.sliderV.dTheme.sliderTC = {colors.lightGray}
+    scrollView.sliderV.dTheme.sliderTBG = {colors.gray}
+    scrollView.sliderV.dTheme.handleL = {"#"}
+    scrollView.sliderV.dTheme.handleLC = {colors.gray}
+    scrollView.sliderV.dTheme.handleLBG = {colors.gray}
+    scrollView.sliderH = assets.extension.copyTable(this.slider)
+    scrollView.sliderH.nTheme.buttonP.nTheme.t = {string.char(17)}
+    scrollView.sliderH.nTheme.buttonP.nTheme.tC = {colors.white}
+    scrollView.sliderH.nTheme.buttonP.nTheme.tBG = {colors.lime}
+    scrollView.sliderH.nTheme.buttonP.sTheme.t = {string.char(17)}
+    scrollView.sliderH.nTheme.buttonP.sTheme.tC = {colors.yellow}
+    scrollView.sliderH.nTheme.buttonP.sTheme.tBG = {colors.lime}
+    scrollView.sliderH.nTheme.buttonP.dTheme.t = {string.char(17)}
+    scrollView.sliderH.nTheme.buttonP.dTheme.tC = {colors.gray}
+    scrollView.sliderH.nTheme.buttonP.dTheme.tBG = {colors.lime}
+    scrollView.sliderH.nTheme.buttonN.nTheme.t = {string.char(16)}
+    scrollView.sliderH.nTheme.buttonN.nTheme.tC = {colors.white}
+    scrollView.sliderH.nTheme.buttonN.nTheme.tBG = {colors.lime}
+    scrollView.sliderH.nTheme.buttonN.sTheme.t = {string.char(16)}
+    scrollView.sliderH.nTheme.buttonN.sTheme.tC = {colors.yellow}
+    scrollView.sliderH.nTheme.buttonN.sTheme.tBG = {colors.lime}
+    scrollView.sliderH.nTheme.buttonN.dTheme.t = {string.char(16)}
+    scrollView.sliderH.nTheme.buttonN.dTheme.tC = {colors.gray}
+    scrollView.sliderH.nTheme.buttonN.dTheme.tBG = {colors.lime}
+    scrollView.sliderH.nTheme.sliderT = {string.char(127)}
+    scrollView.sliderH.nTheme.sliderTC = {colors.lightGray}
+    scrollView.sliderH.nTheme.sliderTBG = {colors.lime}
+    scrollView.sliderH.nTheme.handleL = {"#"}
+    scrollView.sliderH.nTheme.handleLC = {colors.gray}
+    scrollView.sliderH.nTheme.handleLBG = {colors.green}
+    scrollView.sliderH.dTheme.buttonP.dTheme.t = {string.char(17)}
+    scrollView.sliderH.dTheme.buttonP.dTheme.tC = {colors.lightGray}
+    scrollView.sliderH.dTheme.buttonP.dTheme.tBG = {colors.gray}
+    scrollView.sliderH.dTheme.buttonN.dTheme.t = {string.char(16)}
+    scrollView.sliderH.dTheme.buttonN.dTheme.tC = {colors.lightGray}
+    scrollView.sliderH.dTheme.buttonN.dTheme.tBG = {colors.gray}
+    scrollView.sliderH.dTheme.sliderT = {string.char(127)}
+    scrollView.sliderH.dTheme.sliderTC = {colors.lightGray}
+    scrollView.sliderH.dTheme.sliderTBG = {colors.gray}
+    scrollView.sliderH.dTheme.handleL = {"#"}
+    scrollView.sliderH.dTheme.handleLC = {colors.gray}
+    scrollView.sliderH.dTheme.handleLBG = {colors.gray}
     local scrollView_normal = {
-        textColor = colors.lime,
-        textBackgroundColor = colors.green,
+        tC = colors.lime,
+        tBG = colors.green,
         spaceTextColor = colors.white,
         spaceBackgroundColor = colors.white,
-        borderColor = colors.lime,
-        borderBackgroundColor = colors.green,
-        ---@type border
-        border = {
+        bC = colors.lime,
+        bBG = colors.green,
+        b = {
             {"+"},
             {"-"},
             {"+"},
@@ -478,16 +400,14 @@ function new(path)
             {"+"}
         }
     }
-    ---@type style.scrollView.theme
     local scrollView_disabled = {
-        textColor = colors.lightGray,
-        textBackgroundColor = colors.gray,
+        tC = colors.lightGray,
+        tBG = colors.gray,
         spaceTextColor = colors.white,
         spaceBackgroundColor = colors.white,
-        borderColor = colors.lightGray,
-        borderBackgroundColor = colors.gray,
-        ---@type border
-        border = {
+        bC = colors.lightGray,
+        bBG = colors.gray,
+        b = {
             {"+"},
             {"-"},
             {"+"},
@@ -499,16 +419,14 @@ function new(path)
             {"+"}
         }
     }
-    ---@type style.scrollView.theme
     local scrollView_selected = {
-        textColor = colors.yellow,
-        textBackgroundColor = colors.green,
+        tC = colors.yellow,
+        tBG = colors.green,
         spaceTextColor = colors.white,
         spaceBackgroundColor = colors.white,
-        borderColor = colors.lime,
-        borderBackgroundColor = colors.green,
-        ---@type border
-        border = {
+        bC = colors.lime,
+        bBG = colors.green,
+        b = {
             {"+"},
             {"-"},
             {"+"},
@@ -520,29 +438,24 @@ function new(path)
             {"+"}
         }
     }
-    scrollView.normalTheme = scrollView_normal
-    scrollView.disabledTheme = scrollView_disabled
-    scrollView.selectedTheme = scrollView_selected
+    scrollView.nTheme = scrollView_normal
+    scrollView.dTheme = scrollView_disabled
+    scrollView.sTheme = scrollView_selected
     this.scrollView = scrollView
-
-    ---@class  style.inputField
     local inputField = {}
-    inputField.alignment = 1
-    ---@type style.label
+    inputField.align = 1
     inputField.label = assets.extension.copyTable(this.label)
-    inputField.label.normalTheme.textColor = colors.lime
-    inputField.label.normalTheme.backgroundColor = colors.green
-    inputField.label.selectedTheme.textColor = colors.yellow
-    inputField.label.selectedTheme.backgroundColor = colors.green
-    ---@class style.inputField.theme
+    inputField.label.nTheme.tC = colors.lime
+    inputField.label.nTheme.tBG = colors.green
+    inputField.label.sTheme.tC = colors.yellow
+    inputField.label.sTheme.tBG = colors.green
     local inputField_normal = {
-        textColor = colors.white,
-        textBackgroundColor = colors.black,
-        spaceColor = colors.white,
-        borderColor = colors.lime,
-        borderBackgroundColor = colors.green,
-        ---@type border
-        border = {
+        tC = colors.white,
+        tBG = colors.black,
+        sTC = colors.white,
+        bC = colors.lime,
+        bBG = colors.green,
+        b = {
             {"+"},
             {"-"},
             {"+"},
@@ -554,15 +467,13 @@ function new(path)
             {"+"}
         }
     }
-    ---@type style.inputField.theme
     local inputField_disabled = {
-        textColor = colors.lightGray,
-        textBackgroundColor = colors.gray,
-        spaceColor = colors.white,
-        borderColor = colors.lightGray,
-        borderBackgroundColor = colors.gray,
-        ---@type border
-        border = {
+        tC = colors.lightGray,
+        tBG = colors.gray,
+        sTC = colors.white,
+        bC = colors.lightGray,
+        bBG = colors.gray,
+        b = {
             {"+"},
             {"-"},
             {"+"},
@@ -574,17 +485,15 @@ function new(path)
             {"+"}
         }
     }
-    ---@type style.inputField.theme
     local inputField_selected = {
-        textColor = colors.yellow,
-        textBackgroundColor = colors.black,
-        completionTextColor = colors.yellow,
-        completionBackgroundColor = colors.gray,
-        spaceColor = colors.white,
-        borderColor = colors.lime,
-        borderBackgroundColor = colors.green,
-        ---@type border
-        border = {
+        tC = colors.yellow,
+        tBG = colors.black,
+        complC = colors.yellow,
+        complBG = colors.gray,
+        sTC = colors.white,
+        bC = colors.lime,
+        bBG = colors.green,
+        b = {
             {"+"},
             {"-"},
             {"+"},
@@ -596,47 +505,28 @@ function new(path)
             {"+"}
         }
     }
-    inputField.normalTheme = inputField_normal
-    inputField.disabledTheme = inputField_disabled
-    inputField.selectedTheme = inputField_selected
+    inputField.nTheme = inputField_normal
+    inputField.dTheme = inputField_disabled
+    inputField.sTheme = inputField_selected
     this.inputField = inputField
-
-    ---@return style.any
     this.getStyle = function(elementType, arguments)
-        local copiedStyle = assets.extension.copyTable(this[elementType])
-
+        local copiedStyle = assets.extension.copyTable(this[elementType], elementType)
         if type(arguments) == "table" then
             for k, v in pairs(arguments) do
                 copiedStyle[k] = v
             end
         end
-
         return copiedStyle
     end
-
     setmetatable(
         this,
-        {
-            __call = function(t, type, arguments)
+        {__call = function(t, type, arguments)
                 return t.getStyle(type, arguments)
-            end
-        }
+            end}
     )
-
     return this
 end
-
----@param topLeft char[]
----@param topMiddle char[]
----@param topRight char[]
----@param middleLeft char[]
----@param middleRight char[]
----@param bottomLeft char[]
----@param bottomMiddle char[]
----@param bottomRight char[]
----@return border
 function border(topLeft, topMiddle, topRight, middleLeft, middleRight, bottomLeft, bottomMiddle, bottomRight)
-    ---@class border
     return {
         topLeft or {},
         topMiddle or {},

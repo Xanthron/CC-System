@@ -1,22 +1,8 @@
-local function loadAPI(input, dir)
-  local apiFiles = fs.list(dir)
-  for i = 1 , #apiFiles do
-    local path = dir.."/".. apiFiles[i]
-    if fs.isDir(path) == false then
-      local name = string.gmatch( apiFiles[i],"[^.]+")()
-      os.loadAPI(path)
-      local temp = _G[name]
-      os.unloadAPI(name)
-      input[name] = temp
-    else
-      input[apiFiles[i]] = {}
-      loadAPI(input[apiFiles[i]], path)
-    end
-  end
+local function loadAPI(input,dir)local apiFiles=fs.list(dir)for i=1, #apiFiles do
+local path=dir.."/"..apiFiles[i]if fs.isDir(path) ==false then
+local name=string.gmatch(apiFiles[i],"[^.]+")()os.loadAPI(path)local temp=_G[name]os.unloadAPI(name)input[name] =temp
+else
+input[apiFiles[i]] = {}loadAPI(input[apiFiles[i]],path)end
 end
-
-loadAPI(_G,"api")
-
---assets.variables.save("style.lua",ui.style.new())
-
-shell.run("os/init")
+end
+loadAPI(_G,"api")shell.run("os/init")

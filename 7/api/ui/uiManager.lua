@@ -1,29 +1,15 @@
----@return uiManager
 function new(x, y, w, h)
-    ---@class uiManager:element
     local this = ui.element.new(nil, x, y, w, h)
-
-    ---Puts the Cursor at the dedicated position, after every execution the ui. Blinking can be turned on.
-    ---@type function
-    ---@return bool, integer, integer
     this.getCursorPos = nil
-
-    ---@type parallelManager
     this.parallelManager = ui.parallelManager.new()
-
-    ---@type selectionManager
     this.selectionManager = ui.selectionManager.new()
-
     this._needsRedraw = false
     this.draw = function()
         local x, y, w, h = this.getSimpleMaskRect()
         this.doDraw(this.buffer, x, y, w, h)
         this.buffer.draw(x, y, w, h)
     end
-
-    ---@type event
     this._event = ui.event.new()
-
     this._execute = function()
         while true do
             this._event.pull()
@@ -57,9 +43,7 @@ function new(x, y, w, h)
             end
         end
     end
-
     this.parallelManager.addFunction(this._execute)
-
     this.callFunction = function(func)
         this.parallelManager.stop()
         this._callFunction = func
@@ -80,6 +64,5 @@ function new(x, y, w, h)
         end
         this.exit = false
     end
-
     return this
 end

@@ -9,10 +9,9 @@ function save(path, ...)
     end
     local file = nil
     file = io.open(path, "w")
-    file:write("return " .. table.concat(saveString, ", "))
+    file:write("return" .. table.concat(saveString, ","))
     file:close()
 end
-
 function getString(value)
     local valueType = type(value)
     if valueType == "string" then
@@ -27,7 +26,7 @@ function getString(value)
                 if type(key) == "number" then
                     table.insert(tableString, valueString)
                 else
-                    table.insert(tableString, table.concat({key, " = ", valueString}))
+                    table.insert(tableString, table.concat({key, "=", valueString}))
                 end
             end
         end
@@ -36,7 +35,6 @@ function getString(value)
         return "nil"
     end
 end
-
 function open(path)
     if fs.exists(path) then
         return true, dofile(path)

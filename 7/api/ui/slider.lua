@@ -1,47 +1,24 @@
----@param parent element
----@param onValueChange function
----@param orientation "1 = vertical"|"2 = horizontal"
----@param startValue number
----@param endValue number
----@param size number
----@param style style.slider
----@param x integer
----@param y integer
----@param w integer
----@param h integer
----@return slider
 function new(parent, onValueChange, orientation, startValue, endValue, size, style, x, y, w, h)
-    ---@class slider:element
     local this = ui.element.new(parent, x, y, w, h)
-
-    ---@type style.slider
     this.style = style
-
-    ---@type "1 = vertical"|"2 = horizontal"
     this.orientation = orientation
     this.pressedButton = 0
-    ---@type repeatItem
     this.repeatItem = ui.repeatItem.new(0.8, 0.05, 0.7)
-
     this.startValue = startValue
     this.endValue = endValue
     this.size = size
     this.value = startValue
-
     this.recalculate = function()
         local buffer = this.buffer
-        ---@type style.slider.theme
         local theme = {}
         local mode = this.mode
         if mode == 2 then
-            theme = this.style.disabled
+            theme = this.style.dTheme
         else
-            theme = this.style.normal
+            theme = this.style.nTheme
         end
-
         local totalSize = this.endValue - this.startValue
         local value = math.max(0, (this.value) / math.max(1, (totalSize + this.startValue - this.size)))
-
         if this.orientation == 1 then
             local height = this.buffer.rect.h
             local barHeight
@@ -56,74 +33,69 @@ function new(parent, onValueChange, orientation, startValue, endValue, size, sty
                     offset = offset + 1
                 end
             end
-
-            local width = #theme.slider
+            local width = #theme.sliderT
             if this.buffer.rect.w ~= width then
-            --this.buffer.rect.set(nil, nil, width, nil)
             end
-
             local index = 1
             if mode == 2 or value == 0 then
                 for i = 1, width do
-                    buffer.text[index] = theme.buttonPositive.disabled.text[i]
-                    buffer.textColor[index] = theme.buttonPositive.disabled.color[i]
-                    buffer.textBackgroundColor[index] = theme.buttonPositive.disabled.backgroundColor[i]
+                    buffer.text[index] = theme.buttonP.dTheme.t[i]
+                    buffer.textColor[index] = theme.buttonP.dTheme.tC[i]
+                    buffer.textBackgroundColor[index] = theme.buttonP.dTheme.tBG[i]
                     index = index + 1
                 end
             else
                 if this.pressedButton == 1 and this.mode == 4 then
                     for i = 1, width do
-                        buffer.text[index] = theme.buttonPositive.selected.text[i]
-                        buffer.textColor[index] = theme.buttonPositive.selected.color[i]
-                        buffer.textBackgroundColor[index] = theme.buttonPositive.selected.backgroundColor[i]
+                        buffer.text[index] = theme.buttonP.sTheme.t[i]
+                        buffer.textColor[index] = theme.buttonP.sTheme.tC[i]
+                        buffer.textBackgroundColor[index] = theme.buttonP.sTheme.tBG[i]
                         index = index + 1
                     end
                 else
                     for i = 1, width do
-                        buffer.text[index] = theme.buttonPositive.normal.text[i]
-                        buffer.textColor[index] = theme.buttonPositive.normal.color[i]
-                        buffer.textBackgroundColor[index] = theme.buttonPositive.normal.backgroundColor[i]
+                        buffer.text[index] = theme.buttonP.nTheme.t[i]
+                        buffer.textColor[index] = theme.buttonP.nTheme.tC[i]
+                        buffer.textBackgroundColor[index] = theme.buttonP.nTheme.tBG[i]
                         index = index + 1
                     end
                 end
             end
-
             for i = 2, this.buffer.rect.h - 1 do
                 for j = 1, width do
                     if i > offset and i <= offset + barHeight then
-                        buffer.text[index] = theme.slider[j]
-                        buffer.textColor[index] = theme.sliderColor[j]
-                        buffer.textBackgroundColor[index] = theme.sliderBackgroundColor[j]
+                        buffer.text[index] = theme.sliderT[j]
+                        buffer.textColor[index] = theme.sliderTC[j]
+                        buffer.textBackgroundColor[index] = theme.sliderTBG[j]
                         index = index + 1
                     else
-                        buffer.text[index] = theme.handle[j]
-                        buffer.textColor[index] = theme.handleColor[j]
-                        buffer.textBackgroundColor[index] = theme.handleBackgroundColor[j]
+                        buffer.text[index] = theme.handleL[j]
+                        buffer.textColor[index] = theme.handleLC[j]
+                        buffer.textBackgroundColor[index] = theme.handleLBG[j]
                         index = index + 1
                     end
                 end
             end
-
             if mode == 2 or value == 1 or totalSize - this.size <= 0 then
                 for i = 1, width do
-                    buffer.text[index] = theme.buttonNegative.disabled.text[i]
-                    buffer.textColor[index] = theme.buttonNegative.disabled.color[i]
-                    buffer.textBackgroundColor[index] = theme.buttonNegative.disabled.backgroundColor[i]
+                    buffer.text[index] = theme.buttonN.dTheme.t[i]
+                    buffer.textColor[index] = theme.buttonN.dTheme.tC[i]
+                    buffer.textBackgroundColor[index] = theme.buttonN.dTheme.tBG[i]
                     index = index + 1
                 end
             else
                 if this.pressedButton == 2 and this.mode == 4 then
                     for i = 1, width do
-                        buffer.text[index] = theme.buttonNegative.selected.text[i]
-                        buffer.textColor[index] = theme.buttonNegative.selected.color[i]
-                        buffer.textBackgroundColor[index] = theme.buttonNegative.selected.backgroundColor[i]
+                        buffer.text[index] = theme.buttonN.sTheme.t[i]
+                        buffer.textColor[index] = theme.buttonN.sTheme.tC[i]
+                        buffer.textBackgroundColor[index] = theme.buttonN.sTheme.tBG[i]
                         index = index + 1
                     end
                 else
                     for i = 1, width do
-                        buffer.text[index] = theme.buttonNegative.normal.text[i]
-                        buffer.textColor[index] = theme.buttonNegative.normal.color[i]
-                        buffer.textBackgroundColor[index] = theme.buttonNegative.normal.backgroundColor[i]
+                        buffer.text[index] = theme.buttonN.nTheme.t[i]
+                        buffer.textColor[index] = theme.buttonN.nTheme.tC[i]
+                        buffer.textBackgroundColor[index] = theme.buttonN.nTheme.tBG[i]
                         index = index + 1
                     end
                 end
@@ -142,76 +114,71 @@ function new(parent, onValueChange, orientation, startValue, endValue, size, sty
                     offset = offset + 1
                 end
             end
-
-            local height = #theme.slider
+            local height = #theme.sliderT
             if this.buffer.rect.h ~= height then
-            -- this.buffer.rect.set(nil, nil, nil, height)
             end
-
             local index = 1
             if mode == 2 or value == 0 then
                 for i = 1, height do
-                    buffer.text[index] = theme.buttonPositive.disabled.text[i]
-                    buffer.textColor[index] = theme.buttonPositive.disabled.color[i]
-                    buffer.textBackgroundColor[index] = theme.buttonPositive.disabled.backgroundColor[i]
+                    buffer.text[index] = theme.buttonP.dTheme.t[i]
+                    buffer.textColor[index] = theme.buttonP.dTheme.tC[i]
+                    buffer.textBackgroundColor[index] = theme.buttonP.dTheme.tBG[i]
                     index = index + width
                 end
             else
                 if this.pressedButton == 1 and this.mode == 4 then
                     for i = 1, height do
-                        buffer.text[index] = theme.buttonPositive.selected.text[i]
-                        buffer.textColor[index] = theme.buttonPositive.selected.color[i]
-                        buffer.textBackgroundColor[index] = theme.buttonPositive.selected.backgroundColor[i]
+                        buffer.text[index] = theme.buttonP.sTheme.t[i]
+                        buffer.textColor[index] = theme.buttonP.sTheme.tC[i]
+                        buffer.textBackgroundColor[index] = theme.buttonP.sTheme.tBG[i]
                         index = index + width
                     end
                 else
                     for i = 1, height do
-                        buffer.text[index] = theme.buttonPositive.normal.text[i]
-                        buffer.textColor[index] = theme.buttonPositive.normal.color[i]
-                        buffer.textBackgroundColor[index] = theme.buttonPositive.normal.backgroundColor[i]
+                        buffer.text[index] = theme.buttonP.nTheme.t[i]
+                        buffer.textColor[index] = theme.buttonP.nTheme.tC[i]
+                        buffer.textBackgroundColor[index] = theme.buttonP.nTheme.tBG[i]
                         index = index + width
                     end
                 end
             end
             index = 2
-
             for i = 2, width - 1 do
                 for j = 1, height do
                     if i > offset and i <= offset + barWidth then
-                        buffer.text[index] = theme.slider[j]
-                        buffer.textColor[index] = theme.sliderColor[j]
-                        buffer.textBackgroundColor[index] = theme.sliderBackgroundColor[j]
+                        buffer.text[index] = theme.sliderT[j]
+                        buffer.textColor[index] = theme.sliderTC[j]
+                        buffer.textBackgroundColor[index] = theme.sliderTBG[j]
                         index = index + width
                     else
-                        buffer.text[index] = theme.handle[j]
-                        buffer.textColor[index] = theme.handleColor[j]
-                        buffer.textBackgroundColor[index] = theme.handleBackgroundColor[j]
+                        buffer.text[index] = theme.handleL[j]
+                        buffer.textColor[index] = theme.handleLC[j]
+                        buffer.textBackgroundColor[index] = theme.handleLBG[j]
                         index = index + width
                     end
                     index = i + j
                 end
             end
-
             if mode == 2 or value == 1 or totalSize - this.size <= 0 then
                 for i = 1, height do
-                    buffer.text[index] = theme.buttonNegative.disabled.text[i]
-                    buffer.textColor[index] = theme.buttonNegative.disabled.color[i]
-                    buffer.textBackgroundColor[index] = theme.buttonNegative.disabled.backgroundColor[i]
+                    buffer.text[index] = theme.buttonN.dTheme.t[i]
+                    buffer.textColor[index] = theme.buttonN.dTheme.tC[i]
+                    buffer.textBackgroundColor[index] = theme.buttonN.dTheme.tBG[i]
                     index = index + width
                 end
             else
                 if this.pressedButton == 2 and this.mode == 4 then
                     for i = 1, height do
-                        buffer.text[index] = theme.buttonNegative.selected.text[i]
-                        buffer.textColor[index] = theme.buttonNegative.selected.color[i]
-                        buffer.textBackgroundColor[index] = theme.buttonNegative.selected.backgroundColor[i]
+                        buffer.text[index] = theme.buttonN.sTheme.t[i]
+                        buffer.textColor[index] = theme.buttonN.sTheme.tC[i]
+                        buffer.textBackgroundColor[index] = theme.buttonN.sTheme.tBG[i]
                         index = index + width
                     end
                 else
                     for i = 1, height do
-                        buffer.text[index] = theme.buttonNegative.normal.text[i]
-                        buffer.textColor[index] = theme.buttonNegative.normal.color[i]
-                        buffer.textBackgroundColor[index] = theme.buttonNegative.normal.backgroundColor[i]
+                        buffer.text[index] = theme.buttonN.nTheme.t[i]
+                        buffer.textColor[index] = theme.buttonN.nTheme.tC[i]
+                        buffer.textBackgroundColor[index] = theme.buttonN.nTheme.tBG[i]
                         index = index + width
                     end
                 end
@@ -219,8 +186,6 @@ function new(parent, onValueChange, orientation, startValue, endValue, size, sty
         end
     end
     this.recalculate()
-
-    ---@type "fun(`change`:integer)"
     this._onValueChange = nil
     this._repeatButtonPressElement =
         ui.parallelElement.new(
@@ -243,7 +208,6 @@ function new(parent, onValueChange, orientation, startValue, endValue, size, sty
         end,
         {}
     )
-
     this._doPointerEvent = function(event, x, y, w, h)
         local rectX, rectY, rectW, rectH = this.getGlobalRect()
         x, y, w, h = ui.rect.overlaps(x, y, w, h, rectX, rectY, rectW, rectH)
@@ -266,11 +230,9 @@ function new(parent, onValueChange, orientation, startValue, endValue, size, sty
                         return this
                     elseif event.param3 > y and event.param3 < y + h - 1 then
                         this.mode = 4
-
                         local newPos = event.param3 - rectY - 1
                         local totalSize = this.endValue - this.startValue
                         local newValue = math.floor((newPos / (rectH - 3)) * (totalSize - this.size + this.startValue))
-
                         this._onValueChange(newValue - this.value)
                         return this
                     end
@@ -286,7 +248,6 @@ function new(parent, onValueChange, orientation, startValue, endValue, size, sty
                         local newPos = math.max(0, math.min(rectH - 2, event.param3 - rectY - 1))
                         local totalSize = this.endValue - this.startValue
                         local newValue = math.floor((newPos / (rectH - 3)) * (totalSize - this.size + this.startValue))
-
                         this._onValueChange(newValue - this.value)
                         return this
                     else
@@ -326,11 +287,9 @@ function new(parent, onValueChange, orientation, startValue, endValue, size, sty
                         return this
                     elseif event.param2 > x and event.param2 < x + w - 1 then
                         this.mode = 4
-
                         local newPos = event.param2 - rectX - 1
                         local totalSize = this.endValue - this.startValue
                         local newValue = math.floor((newPos / (rectW - 3)) * (totalSize - this.size + this.startValue))
-
                         this._onValueChange(newValue - this.value)
                         return this
                     end
@@ -346,7 +305,6 @@ function new(parent, onValueChange, orientation, startValue, endValue, size, sty
                         local newPos = math.max(0, math.min(rectW - 2, event.param2 - rectX - 1))
                         local totalSize = this.endValue - this.startValue
                         local newValue = math.floor((newPos / (rectW - 3)) * (totalSize - this.size + this.startValue))
-
                         this._onValueChange(newValue - this.value)
                         return this
                     else
@@ -369,8 +327,5 @@ function new(parent, onValueChange, orientation, startValue, endValue, size, sty
             end
         end
     end
-
     return this
 end
-
---TODO Clear every buffer before recalculating

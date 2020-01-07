@@ -1,44 +1,17 @@
---TODO remove multiLine!
----@param parent element
----@param label string
----@param text string
----@param multiLine boolean
----@param onSubmit function
----@param style style.inputField
 function new(parent, label, text, multiLine, onSubmit, style, x, y, w, h)
-    ---@class inputField:element
     local this = ui.element.new(parent, x, y, w, h)
-
     this.style = style
     this.text = nil
     this.label = label
     this.multiLine = multiLine
-    ---@type function
-    ---@param event event
-    ---@param string text
-    ---@return nil
     this._onSubmit = onSubmit
-
-    ---@type repeatItem
     this.repeatItem = ui.repeatItem.new(0.8, 0, 0)
-
     this._cursorX = 1
     this._cursorY = 1
-
     this.autoComplete = {}
     this.autoCompleteIndex = 1
-    ---@type function
-    ---@param text string
-    ---@param offset integer
-    ---@return table
     this.onSuggestCompletion = nil
-    ---@type function
-    ---@param text string
-    ---@param offset integer
-    ---@param completion string
-    ---@return boolean, string, integer
     this.onAutoCompletion = nil
-
     this.ignoreKeys = {
         "tab",
         "leftCtrl",
@@ -82,7 +55,6 @@ function new(parent, label, text, multiLine, onSubmit, style, x, y, w, h)
         "insert",
         "delete"
     }
-
     this.cursorOffset = 0
     this.setText = function(text, index)
         this.text = text
@@ -99,7 +71,6 @@ function new(parent, label, text, multiLine, onSubmit, style, x, y, w, h)
         end
     end
     this.setText(text)
-
     this.getAutoComplete = function()
         if this.onSuggestCompletion then
             while #this.autoComplete > 0 do
@@ -111,30 +82,26 @@ function new(parent, label, text, multiLine, onSubmit, style, x, y, w, h)
     end
     this.recalculateText = function()
         local theme
-
         if this.mode == 1 or this.mode == 4 then
-            theme = this.style.normalTheme
+            theme = this.style.nTheme
         elseif this.mode == 2 then
-            theme = this.style.disabledTheme
+            theme = this.style.dTheme
         else
-            theme = this.style.selectedTheme
+            theme = this.style.sTheme
         end
-
-        local left = #theme.border[4]
-        local top = #theme.border[2]
-        local right = #theme.border[6]
-        local bottom = #theme.border[8]
+        local left = #theme.b[4]
+        local top = #theme.b[2]
+        local right = #theme.b[6]
+        local bottom = #theme.b[8]
         local width = this.getWidth()
         local length = this.text:len()
-
         if this.mode <= 2 then
             local text
             if length > width then
-                local alignment = this.style.alignment
-                --TODO depend on alignment
-                if alignment == 1 or alignment == 4 or alignment == 7 then
+                local align = this.style.align
+                if align == 1 or align == 4 or align == 7 then
                     text = this.text:sub(1, width - left - right - 3) .. "..."
-                elseif alignment == 2 or alignment == 1 or alignment == 8 then
+                elseif align == 2 or align == 1 or align == 8 then
                     local w = width - left - right - 3
                     text = this.text:sub(1, math.floor(w / 2)) .. "..." .. this.text:sub(length - math.ceil(w / 2))
                 else
@@ -143,7 +110,7 @@ function new(parent, label, text, multiLine, onSubmit, style, x, y, w, h)
             else
                 text = this.text
             end
-            ui.buffer.labelBox(this.buffer, text, theme.textColor, theme.textBackgroundColor, 1, theme.border[5][1], left, top, right, bottom)
+            ui.buffer.labelBox(this.buffer, text, theme.tC, theme.tBG, 1, theme.b[5][1], left, top, right, bottom)
         else
             this.getManager().getCursorPos = this.getCursorPos
             local completeText
@@ -153,66 +120,54 @@ function new(parent, label, text, multiLine, onSubmit, style, x, y, w, h)
                 completeText = ""
             end
             local completeLength = completeText:len()
-
             local offsetT = length - (width - left - right) + 1
             offsetT = math.min(offsetT, this.cursorOffset - width + left + right + 1)
             local offsetC = math.max(0, math.min(width - left - right - 3, completeLength, length + completeLength - width - left - right + 3))
             offsetT = offsetT + offsetC
             offsetT = math.max(0, offsetT)
-
             this._cursorX = this.buffer.rect.x + left + this.cursorOffset - offsetT
             this._cursorY = this.buffer.rect.y + top
-
             if completeText == "" then
                 local text = this.text:sub(offsetT + 1, math.min(offsetT + width - left - right, length))
-                ui.buffer.labelBox(this.buffer, text, theme.textColor, theme.textBackgroundColor, 1, theme.border[5][1], left, top, right, bottom)
+                ui.buffer.labelBox(this.buffer, text, theme.tC, theme.tBG, 1, theme.b[5][1], left, top, right, bottom)
             else
-                --TODO Zeile nur so lang berechnen, wie auch nötig ist.
                 local text = this.text:sub(offsetT + 1, math.min(offsetT + width - left - right - offsetC, length))
-                ui.buffer.labelBox(this.buffer, text, theme.textColor, theme.textBackgroundColor, 1, theme.border[5][1], left, top, right, bottom)
-                ui.buffer.labelBox(this.buffer, completeText, theme.completionTextColor, theme.completionBackgroundColor, 1, theme.border[5][1], left + this.cursorOffset - offsetT, top, right, bottom)
+                ui.buffer.labelBox(this.buffer, text, theme.tC, theme.tBG, 1, theme.b[5][1], left, top, right, bottom)
+                ui.buffer.labelBox(this.buffer, completeText, theme.complC, theme.complBG, 1, theme.b[5][1], left + this.cursorOffset - offsetT, top, right, bottom)
                 text = this.text:sub(offsetT + width - left - right - offsetC, math.min(offsetT + width - left - right, length))
-                ui.buffer.labelBox(this.buffer, text, theme.textColor, theme.textBackgroundColor, 1, theme.border[5][1], left + length + completeLength - offsetT, top, right, bottom)
+                ui.buffer.labelBox(this.buffer, text, theme.tC, theme.tBG, 1, theme.b[5][1], left + length + completeLength - offsetT, top, right, bottom)
             end
         end
     end
     this.recalculate = function()
-        ---@type style.inputField.theme
         local theme
-        ---@type style.label.theme
         local labelTheme
-
         if this.mode == 1 or this.mode == 4 then
-            theme = this.style.normalTheme
-            labelTheme = this.style.label.normalTheme
+            theme = this.style.nTheme
+            labelTheme = this.style.label.nTheme
         elseif this.mode == 2 then
-            theme = this.style.disabledTheme
-            labelTheme = this.style.label.disabledTheme
+            theme = this.style.dTheme
+            labelTheme = this.style.label.dTheme
         else
-            theme = this.style.selectedTheme
-            labelTheme = this.style.label.selectedTheme
+            theme = this.style.sTheme
+            labelTheme = this.style.label.sTheme
         end
-
-        ui.buffer.borderBox(this.buffer, theme.border, theme.borderColor, theme.borderBackgroundColor)
+        ui.buffer.borderBox(this.buffer, theme.b, theme.bC, theme.bBG)
         if this.label then
-            local yPos = math.max(0, math.floor((#theme.border[2] - 1) / 2))
-            ui.buffer.labelBox(this.buffer, this.label, labelTheme.textColor, labelTheme.backgroundColor, this.style.label.alignment, nil, #theme.border[4], yPos, #theme.border[6], this.buffer.rect.h - yPos)
+            local yPos = math.max(0, math.floor((#theme.b[2] - 1) / 2))
+            ui.buffer.labelBox(this.buffer, this.label, labelTheme.tC, labelTheme.tBG, this.style.label.align, nil, #theme.b[4], yPos, #theme.b[6], this.buffer.rect.h - yPos)
         end
         this.recalculateText()
     end
     this.recalculate()
-
     this.getCursorPos = function()
         if this.mode == 3 then
             return true, this._cursorX, this._cursorY, colors.red
         end
     end
-
-    ---@param event event
     this._doNormalEvent = function(event)
         if this.mode == 3 then
             if event.name == "char" then
-                --return this
                 this.text = this.text:sub(1, this.cursorOffset) .. event.param1 .. this.text:sub(this.cursorOffset + 1)
                 this.cursorOffset = this.cursorOffset + 1
                 this.getAutoComplete()
@@ -317,7 +272,6 @@ function new(parent, label, text, multiLine, onSubmit, style, x, y, w, h)
             end
         end
     end
-
     this._doPointerEvent = function(event, x, y, w, h)
         x, y, w, h = ui.rect.overlaps(x, y, w, h, this.buffer.rect.getUnpacked())
         if event.name == "mouse_click" then
@@ -348,6 +302,5 @@ function new(parent, label, text, multiLine, onSubmit, style, x, y, w, h)
             end
         end
     end
-
     return this
 end

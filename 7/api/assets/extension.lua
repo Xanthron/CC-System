@@ -1,4 +1,7 @@
-function copyTable(table)
+function copyTable(table, pr)
+    if pr then
+        print(pr)
+    end
     local new = {}
     for key, value in pairs(table) do
         if type(value) == "table" then
@@ -9,7 +12,6 @@ function copyTable(table)
     end
     return new
 end
-
 function getAllFilePaths(path, paths)
     local paths = paths or {}
     local list = fs.list(path)

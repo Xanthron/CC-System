@@ -1,0 +1,1 @@
+return{{"-"," ","-"}, {colors.white,colors.black,colors.gray}, {colors.lightGray,colors.lightGray,colors.lightGray}}

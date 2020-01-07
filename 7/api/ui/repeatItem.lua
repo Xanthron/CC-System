@@ -1,19 +1,9 @@
 function new(startRepeatSpeed, endRepeatSpeed, repeatSpeedIncrement)
-    --- A simple class to handle repeating in a set time. Capable of changing the repeat speed over time
-    ---@class repeatItem
-    local this = {
-        _lastPressTime = -1,
-        _currentRepeatSpeed = startRepeatSpeed,
-        startRepeatSpeed = startRepeatSpeed,
-        endRepeatSpeed = endRepeatSpeed,
-        repeatSpeedIncrement = repeatSpeedIncrement
-    }
-
+    local this = {_lastPressTime = -1, _currentRepeatSpeed = startRepeatSpeed, startRepeatSpeed = startRepeatSpeed, endRepeatSpeed = endRepeatSpeed, repeatSpeedIncrement = repeatSpeedIncrement}
     this.reset = function()
         this._lastPressTime = -1
         this._currentRepeatSpeed = this.startRepeatSpeed
     end
-
     this.call = function()
         if this._lastPressTime == -1 then
             this._lastPressTime = os.clock()
@@ -27,6 +17,5 @@ function new(startRepeatSpeed, endRepeatSpeed, repeatSpeedIncrement)
         end
         return true
     end
-
     return this
 end

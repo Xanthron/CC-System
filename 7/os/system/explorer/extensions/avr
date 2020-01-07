@@ -1,0 +1,1 @@
+return{{"A","V","R"}, {colors.red,colors.yellow,colors.blue}, {colors.magenta,colors.magenta,colors.magenta}}

@@ -1,33 +1,14 @@
----need:
----  x
----  y
----  manager
----  buttons
----
----optional:
----  anchor
----  w
----  h
----  select
----  listBoxStyle
----  listButtonStyle
----  label
 local args = ...
-
 local _x, _y, _w, _h = args.manager.getGlobalRect()
-
 args.anchor = args.anchor or 1
-args.listBoxStyle = args.listBoxStyle or theme.listBox
----@type style.button
-args.listButtonStyle = args.listButtonStyle or theme.listButton
+args.listBoxStyle = args.listBoxStyle or theme.sView2
+args.listButtonStyle = args.listButtonStyle or theme.button3
 args.select = args.select or not term.isColor()
-
-local listBoxLeft, listBoxTop, listBoxRight, listBoxBottom = #args.listBoxStyle.normalTheme.border[4], #args.listBoxStyle.normalTheme.border[2], #args.listBoxStyle.normalTheme.border[6], #args.listBoxStyle.normalTheme.border[8]
-local listButtonLeft, listButtonRight = #args.listButtonStyle.normalTheme.border[4], #args.listButtonStyle.normalTheme.border[6]
+local select = args.select
+local listBoxLeft, listBoxTop, listBoxRight, listBoxBottom = #args.listBoxStyle.nTheme.b[4], #args.listBoxStyle.nTheme.b[2], #args.listBoxStyle.nTheme.b[6], #args.listBoxStyle.nTheme.b[8]
+local listButtonLeft, listButtonRight = #args.listButtonStyle.nTheme.b[4], #args.listButtonStyle.nTheme.b[6]
 local borderW, borderH = listButtonLeft + listButtonRight + listBoxLeft + listBoxRight, listBoxTop + listBoxBottom
 local indexes = {}
-
----Function
 local function getHorizontal(buttons, posX, border, anchor)
     local x = posX
     local w = 1
@@ -51,7 +32,6 @@ local function getHorizontal(buttons, posX, border, anchor)
     end
     return x, w
 end
-
 local function getVertical(buttons, posY, border, anchor)
     local y = posY
     local h = #buttons + border
@@ -62,7 +42,6 @@ local function getVertical(buttons, posY, border, anchor)
     end
     return y, h
 end
-
 local function clearListBox(listBox)
     local container = listBox.getContainer()
     for i = 1, #container._elements do
@@ -72,22 +51,16 @@ local function clearListBox(listBox)
         listBox.selectionGroup.selectionElements[i] = nil
     end
 end
----@param manager uiManager
----@param listBox scrollView
----@param buttons string[]|table[]
 local function setListBox(manager, listBox, buttons, indexes, x, y, w, h)
     listBox.setGlobalRect(x, y, w, h)
     local currentButtons = buttons
     for i = 1, #indexes do
         currentButtons = currentButtons[indexes[i]]
     end
-
     clearListBox(listBox)
-
     local container = listBox.getContainer()
     local selectionElements = {}
     if #indexes > 0 then
-        ---@type button
         local element = ui.button.new(container, " <<<", nil, args.listButtonStyle, args.x + listBoxLeft, args.y + listBoxTop, args.w - listBoxLeft - listBoxRight, 1)
         element._onClick = function(event)
             local select = true
@@ -120,7 +93,6 @@ local function setListBox(manager, listBox, buttons, indexes, x, y, w, h)
         local button = currentButtons[i]
         local x, y, w, h = args.x + listBoxLeft, args.y + i - 1 + listBoxTop + math.min(#indexes, 1), args.w - listBoxLeft - listBoxRight, 1
         if type(button) == "table" then
-            ---@type button
             local element = ui.button.new(container, button.name .. " >", nil, args.listButtonStyle, x, y, w, h)
             element._onClick = function(event)
                 local select = true
@@ -146,20 +118,19 @@ local function setListBox(manager, listBox, buttons, indexes, x, y, w, h)
             table.insert(selectionElements, listBox.selectionGroup.addNewSelectionElement(element))
         else
             if button == "-" then
-                ---@type element
                 local element = ui.element.new(container, x, y, w, h)
                 for i = 1, w do
                     element.buffer.text[i] = "-"
-                    element.buffer.textColor[i] = args.listButtonStyle.normalTheme.textColor
-                    element.buffer.textBackgroundColor[i] = args.listButtonStyle.normalTheme.textBackgroundColor
+                    element.buffer.textColor[i] = args.listButtonStyle.nTheme.tC
+                    element.buffer.textBackgroundColor[i] = args.listButtonStyle.nTheme.tBG
                 end
                 element.buffer.text[1] = " "
                 element.buffer.text[w] = " "
             elseif button ~= "" then
-                ---@type button
                 local element = ui.button.new(container, button, nil, args.listButtonStyle, x, y, w, h)
-                element._onClick = function()
+                element._onClick = function(event)
                     table.insert(indexes, i)
+                    select = (event.name ~= "mouse_up")
                     manager.exit()
                 end
                 table.insert(selectionElements, listBox.selectionGroup.addNewSelectionElement(element))
@@ -171,66 +142,55 @@ local function setListBox(manager, listBox, buttons, indexes, x, y, w, h)
             end
         end
     end
-
     for i, value in ipairs(selectionElements) do
         selectionElements[i].up = selectionElements[i - 1]
         selectionElements[i].down = selectionElements[i + 1]
     end
-
     listBox.resetLayout()
     listBox.recalculate()
-
     listBox.selectionGroup.currentSelectionElement = selectionElements[1]
 end
-
----Setup
 if not args.w then
     args.x, args.w = getHorizontal(args.buttons, args.x, borderW, args.anchor)
 end
 if not args.h then
     args.y, args.h = getVertical(args.buttons, args.y, borderH, args.anchor)
 end
-
----@type uiManager
 local manager = ui.uiManager.new(_x, _y, _w, _h)
 manager.recalculate = function()
     manager.buffer.contract(args.manager.buffer)
 end
 manager.recalculate()
----@type scrollView
 local listBox = ui.scrollView.new(manager, args.label, 3, args.listBoxStyle, args.x, args.y, args.w, args.h)
 setListBox(manager, listBox, args.buttons, indexes, args.x, args.y, args.w, args.h)
 listBox.selectionGroup.listener = function(name, source, ...)
     if name == "key_up" then
         local key = keys.getName(...)
         if key == "tab" or key == "e" or key == "q" then
+            select = true
             manager.exit()
         end
     elseif name == "mouse" then
-        ---@type event
         local event = ...
         if event.name == "mouse_click" then
             local x, y, w, h = listBox.getGlobalRect()
             if event.param2 < x or event.param2 > x + w or event.param3 < y or event.param3 > y + h then
+                select = false
                 manager.exit()
             end
         end
     end
 end
-
 manager.selectionManager.addSelectionGroup(listBox.selectionGroup)
 if args.select then
-    manager.selectionManager.setCurrentSelectionGroup(listBox.selectionGroup)
+    manager.selectionManager.setCurrentSelectionGroup(listBox.selectionGroup, "code")
 else
     manager.selectionManager._currentSelectionGroup = listBox.selectionGroup
 end
-
 manager.draw()
 manager.execute()
-
 local name = args.buttons[indexes[1]]
 for i = 2, #indexes do
     name = name[indexes[i]]
 end
-
-return name, indexes
+return name, indexes, select

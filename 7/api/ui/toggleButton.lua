@@ -1,25 +1,9 @@
----@param parent element
----@param x integer
----@param y integer
----@param w integer
----@param h integer
----@param text string
----@param func function
----@param style toggleButton
----@return button
 function new(parent, text, checked, func, style, x, y, w, h)
-    ---@class toggle:element
     local this = ui.element.new(parent, x, y, w, h)
-
-    ---@type style.toggleButton
     this.style = style
-    ---@type string
     this.text = text
-    ---@type boolean
     this._checked = checked
-
     this._inAnimation = false
-
     this._pressAnimation = function(data)
         local clock = data[1] - os.clock() + 0.15
         if clock > 0 then
@@ -33,12 +17,6 @@ function new(parent, text, checked, func, style, x, y, w, h)
         end
         return false
     end
-    ---@param event event
-    ---@param x integer
-    ---@param y integer
-    ---@param w integer
-    ---@param h integer
-    ---@return boolean
     this._doPointerEvent = function(event, x, y, w, h)
         x, y, w, h = ui.rect.overlaps(x, y, w, h, this.buffer.rect.getUnpacked())
         if event.name == "mouse_click" then
@@ -74,7 +52,7 @@ function new(parent, text, checked, func, style, x, y, w, h)
                     this.recalculate()
                     this.repaint("this", x, y, w, h)
                 end
-                this._onToggle(this._checked)
+                this._onToggle(event, this._checked)
                 return this
             elseif this.mode == 3 and (event.param2 < x or event.param2 >= x + w or event.param3 < y or event.param3 >= y + h) then
                 this.mode = 1
@@ -86,8 +64,6 @@ function new(parent, text, checked, func, style, x, y, w, h)
             end
         end
     end
-
-    ---@param event event
     this._doNormalEvent = function(event)
         if event.name == "key" and this.mode == 3 and (event.param1 == 57 or event.param1 == 28) then
             this.mode = 4
@@ -105,54 +81,45 @@ function new(parent, text, checked, func, style, x, y, w, h)
                 this.recalculate()
                 this.repaint("this", this.getCompleteMaskRect())
             end
-            this._onToggle(this._checked)
+            this._onToggle(event, this._checked)
             return true
         end
     end
-
     this._onToggle = func or function()
         end
-
     this.recalculate = function()
         local mode = this.mode
-        ---@type style.toggleButton.theme
         local theme = nil
         if mode == 1 then
-            theme = this.style.normalTheme
+            theme = this.style.nTheme
         elseif mode == 2 then
-            theme = this.style.disabledTheme
+            theme = this.style.dTheme
         elseif mode == 3 then
-            theme = this.style.selectedTheme
+            theme = this.style.sTheme
         else
-            theme = this.style.pressedTheme
+            theme = this.style.pTheme
         end
-
         local checkbox, checkboxTextColor, checkboxBackGroundColor = nil, nil, nil
         if this._checked == true then
-            checkbox = theme.checkedCheckbox
-            checkboxTextColor = theme.checkedCheckboxTextColor
-            checkboxBackGroundColor = theme.checkedCheckboxBackgroundColor
+            checkbox = theme.checkedL
+            checkboxTextColor = theme.checkedLC
+            checkboxBackGroundColor = theme.checkedLBG
         else
-            checkbox = theme.uncheckedCheckbox
-            checkboxTextColor = theme.uncheckedCheckboxTextColor
-            checkboxBackGroundColor = theme.uncheckedCheckboxBackgroundColor
+            checkbox = theme.uncheckedL
+            checkboxTextColor = theme.uncheckedLC
+            checkboxBackGroundColor = theme.uncheckedLBG
         end
-
         local buffer = this.buffer
-        local alignment = this.style.alignment
-
-        ui.buffer.labelBox(buffer, this.text, theme.textColor, theme.backgroundColor, alignment, " ", #checkbox, 0, 0, 0)
-
+        local align = this.style.align
+        ui.buffer.labelBox(buffer, this.text, theme.tC, theme.tBG, align, " ", #checkbox, 0, 0, 0)
         local topPadding = 0
-
-        if alignment == 1 or alignment == 2 or alignment == 3 then
+        if align == 1 or align == 2 or align == 3 then
             topPadding = 1
-        elseif alignment == 4 or alignment == 5 or alignment == 6 then
+        elseif align == 4 or align == 5 or align == 6 then
             topPadding = math.ceil(buffer.rect.h / 2)
         else
             topPadding = buffer.rect.h
         end
-
         local index = 1
         for j = 1, buffer.rect.h do
             if j == topPadding then
@@ -166,8 +133,8 @@ function new(parent, text, checked, func, style, x, y, w, h)
             else
                 for i = 1, #checkbox do
                     buffer.text[index] = " "
-                    buffer.textColor[index] = theme.textColor
-                    buffer.textBackgroundColor[index] = theme.backgroundColor
+                    buffer.textColor[index] = theme.tC
+                    buffer.textBackgroundColor[index] = theme.tBG
                     index = index + 1
                 end
                 index = index + buffer.rect.h - #checkbox
@@ -175,6 +142,5 @@ function new(parent, text, checked, func, style, x, y, w, h)
         end
     end
     this.recalculate()
-
     return this
 end

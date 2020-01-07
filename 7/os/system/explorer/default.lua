@@ -1,8 +1,1 @@
-return {
-    showIcons = true,
-    showHidden = false,
-    showExtensions = true,
-    neatNames = false,
-    pathSaveSize = 20,
-    showType = ""
-}
+return {icons = true, hidden = false, extensions = true, neatNames = false, pathsSize = 20, type = "", edit = true}

@@ -1,27 +1,8 @@
----
---- Creates a new button
----@param parent element
----@param x integer
----@param y integer
----@param w integer
----@param h integer
----@param text string
----@param func function
----@param style buttonStyle
----@return button
 function new(parent, text, func, style, x, y, w, h)
-    ---
-    --- An button ui element that handels the draw and event of an button
-    ---@class button:element
     local this = ui.element.new(parent, x, y, w, h)
-
-    ---@type style.button
     this.style = style
-    ---@type string
     this.text = text
-
     this._inAnimation = false
-
     this._pressAnimation = function(data)
         local clock = data[1] - os.clock() + 0.15
         if clock > 0 then
@@ -32,12 +13,6 @@ function new(parent, text, func, style, x, y, w, h)
         this.repaint("this")
         return false
     end
-    ---@param event event
-    ---@param x integer
-    ---@param y integer
-    ---@param w integer
-    ---@param h integer
-    ---@return boolean
     this._doPointerEvent = function(event, x, y, w, h)
         x, y, w, h = ui.rect.overlaps(x, y, w, h, this.buffer.rect.getUnpacked())
         if event.name == "mouse_click" then
@@ -84,10 +59,8 @@ function new(parent, text, func, style, x, y, w, h)
             end
         end
     end
-
-    ---@param event event
     this._doNormalEvent = function(event)
-        if event.name == "key" and this.mode == 3 and (event.param1 == 57 or event.param1 == 28) then
+        if event.name == "key" and this.mode == 3 and (event.param1 == 57 or event.param1 == 28 or event.param1 == 29) then
             this.mode = 4
             if this._inAnimation == false then
                 this.recalculate()
@@ -96,7 +69,7 @@ function new(parent, text, func, style, x, y, w, h)
                 this.getManager().parallelManager.addFunction(this._pressAnimation, {os.clock()})
             end
             return true
-        elseif event.name == "key_up" and this.mode == 4 and (event.param1 == 57 or event.param1 == 28) then
+        elseif event.name == "key_up" and this.mode == 4 and (event.param1 == 57 or event.param1 == 28 or event.param1 == 29) then
             this.mode = 3
             if this._inAnimation == false then
                 this.recalculate()
@@ -106,26 +79,22 @@ function new(parent, text, func, style, x, y, w, h)
             return true
         end
     end
-
     this._onClick = func or function()
         end
-
     this.recalculate = function()
         local mode = this.mode
-        ---@type style.button.theme
         local theme = nil
         if mode == 1 then
-            theme = this.style.normalTheme
+            theme = this.style.nTheme
         elseif mode == 2 then
-            theme = this.style.disabledTheme
+            theme = this.style.dTheme
         elseif mode == 3 then
-            theme = this.style.selectedTheme
+            theme = this.style.sTheme
         else
-            theme = this.style.pressedTheme
+            theme = this.style.pTheme
         end
-        ui.buffer.borderLabelBox(this.buffer, this.text, theme.textColor, theme.textBackgroundColor, theme.border, theme.borderColor, theme.borderBackgroundColor, this.style.alignment)
+        ui.buffer.borderLabelBox(this.buffer, this.text, theme.tC, theme.tBG, theme.b, theme.bC, theme.bBG, this.style.align)
     end
     this.recalculate()
-
     return this
 end
