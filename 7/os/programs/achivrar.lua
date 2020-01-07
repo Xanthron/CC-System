@@ -25,13 +25,13 @@ local function save(path, paths, compress)
                     '"[^\n\r]-"',
                     function(t)
                         table.insert(d, t)
-                        return ("d%'"):format(#d)
+                        return ("d%s" .. "@"):format(#d)
                     end
                 ):gsub(
                     "'[^\n\r]-'",
                     function(t)
                         table.insert(s, t)
-                        return ("s%'"):format(#s)
+                        return ("s%s" .. "@"):format(#s)
                     end
                 ):gsub("%-%-[^\n]+%[%[", "--"):gsub("%-%-%[%[.*%]%]+", ""):gsub("%-%-.-\n+", "\n"):gsub("\n%s+", "\n"):gsub("[%a%d_]%s[^%a%d_]", emptySpace):gsub("[^%d%a_]%s+[%a%d_]", emptySpace):gsub(
                     "s[0-9]+@",
@@ -205,5 +205,21 @@ button4._onClick = function(event)
         end
     )
 end
+local selectionGroup = manager.selectionManager.addNewSelectionGroup()
+local items = {}
+table.insert(items, selectionGroup.addNewSelectionElement(button1))
+table.insert(items, selectionGroup.addNewSelectionElement(button2))
+table.insert(items, selectionGroup.addNewSelectionElement(toggle1))
+table.insert(items, selectionGroup.addNewSelectionElement(toggle2))
+table.insert(items, selectionGroup.addNewSelectionElement(button3))
+table.insert(items, selectionGroup.addNewSelectionElement(button4))
+for i = 1, #items do
+    items[i].up = items[i - 1]
+    items[i].down = items[i + 1]
+end
+selectionGroup.currentSelectionElement = items[2]
+manager.selectionManager.addSelectionGroup(tBox1.selectionGroup)
+manager.selectionManager.setCurrentSelectionGroup(selectionGroup)
+
 manager.draw()
 manager.execute()
