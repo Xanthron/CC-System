@@ -1,15 +1,39 @@
+---@param parent element
+--TODO remove
+---@param onValueChange function
+---@param orientation "1 = vertical"|"2 = horizontal"
+---@param startValue integer
+---@param endValue integer
+---@param size integer
+---@param style style.slider
+---@param x integer
+---@param y integer
+---@param w integer
+---@param h integer
+---@return slider
 function new(parent, onValueChange, orientation, startValue, endValue, size, style, x, y, w, h)
     ---@class slider:element
     local this = ui.element.new(parent, x, y, w, h)
+    ---@type style.slider
     this.style = style
+    ---@type integer
     this.orientation = orientation
+    ---TODO hidden
+    ---@type integer
     this.pressedButton = 0
+    ---@type repeatItem
     this.repeatItem = ui.repeatItem.new(0.8, 0.05, 0.7)
+    ---@type integer
     this.startValue = startValue
+    ---@type integer
     this.endValue = endValue
+    ---@type integer
     this.size = size
+    ---@type integer
     this.value = startValue
+    ---@type function
     this._onValueChange = nil
+    ---@type parallelElement
     this._repeatButtonPressElement =
         ui.parallelElement.new(
         nil,

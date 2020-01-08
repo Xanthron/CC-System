@@ -4,8 +4,12 @@ function new()
     ---Handles the parallel execution of functions
     ---@class parallelManager
     local this = {}
+
+    ---@type parallelElement[]
     this._parallelElements = {}
+    ---@type boolean
     this._stop = true
+
     ---Add a new function or parallelElement with data
     ---@param func function|parallelElement
     ---@param data table

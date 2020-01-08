@@ -1,8 +1,20 @@
+---@param parent element
+---@param label string|nil
+---@param mode "1 = vertical, horizontal"|"2 = non"|"3 = vertical"|"4 = horizontal"
+---@param style style.scrollView
+---@param x integer
+---@param y integer
+---@param w integer
+---@param h integer
 function new(parent, label, mode, style, x, y, w, h)
     ---@class scrollView:element
     local this = ui.element.new(parent, x, y, w, h)
+
+    ---@type string
     this.label = label
+    ---@type style.scrollView
     this.style = style
+    ---@type padding
     this.stylePadding = ui.padding.new(#style.nTheme.b[4], #style.nTheme.b[2], #style.nTheme.b[5], #style.nTheme.b[7])
     this._elements[1] = ui.element.new(this, this.stylePadding:getPaddedRect(this.buffer.rect:getUnpacked()))
     this._elements[1]._elements[1] =
@@ -41,6 +53,7 @@ function new(parent, label, mode, style, x, y, w, h)
             slideHeight
         )
     end
+    ---@type selectionGroup
     this.selectionGroup = ui.selectionGroup.new(nil, nil, this._selectionGroupListener)
 
     ---Get the container

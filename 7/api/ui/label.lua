@@ -1,11 +1,22 @@
 ---Create a new label
+---@param parent element
+---@param text string
+---@param style style.label
+---@param x integer
+---@param y integer
+---@param w integer
+---@param h integer
 ---@return label
 function new(parent, text, style, x, y, w, h)
     ---A simple label without function
     ---@class label:element
     local this = ui.element.new(parent, x, y, w, h)
+
+    ---@type style.label
     this.style = style
+    ---@type string
     this.text = text
+
     function this:recalculate()
         local theme = nil
         if self.mode == 2 then

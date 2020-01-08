@@ -6,6 +6,18 @@
 ---@return selectionElement
 function new(element, left, up, right, down)
     ---@class selectionElement
-    local this = {element = element, left = left, up = up, right = right, down = down}
+    local this = {}
+
+    ---@type element
+    this.element = element
+    ---@type selectionElement
+    this.left = left
+    ---@type selectionElement
+    this.up = up
+    ---@type selectionElement
+    this.right = right
+    ---@type selectionElement
+    this.down = down
+
     return this
 end

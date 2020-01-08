@@ -1,4 +1,9 @@
 ---Create a new uiManager
+---@param x integer
+---@param y integer
+---@param w integer
+---@param h integer
+---@return uiManager
 function new(x, y, w, h)
     ---Base Manager to handel drawing end events
     ---@class uiManager:element

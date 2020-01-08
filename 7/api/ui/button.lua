@@ -1,11 +1,26 @@
 ---Create a new button
 ---@return button
+---@param parent element
+--TODO rename to label
+---@param text string
+--TODO remove
+---@param func function
+---@param style style.button
+---@param x integer
+---@param y integer
+---@param w integer
+---@param h integer
+---@return button
 function new(parent, text, func, style, x, y, w, h)
     ---A simple button
     ---@class button:element
     local this = ui.element.new(parent, x, y, w, h)
+
+    ---@type style.button
     this.style = style
+    ---@type string
     this.text = text
+    ---@type boolean
     this._inAnimation = false
 
     ---Animation when button is pressed, so it is visible at a short click. return false when animation is finished

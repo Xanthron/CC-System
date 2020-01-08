@@ -1,8 +1,16 @@
 ---Create a new element
+---@param parent element
+---@param x integer
+---@param y integer
+---@param w integer
+---@param h integer
+---@return element
 function new(parent, x, y, w, h)
     ---Base of every ui element
     ---@class element
     local this = {}
+
+    ---@type boolean
     this.isVisible = true
     ---@type "1"|"2"|"3"|"4"
     this.mode = 1

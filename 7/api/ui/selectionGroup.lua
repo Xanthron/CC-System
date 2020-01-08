@@ -1,9 +1,24 @@
+---Create a new selectionGroup
+---@param previous selectionGroup|optional
+---@param next selectionGroup|optional
+---@param listener function|optional
+---@return selectionGroup
 function new(previous, next, listener)
     ---Container of selectionElements
     ---@class selectionGroup
     local this = {previous = previous, next = next, listener = listener}
+
+    ---@type selectionGroup
+    this.previous = previous
+    ---@type selectionGroup
+    this.next = next
+    ---@type function
+    this.listener = listener
+    ---@type selectionElement
     this.currentSelectionElement = nil
+    ---@type selectionElement[]
     this.selectionElements = {}
+
     ---Create and add a new selectionElement to this container
     ---@param element element
     ---@param left selectionElement|optional

@@ -12,6 +12,10 @@ _padding_metatable = {
     __metatable = false
 }
 ---Create a new padding
+---@param left integer
+---@param top integer
+---@param right integer
+---@param bottom integer
 ---@return padding
 function new(left, top, right, bottom)
     ---@class padding

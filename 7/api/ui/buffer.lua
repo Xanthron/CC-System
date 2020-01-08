@@ -6,6 +6,7 @@
 ---@param t string|optional
 ---@param tC string|optional
 ---@param tBG string|optional
+---@return buffer
 function new(x, y, w, h, t, tC, tBG)
     ---Buffers the screen, so it can be drawn
     ---@class buffer

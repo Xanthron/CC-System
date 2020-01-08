@@ -1,20 +1,47 @@
 ---Create a new inputField
+---@param parent element
+---@param label string|nil
+---@param text string
+--TODO remove multiline, it is not in use
+---@param multiLine boolean
+--TODO remove onSubmit
+---@param onSubmit function
+---@param style style.inputField
+---@param x integer
+---@param y integer
+---@param w integer
+---@param h integer
+---@return inputField
 function new(parent, label, text, multiLine, onSubmit, style, x, y, w, h)
     ---Input field
     ---@class inputField:element
     local this = ui.element.new(parent, x, y, w, h)
+
+    ---@type style.inputField
     this.style = style
+    ---@type string
     this.text = nil
+    ---@type string|nil
     this.label = label
+    ---@type boolean
     this.multiLine = multiLine
+    ---@type function
     this._onSubmit = onSubmit
+    ---@type repeatItem
     this.repeatItem = ui.repeatItem.new(0.8, 0, 0)
+    ---@type integer
     this._cursorX = 1
+    ---@type integer
     this._cursorY = 1
+    ---@type string[]
     this.autoComplete = {}
+    ---@type integer
     this.autoCompleteIndex = 1
+    ---@type function
     this.onSuggestCompletion = nil
+    ---@type function
     this.onAutoCompletion = nil
+    ---@type string[]
     this.ignoreKeys = {
         "tab",
         "leftCtrl",
@@ -58,7 +85,9 @@ function new(parent, label, text, multiLine, onSubmit, style, x, y, w, h)
         "insert",
         "delete"
     }
+    ---@type integer
     this.cursorOffset = 0
+
     this.getCursorPos = function()
         if this.mode == 3 then
             return true, this._cursorX, this._cursorY, colors.red

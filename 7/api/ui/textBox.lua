@@ -1,6 +1,17 @@
+---@param parent element
+---@param label string|nil
+---@param text string
+---@param style style.textBox
+---@param x integer
+---@param y integer
+---@param w integer
+---@param h integer
+---@return textBox
 function new(parent, label, text, style, x, y, w, h)
     ---@class textBox:element
     local this = ui.element.new(parent, x, y, w, h)
+
+    ---@type padding
     this.stylePadding = ui.padding.new(#style.nTheme.b[4], #style.nTheme.b[2], #style.nTheme.b[6], #style.nTheme.b[8])
     this._elements[1] = ui.element.new(this, this.stylePadding:getPaddedRect(this.buffer.rect:getUnpacked()))
     this._elements[1]._elements[1] = ui.label.new(this, text, style.text, this._elements[1]:getGlobalRect())
@@ -19,9 +30,13 @@ function new(parent, label, text, style, x, y, w, h)
         slideWidth,
         h - this.stylePadding.top - this.stylePadding.bottom
     )
+    ---@type string
     this.label = label
+    ---@type style.textBox
     this.style = style
+    ---@type selectionGroup
     this.selectionGroup = ui.selectionGroup.new(nil, nil, this._selectionGroupListener)
+
     ---Recalculate the buffer of this element
     ---@return nil
     function this:resetLayout()

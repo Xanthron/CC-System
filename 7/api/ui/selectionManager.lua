@@ -1,10 +1,17 @@
+---Create a new selectionManager
+---@return selectionManager
 function new()
     ---Container and manager of selectionGroups
     ---@class selectionManager
     local this = {}
+
+    ---@type selectionGroup
     this._currentSelectionGroup = nil
+    ---@type selectionGroup[]
     this.selectionGroups = {}
+    ---@type repeatItem
     this.repeatItem = ui.repeatItem.new(0.8, 0.1, 0.8)
+
     ---Set current selection group
     ---@param selectionGroup selectionGroup
     ---@param source string
@@ -13,7 +20,6 @@ function new()
     function this:setCurrentSelectionGroup(selectionGroup, source, ...)
         _switch(self, selectionGroup, source, ...)
     end
-
     ---Get current selection group
     ---@return selectionGroup
     function this:getCurrentSelectionGroup()
@@ -319,6 +325,7 @@ function new()
     end
     return this
 end
+---
 function _select(selectionGroup, direction, source)
     local currentSelectionElement = selectionGroup.currentSelectionElement
     local newSelection = currentSelectionElement[direction]

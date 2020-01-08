@@ -1,11 +1,31 @@
+---@param parent element
+--TODO edit to label?
+---@param text string
+---@param checked boolean
+--TODO remove
+---@param func function
+---@param style style.toggleButton
+---@param x integer
+---@param y integer
+---@param w integer
+---@param h integer
+---@return toggle
 function new(parent, text, checked, func, style, x, y, w, h)
-    ---@class toggle
+    ---@class toggle:element
     local this = ui.element.new(parent, x, y, w, h)
+
+    ---@type style.toggleButton
     this.style = style
+    ---@type string
     this.text = text
+    ---@type boolean
     this._checked = checked
+    ---@type boolean
     this._inAnimation = false
+    ---@type function
     this._onToggle = func
+    --TODO edit to parallelElement in button file too
+    ---@type function
     this._pressAnimation = function(data)
         local clock = data[1] - os.clock() + 0.15
         if clock > 0 then
@@ -19,6 +39,7 @@ function new(parent, text, checked, func, style, x, y, w, h)
         end
         return false
     end
+
     ---Assigned function for every event dedicated to the mouse
     ---@param event event
     ---@param x integer|optional

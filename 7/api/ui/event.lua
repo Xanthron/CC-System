@@ -3,7 +3,11 @@
 function new()
     ---Contains the event name and parameter. The max amount of parameter is 5
     ---@class event
-    local this = {name = nil, param1 = nil, param2 = nil, param3 = nil, param4 = nil, param5 = nil}
+    local this = {param1 = nil, param2 = nil, param3 = nil, param4 = nil, param5 = nil}
+
+    ---@type string
+    this.name = nil
+
     ---Unpack this this table
     ---@return string,any,any,any,any,any
     function this:getUnpacked()
