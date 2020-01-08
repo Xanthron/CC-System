@@ -1,68 +1,87 @@
+---Create a new parallelManager
+---@return parallelManager
 function new()
+    ---Handles the parallel execution of functions
+    ---@class parallelManager
     local this = {}
     this._parallelElements = {}
-    this.addFunction = function(func, data)
+    this._stop = true
+    ---Add a new function or parallelElement with data
+    ---@param func function|parallelElement
+    ---@param data table
+    ---@return nil
+    function this:addFunction(func, data)
         if type(func) == "table" then
-            for i = 1, #this._parallelElements do
-                if this._parallelElements == func then
+            for i = 1, #self._parallelElements do
+                if self._parallelElements == func then
                     return
                 end
             end
-            func.caller = this
+            func.caller = self
             if data then
                 func.data = data
             end
-            table.insert(this._parallelElements, func)
+            table.insert(self._parallelElements, func)
         else
-            for i = 1, #this._parallelElements do
-                if this._parallelElements.func == func then
+            for i = 1, #self._parallelElements do
+                if self._parallelElements.func == func then
                     return
                 end
             end
-            table.insert(this._parallelElements, ui.parallelElement.new(this, func, data))
+            table.insert(self._parallelElements, ui.parallelElement.new(self, func, data))
         end
-        this._stop = true
+        self._stop = true
     end
-    this.removeFunction = function(func)
+    ---Remove a function or parallelElement with data
+    ---@param func function|parallelElement
+    ---@return boolean
+    function this:removeFunction(func)
         if type(func) == "table" then
-            for i = 1, #this._parallelElements do
-                if this._parallelElements[i] == func then
-                    table.remove(this._parallelElements, i)
-                    this._stop = true
+            for i = 1, #self._parallelElements do
+                if self._parallelElements[i] == func then
+                    table.remove(self._parallelElements, i)
+                    self._stop = true
                     return true
                 end
             end
         else
-            for i = 1, #this._parallelElements do
-                if this._parallelElements[i]._func == func then
-                    table.remove(this._parallelElements, i)
-                    this._stop = true
+            for i = 1, #self._parallelElements do
+                if self._parallelElements[i]._func == func then
+                    table.remove(self._parallelElements, i)
+                    self._stop = true
                     return true
                 end
             end
         end
         return false
     end
-    this._stop = true
-    this._waitForChange = function()
-        while this._stop == false do
+    ---Intern function fot waiting to stop
+    ---@return nil
+    function this:_waitForChange(self)
+        while self._stop == false do
             coroutine.yield()
         end
     end
-    this.init = function()
-        this._stop = false
+    ---Start the parallel process
+    ---@return nil
+    function this:init()
+        self._stop = false
         local functions = {}
-        for i = 1, #this._parallelElements do
-            table.insert(functions, this._parallelElements[i].init)
+        for i = 1, #self._parallelElements do
+            table.insert(functions, self._parallelElements[i].init)
         end
-        table.insert(functions, this._waitForChange)
+        table.insert(functions, self._waitForChange)
         parallel.waitForAny(table.unpack(functions))
     end
-    this.stop = function()
-        this._stop = true
+    ---Stops the parallel process
+    ---@return nil
+    function this:stop()
+        self._stop = true
     end
-    this.isRunning = function()
-        return this._stop == false
+    ---Get the running state
+    ---@return boolean
+    function this:isRunning()
+        return self._stop == false
     end
     return this
 end

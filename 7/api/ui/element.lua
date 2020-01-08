@@ -1,92 +1,136 @@
+---Create a new element
 function new(parent, x, y, w, h)
+    ---Base of every ui element
+    ---@class element
     local this = {}
     this.isVisible = true
+    ---@type "1"|"2"|"3"|"4"
     this.mode = 1
+    ---@type buffer
     this.buffer = ui.buffer.new(x, y, w, h)
+    ---@type element[]
     this._elements = {}
+    ---@type element
     this._parent = nil
-    this.setParent = function(element, index)
-        if element == this then
+    ---@type padding
+    this.maskPadding = nil
+
+    ---Set the parent of an element
+    ---@param element element
+    ---@param index index|optional
+    ---@return boolean
+    function this:setParent(element, index)
+        if element == self then
             return false
         end
-        if element and this.containsElement(element, true) then
+        if element and self:containsElement(element, true) then
             return false
         end
-        if this._parent then
-            for i = 1, #this._parent._elements do
-                if this._parent._elements[i] == this then
-                    table.remove(this._parent._elements, i)
+        if self._parent then
+            for i = 1, #self._parent._elements do
+                if self._parent._elements[i] == self then
+                    table.remove(self._parent._elements, i)
                     break
                 end
             end
         end
-        this._parent = element
+        self._parent = element
         if element then
             if index then
-                table.insert(element._elements, index, this)
+                table.insert(element._elements, index, self)
             else
-                table.insert(element._elements, this)
+                table.insert(element._elements, self)
             end
         else
-            this._parent = nil
+            self._parent = nil
         end
         return true
     end
-    this.getParent = function()
-        return this._parent
+    ---Get the parent of this element
+    ---@return element
+    function this:getParent()
+        return self._parent
     end
-    this.containsElement = function(element, checkChildren)
-        for i = 1, #this._elements do
-            if this._elements[i] == element then
+
+    ---Check if this has the given element. If checkChildren is true then the children get checked too.
+    ---@param element element
+    ---@param checkChildren boolean
+    ---@return boolean
+    function this:containsElement(element, checkChildren)
+        for i = 1, #self._elements do
+            if self._elements[i] == element then
                 return true
             end
-            if checkChildren == true and this._elements[i].containsElement(element) then
+            if checkChildren == true and self._elements[i]:containsElement(element) then
                 return true
             end
         end
         return false
     end
-    this.getManager = function()
-        if this._parent then
-            return this._parent.getManager()
+    ---Get the uiManager of this element
+    ---@return uiManager
+    function this:getManager()
+        if self._parent then
+            return self._parent:getManager()
         else
-            return this
+            return self
         end
     end
-    this.setParent(parent)
-    this.getGlobalRect = function()
-        return this.buffer.rect.getUnpacked()
+    ---Get the global unpacked rect
+    ---@return integer, integer, integer, integer
+    function this:getGlobalRect()
+        return self.buffer.rect:getUnpacked()
     end
-    this.getGlobalPosX = function()
-        return this.buffer.rect.x
+    ---Get the global x position
+    ---@return integer
+    function this:getGlobalPosX()
+        return self.buffer.rect.x
     end
-    this.getGlobalPosY = function()
-        return this.buffer.rect.y
+    ---Get the global y position
+    ---@return integer
+    function this:getGlobalPosY()
+        return self.buffer.rect.y
     end
-    this.getLocalRect = function()
-        return this.getLocalPosX(), this.getLocalPosY(), this.buffer.rect.w, this.buffer.rect.h
+    ---Get the local unpacked rect
+    ---@return integer, integer, integer, integer
+    function this:getLocalRect()
+        return self:getLocalPosX(), self:getLocalPosY(), self.buffer.rect.w, self.buffer.rect.h
     end
-    this.getLocalPosX = function()
-        if this._parent then
-            return this.buffer.rect.x - this._parent.buffer.rect.x + 1
+    ---Get the local x position
+    ---@return integer
+    function this:getLocalPosX()
+        if self._parent then
+            return self.buffer.rect.x - self._parent.buffer.rect.x + 1
         end
-        return this.buffer.rect.x
+        return self.buffer.rect.x
     end
-    this.getLocalPosY = function()
-        if this._parent then
-            return this.buffer.rect.y - this._parent.buffer.rect.y + 1
+    ---Get the local y position
+    ---@return integer
+    function this:getLocalPosY()
+        if self._parent then
+            return self.buffer.rect.y - self._parent.buffer.rect.y + 1
         end
-        return this.buffer.rect.y
+        return self.buffer.rect.y
     end
-    this.getWidth = function()
-        return this.buffer.rect.w
+    ---Get the with
+    ---@return integer
+    function this:getWidth()
+        return self.buffer.rect.w
     end
-    this.getHeight = function()
-        return this.buffer.rect.h
+    ---Get the height
+    ---@return integer
+    function this:getHeight()
+        return self.buffer.rect.h
     end
-    this.setGlobalRect = function(x, y, w, h)
-        local newX, newY = this.getGlobalRect()
-        this.buffer.rect.set(x, y, w, h)
+    ---Set the global rect
+    ---@param x integer
+    ---@param y integer
+    ---@param w integer
+    ---@param h integer
+    ---@return nil
+    function this:setGlobalRect(x, y, w, h)
+        local newX, newY = self:getGlobalRect()
+        self.buffer.rect:set(x, y, w, h)
         if x then
             x = x - newX
         end
@@ -94,82 +138,113 @@ function new(parent, x, y, w, h)
             y = y - newY
         end
         if x and y then
-            for i = 1, #this._elements do
-                this._elements[i].setLocalRect(x, y, nil, nil)
+            for i = 1, #self._elements do
+                self._elements[i]:setLocalRect(x, y, nil, nil)
             end
         end
     end
-    this.setLocalRect = function(x, y, w, h)
+    ---Set the local rect
+    ---@param x integer
+    ---@param y integer
+    ---@param w integer
+    ---@param h integer
+    ---@return nil
+    function this:setLocalRect(x, y, w, h)
         if x == nil then
             x = 0
         end
         if y == nil then
             y = 0
         end
-        this.buffer.rect.set(x + this.getGlobalPosX(), y + this.getGlobalPosY(), w, h)
-        for i = 1, #this._elements do
-            this._elements[i].setLocalRect(x, y, nil, nil)
+        self.buffer.rect:set(x + self:getGlobalPosX(), y + self:getGlobalPosY(), w, h)
+        for i = 1, #self._elements do
+            self._elements[i]:setLocalRect(x, y, nil, nil)
         end
     end
-    this.maskPadding = nil
-    this.getCompleteMaskRect = function(x, y, w, h, db)
+    ---Get the unpacked rect in consideration of all parent rects and paddings
+    ---@param x integer|optional
+    ---@param y integer|optional
+    ---@param w integer|optional
+    ---@param h integer|optional
+    ---@return integer, integer, integer, integer
+    function this:getCompleteMaskRect(x, y, w, h)
         local possible = true
-        if this._parent then
-            x, y, w, h, possible = this._parent.getCompleteMaskRect(x, y, w, h, db)
+        if self._parent then
+            x, y, w, h, possible = self._parent:getCompleteMaskRect(x, y, w, h)
             if possible == false then
                 return x, y, w, h, possible
             end
         end
-        if this.maskPadding then
+        if self.maskPadding then
             if x then
-                return ui.rect.overlaps(x, y, w, h, this.maskPadding.getPaddedRect(this.buffer.rect.getUnpacked()))
+                return ui.rect.overlaps(x, y, w, h, self.maskPadding:getPaddedRect(self.buffer.rect:getUnpacked()))
             else
-                x, y, w, h = this.maskPadding.getPaddedRect(this.buffer.rect.getUnpacked())
+                x, y, w, h = self.maskPadding:getPaddedRect(self.buffer.rect:getUnpacked())
                 return x, y, w, h, true
             end
         else
             if x then
-                return this.buffer.rect.getOverlaps(x, y, w, h)
+                return self.buffer.rect:getOverlaps(x, y, w, h)
             else
-                x, y, w, h = this.buffer.rect.getUnpacked()
+                x, y, w, h = self.buffer.rect:getUnpacked()
                 return x, y, w, h, true
             end
         end
     end
-    this.getSimpleMaskRect = function(x, y, w, h)
-        if this.maskPadding then
+    ---Get the unpacked rect in consideration of paddings
+    ---@param x integer|optional
+    ---@param y integer|optional
+    ---@param w integer|optional
+    ---@param h integer|optional
+    ---@return integer, integer, integer, integer
+    function this:getSimpleMaskRect(x, y, w, h)
+        if self.maskPadding then
             if x then
-                return ui.rect.overlaps(x, y, w, h, this.maskPadding.getPaddedRect(this.buffer.rect.getUnpacked()))
+                return ui.rect.overlaps(x, y, w, h, self.maskPadding:getPaddedRect(self.buffer.rect:getUnpacked()))
             else
-                return this.maskPadding.getPaddedRect(this.buffer.rect.getUnpacked())
+                return self.maskPadding:getPaddedRect(self.buffer.rect:getUnpacked())
             end
         else
             if x then
-                return this.buffer.rect.getOverlaps(x, y, w, h)
+                return self.buffer.rect:getOverlaps(x, y, w, h)
             else
-                return this.buffer.rect.getUnpacked()
+                return self.buffer.rect:getUnpacked()
             end
         end
     end
-    this.doDraw = function(buffer, x, y, w, h)
+    ---Intern function to draw this element in a buffer
+    ---@param buffer buffer
+    ---@param x integer|optional
+    ---@param y integer|optional
+    ---@param w integer|optional
+    ---@param h integer|optional
+    ---@return nil
+    function this:doDraw(buffer, x, y, w, h)
         if x == nil then
-            x, y, w, h = this.buffer.rect.getUnpacked()
+            x, y, w, h = self.buffer.rect:getUnpacked()
         end
-        if this.isVisible then
-            buffer.contract(this.buffer, x, y, w, h)
-            if this._elements == 0 then
+        if self.isVisible then
+            buffer.contract(self.buffer, x, y, w, h)
+            if self._elements == 0 then
                 return
             end
             local possible = true
-            x, y, w, h, possible = ui.rect.overlaps(x, y, w, h, this.getCompleteMaskRect())
+            x, y, w, h, possible = ui.rect.overlaps(x, y, w, h, self:getCompleteMaskRect())
             if possible then
-                for i = 1, #this._elements do
-                    this._elements[i].doDraw(buffer, x, y, w, h)
+                for i = 1, #self._elements do
+                    self._elements[i]:doDraw(buffer, x, y, w, h)
                 end
             end
         end
     end
-    this.repaint = function(mode, x, y, w, h)
+    ---Repaint "this" = this element | "parent" = parent element and all children | "all" all elements
+    ---@param mode "this"|"parent"|"all"
+    ---@param x integer|optional
+    ---@param y integer|optional
+    ---@param w integer|optional
+    ---@param h integer|optional
+    ---@return nil
+    function this:repaint(mode, x, y, w, h)
         if mode == "this" then
             if x and false then
                 x = x + 1
@@ -177,50 +252,77 @@ function new(parent, x, y, w, h)
                 w = w - 2
                 h = h - 2
             end
-            x, y, w, h = this.getCompleteMaskRect(x, y, w, h)
-            local manager = this.getManager()
-            this.doDraw(manager.buffer, x, y, w, h)
-            manager.buffer.draw(x, y, w, h)
+            x, y, w, h = self:getCompleteMaskRect(x, y, w, h)
+            local manager = self:getManager()
+            self:doDraw(manager.buffer, x, y, w, h)
+            manager.buffer:draw(x, y, w, h)
         elseif mode == "parent" then
-            if this._parent then
-                this._parent.repaint("this", x, y, w, h)
+            if self._parent then
+                self._parent:repaint("this", x, y, w, h)
             end
         elseif mode == "all" then
-            this.getManager().repaint("this", x, y, w, h)
+            self:getManager():repaint("this", x, y, w, h)
+        else
+            error("given mode (" .. mode .. ") is not supported", 2)
         end
     end
-    this.doPointerEvent = function(event, x, y, w, h)
-        local maskX, maskY, maskW, maskH, possible = this.getSimpleMaskRect(x, y, w, h)
+    ---Intern function for events dedicated to the mouse
+    ---@param event event
+    ---@param x integer|optional
+    ---@param y integer|optional
+    ---@param w integer|optional
+    ---@param h integer|optional
+    ---@return element|nil
+    function this:doPointerEvent(event, x, y, w, h)
+        local maskX, maskY, maskW, maskH, possible = self:getSimpleMaskRect(x, y, w, h)
         if possible then
-            for i = #this._elements, 1, -1 do
-                local element = this._elements[i].doPointerEvent(event, maskX, maskY, maskW, maskH)
+            for i = #self._elements, 1, -1 do
+                local element = self._elements[i]:doPointerEvent(event, maskX, maskY, maskW, maskH)
                 if element then
                     return element
                 end
             end
         end
-        if this.mode ~= 2 then
-            return this._doPointerEvent(event, x, y, w, h)
+        if self.mode ~= 2 then
+            return self:_doPointerEvent(event, x, y, w, h)
         end
     end
-    this.doNormalEvent = function(event)
-        for i = #this._elements, 1, -1 do
-            local element = this._elements[i].doNormalEvent(event)
+    ---Intern function for every event except events dedicated to the mouse
+    ---@param event event
+    ---@return element|nil
+    function this:doNormalEvent(event)
+        for i = #self._elements, 1, -1 do
+            local element = self._elements[i]:doNormalEvent(event)
             if element then
                 return element
             end
         end
-        if this.mode ~= 2 then
-            return this._doNormalEvent(event)
+        if self.mode ~= 2 then
+            return self:_doNormalEvent(event)
         end
     end
-    this._doPointerEvent = function(event, x, y, w, h)
+    ---Assigned function for every event dedicated to the mouse
+    ---@param event event
+    ---@param x integer|optional
+    ---@param y integer|optional
+    ---@param w integer|optional
+    ---@param h integer|optional
+    ---@return element|nil
+    function this:_doPointerEvent(event, x, y, w, h)
         return nil
     end
-    this._doNormalEvent = function(event)
-        return false
+    ---Assigned function for every event except events dedicated to the mouse
+    ---@param event event
+    ---@return element|nil
+    function this:_doNormalEvent(event)
+        return nil
     end
-    this.recalculate = function()
+    ---Recalculate the buffer of this element
+    ---@return nil
+    function this:recalculate()
     end
+
+    this:setParent(parent)
+
     return this
 end

@@ -1,13 +1,26 @@
+---Create a new event container
+---@return event
 function new()
+    ---Contains the event name and parameter. The max amount of parameter is 5
+    ---@class event
     local this = {name = nil, param1 = nil, param2 = nil, param3 = nil, param4 = nil, param5 = nil}
-    this.getUnpacked = function()
-        return this.name, this.param1, this.param2, this.param3, this.param4, this.param5
+    ---Unpack this this table
+    ---@return string,any,any,any,any,any
+    function this:getUnpacked()
+        return self.name, self.param1, self.param2, self.param3, self.param4, self.param5
     end
-    this.pull = function(name)
-        this.name, this.param1, this.param2, this.param3, this.param4, this.param5 = os.pullEvent(name)
+    ---Execute the os.pullEvent() and saves the result in this table
+    ---@param name string|"nil"
+    ---@return nil
+    function this:pull(name)
+        self.name, self.param1, self.param2, self.param3, self.param4, self.param5 = os.pullEvent(name)
     end
-    this.pullRaw = function(name)
-        this.name, this.param1, this.param2, this.param3, this.param4, this.param5 = os.pullEvent(name)
+    ---Execute the os.pullRawEvent() and saves the result in this table
+    ---@param name string|"nil"
+    ---@return nil
+    function this:pullRaw(name)
+        self.name, self.param1, self.param2, self.param3, self.param4, self.param5 = os.pullEvent(name)
+        --TODO only os.pullEvent
     end
     return this
 end

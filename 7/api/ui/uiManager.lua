@@ -1,38 +1,56 @@
+---Create a new uiManager
 function new(x, y, w, h)
+    ---Base Manager to handel drawing end events
+    ---@class uiManager:element
     local this = ui.element.new(nil, x, y, w, h)
-    this.getCursorPos = nil
+    ---@type parallelManager
     this.parallelManager = ui.parallelManager.new()
+    ---@type selectionManager
     this.selectionManager = ui.selectionManager.new()
-    this._needsRedraw = false
-    this.draw = function()
-        local x, y, w, h = this.getSimpleMaskRect()
-        this.doDraw(this.buffer, x, y, w, h)
-        this.buffer.draw(x, y, w, h)
-    end
+    ---@type event
     this._event = ui.event.new()
-    this._execute = function()
+    ---@type function
+    this.getCursorPos = nil
+    ---@type function
+    this._callFunction = nil
+    ---@type boolean
+    this._exit = false
+
+    ---Draws the containing elements to the screen
+    ---@return nil
+    function this:draw()
+        local x, y, w, h = self:getSimpleMaskRect()
+        self:doDraw(self.buffer, x, y, w, h)
+        self.buffer:draw(x, y, w, h)
+    end
+    ---Intern function for execute to pass down the event to all elements
+    ---@return nil
+    function this:_execute()
         while true do
-            this._event.pull()
+            self._event:pull()
             term.setCursorBlink(false)
-            local eventName = this._event.name
-            if eventName == "mouse_click" or eventName == "mouse_up" or eventName == "mouse_drag" or eventName == "monitor_touch" then
-                local element = this.doPointerEvent(this._event, this.getSimpleMaskRect())
-                if #this.selectionManager.selectionGroups > 0 then
-                    this.selectionManager.mouseEvent(this._event, element)
+            local eventName = self._event.name
+            if
+                eventName == "mouse_click" or eventName == "mouse_up" or eventName == "mouse_drag" or
+                    eventName == "monitor_touch"
+             then
+                local element = self:doPointerEvent(self._event, self:getSimpleMaskRect())
+                if #self.selectionManager.selectionGroups > 0 then
+                    self.selectionManager:mouseEvent(self._event, element)
                 end
             else
-                if not this.doNormalEvent(this._event) then
+                if not self:doNormalEvent(self._event) then
                     if eventName == "key" or eventName == "key_up" then
-                        if #this.selectionManager.selectionGroups > 0 then
-                            this.selectionManager.keyEvent(this._event)
+                        if #self.selectionManager.selectionGroups > 0 then
+                            self.selectionManager:keyEvent(self._event)
                         end
                     end
                 end
             end
-            if this.getCursorPos then
-                local blinking, posX, posY, textColor = this.getCursorPos()
+            if self.getCursorPos then
+                local blinking, posX, posY, textColor = self.getCursorPos()
                 if blinking == nil then
-                    this.getCursorPos = nil
+                    self.getCursorPos = nil
                 else
                     term.setCursorPos(posX, posY)
                     term.setCursorBlink(blinking)
@@ -43,26 +61,32 @@ function new(x, y, w, h)
             end
         end
     end
-    this.parallelManager.addFunction(this._execute)
-    this.callFunction = function(func)
-        this.parallelManager.stop()
-        this._callFunction = func
+    ---Stops the loop to execute the function
+    ---@param func function
+    ---@return nil
+    function this:callFunction(func)
+        self.parallelManager:stop()
+        self._callFunction = func
     end
-    this._callFunction = nil
-    this.exit = function()
-        this.parallelManager.stop()
-        this._exit = true
+    ---Exit the uiManager Loop
+    ---@return nil
+    function this:exit()
+        self.parallelManager:stop()
+        self._exit = true
     end
-    this._exit = false
-    this.execute = function()
-        while this._exit == false do
-            this.parallelManager.init()
-            if this._callFunction then
-                this._callFunction()
-                this._callFunction = nil
+    ---Start the uiManager loop
+    function this:execute(self)
+        while self._exit == false do
+            self.parallelManager:init()
+            if self._callFunction then
+                self._callFunction()
+                self._callFunction = nil
             end
         end
-        this.exit = false
+        self.exit = false
     end
+
+    this.parallelManager:addFunction(this._execute)
+
     return this
 end

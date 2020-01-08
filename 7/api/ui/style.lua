@@ -1,16 +1,24 @@
 function new(path)
+    ---@class style
     local this = {}
+    ---@class style.label
     local label = {}
     label.align = 1
+    ---@class style.label.theme
     local label_normal = {prefix = "", suffix = "", tC = colors.black, tBG = colors.white}
+    ---@type style.label.theme
     local label_disabled = {prefix = "", suffix = "", tC = colors.gray, tBG = colors.white}
+    ---@type style.label.theme
     local label_selected = {prefix = "", suffix = "", tC = colors.black, tBG = colors.orange}
     label.nTheme = label_normal
     label.dTheme = label_disabled
     label.sTheme = label_selected
     this.label = label
+
+    ---@class style.button
     local button = {}
     button.align = 5
+    ---@class style.button.theme
     local button_normal = {
         tC = colors.lightBlue,
         tBG = colors.blue,
@@ -28,6 +36,7 @@ function new(path)
             {}
         }
     }
+    ---@type style.button.theme
     local button_disabled = {
         tC = colors.lightGray,
         tBG = colors.gray,
@@ -45,6 +54,7 @@ function new(path)
             {}
         }
     }
+    ---@type style.button.theme
     local button_selected = {
         tC = colors.white,
         tBG = colors.blue,
@@ -62,6 +72,7 @@ function new(path)
             {}
         }
     }
+    ---@type style.button.theme
     local button_pressed = {
         tC = colors.white,
         tBG = colors.lightBlue,
@@ -84,8 +95,11 @@ function new(path)
     button.sTheme = button_selected
     button.pTheme = button_pressed
     this.button = button
+
+    ---@class style.toggleButton
     local toggleButton = {}
     toggleButton.align = 1
+    ---@class style.toggleButton.theme
     local toggleButton_normal = {
         tC = colors.black,
         tBG = colors.white,
@@ -96,6 +110,7 @@ function new(path)
         checkedLC = {colors.white, colors.orange, colors.white},
         checkedLBG = {colors.white, colors.red, colors.white}
     }
+    ---@type style.toggleButton.theme
     local toggleButton_disabled = {
         tC = colors.gray,
         tBG = colors.white,
@@ -106,6 +121,7 @@ function new(path)
         checkedLC = {colors.white, colors.gray, colors.white},
         checkedLBG = {colors.gray, colors.lightGray, colors.gray}
     }
+    ---@type style.toggleButton.theme
     local toggleButton_selected = {
         tC = colors.orange,
         tBG = colors.white,
@@ -116,6 +132,7 @@ function new(path)
         checkedLC = {colors.orange, colors.white, colors.orange},
         checkedLBG = {colors.white, colors.red, colors.white}
     }
+    ---@type style.toggleButton.theme
     local toggleButton_pressed = {
         tC = colors.orange,
         tBG = colors.white,
@@ -131,7 +148,10 @@ function new(path)
     toggleButton.sTheme = toggleButton_selected
     toggleButton.pTheme = toggleButton_pressed
     this.toggleButton = toggleButton
+
+    ---@class style.slider
     local slider = {}
+    ---@class style.slider.theme
     local slider_normal = {
         sliderT = {"|", "#", "|"},
         sliderTC = {colors.lightGray, colors.lightGray, colors.lightGray},
@@ -140,17 +160,21 @@ function new(path)
         handleLC = {colors.lightGray, colors.gray, colors.lightGray},
         handleLBG = {colors.lightGray, colors.black, colors.lightGray}
     }
+    ---@class style.slider.button
     local slider_normal_buttonPositive = {}
+    ---@class style.slider.button.theme
     local slider_normal_buttonPositive_normal = {
         t = {"[", "A", "]"},
         tC = {colors.lightBlue, colors.lightBlue, colors.lightBlue},
         tBG = {colors.blue, colors.blue, colors.blue}
     }
+    ---@type style.slider.button.theme
     local slider_normal_buttonPositive_disabled = {
         t = {"[", "A", "]"},
         tC = {colors.lightGray, colors.lightGray, colors.lightGray},
         tBG = {colors.gray, colors.gray, colors.gray}
     }
+    ---@type style.slider.button.theme
     local slider_normal_buttonPositive_selected = {
         t = {"[", "A", "]"},
         tC = {colors.white, colors.white, colors.white},
@@ -159,17 +183,21 @@ function new(path)
     slider_normal_buttonPositive.nTheme = slider_normal_buttonPositive_normal
     slider_normal_buttonPositive.dTheme = slider_normal_buttonPositive_disabled
     slider_normal_buttonPositive.sTheme = slider_normal_buttonPositive_selected
+    ---@type style.slider.button
     local slider_normal_buttonNegative = {}
+    ---@type style.slider.button.theme
     local slider_normal_buttonNegative_normal = {
         t = {"[", "A", "]"},
         tC = {colors.lightBlue, colors.lightBlue, colors.lightBlue},
         tBG = {colors.blue, colors.blue, colors.blue}
     }
+    ---@type style.slider.button.theme
     local slider_normal_buttonNegative_disabled = {
         t = {"[", "A", "]"},
         tC = {colors.lightGray, colors.lightGray, colors.lightGray},
         tBG = {colors.gray, colors.gray, colors.gray}
     }
+    ---@type style.slider.button.theme
     local slider_normal_buttonNegative_selected = {
         t = {"[", "A", "]"},
         tC = {colors.white, colors.white, colors.white},
@@ -180,6 +208,7 @@ function new(path)
     slider_normal_buttonNegative.sTheme = slider_normal_buttonNegative_selected
     slider_normal.buttonP = slider_normal_buttonPositive
     slider_normal.buttonN = slider_normal_buttonNegative
+    ---@type style.slider.theme
     local slider_disabled = {
         sliderT = {"|", "#", "|"},
         sliderTC = {colors.lightGray, colors.lightGray, colors.lightGray},
@@ -188,7 +217,9 @@ function new(path)
         handleLC = {colors.lightGray, colors.gray, colors.lightGray},
         handleLBG = {colors.lightGray, colors.black, colors.lightGray}
     }
+    ---@type style.slider.button
     local slider_disabled_buttonPositive = {}
+    ---@type style.slider.button
     local slider_disabled_buttonNegative = {}
     slider_disabled_buttonPositive.dTheme = slider_normal_buttonPositive_disabled
     slider_disabled_buttonNegative.dTheme = slider_normal_buttonNegative_disabled
@@ -197,7 +228,10 @@ function new(path)
     slider.nTheme = slider_normal
     slider.dTheme = slider_disabled
     this.slider = slider
+
+    ---@class style.textBox
     local textBox = {}
+    ---@type style.label
     textBox.label = assets.extension.copyTable(this.label)
     textBox.label.nTheme.tBG = colors.green
     textBox.label.nTheme.tC = colors.lime
@@ -209,6 +243,7 @@ function new(path)
     textBox.label.sTheme.tC = colors.yellow
     textBox.label.sTheme.prefix = ">"
     textBox.label.sTheme.suffix = "<"
+    ---@type style.label
     textBox.text = assets.extension.copyTable(this.label)
     textBox.text.nTheme.tBG = colors.white
     textBox.text.nTheme.tC = colors.black
@@ -216,6 +251,7 @@ function new(path)
     textBox.text.dTheme.tC = colors.black
     textBox.text.sTheme.tBG = colors.white
     textBox.text.sTheme.tC = colors.black
+    ---@type style.slider
     textBox.slider = assets.extension.copyTable(this.slider)
     textBox.slider.nTheme.buttonP.nTheme.t = {string.char(30)}
     textBox.slider.nTheme.buttonP.nTheme.tC = {colors.white}
@@ -253,6 +289,7 @@ function new(path)
     textBox.slider.dTheme.handleL = {"#"}
     textBox.slider.dTheme.handleLC = {colors.gray}
     textBox.slider.dTheme.handleLBG = {colors.gray}
+    ---@class style.textBox.theme
     local textBox_normal = {
         sTC = colors.white,
         bC = colors.lime,
@@ -269,6 +306,7 @@ function new(path)
             {"+", "|", "+"}
         }
     }
+    ---@type style.textBox.theme
     local textBox_disabled = {
         sTC = colors.white,
         bC = colors.lightGray,
@@ -285,6 +323,7 @@ function new(path)
             {"+", "|", "+"}
         }
     }
+    ---@type style.textBox.theme
     local textBox_selected = {
         sTC = colors.white,
         bC = colors.lime,
@@ -305,8 +344,12 @@ function new(path)
     textBox.dTheme = textBox_disabled
     textBox.sTheme = textBox_selected
     this.textBox = textBox
+
+    ---@class style.scrollView
     local scrollView = {}
+    ---@type style.label
     scrollView.label = assets.extension.copyTable(this.label)
+    ---@type style.slider
     scrollView.sliderV = assets.extension.copyTable(this.slider)
     scrollView.sliderV.nTheme.buttonP.nTheme.t = {string.char(30)}
     scrollView.sliderV.nTheme.buttonP.nTheme.tC = {colors.white}
@@ -344,6 +387,7 @@ function new(path)
     scrollView.sliderV.dTheme.handleL = {"#"}
     scrollView.sliderV.dTheme.handleLC = {colors.gray}
     scrollView.sliderV.dTheme.handleLBG = {colors.gray}
+    ---@type style.slider
     scrollView.sliderH = assets.extension.copyTable(this.slider)
     scrollView.sliderH.nTheme.buttonP.nTheme.t = {string.char(17)}
     scrollView.sliderH.nTheme.buttonP.nTheme.tC = {colors.white}
@@ -381,6 +425,7 @@ function new(path)
     scrollView.sliderH.dTheme.handleL = {"#"}
     scrollView.sliderH.dTheme.handleLC = {colors.gray}
     scrollView.sliderH.dTheme.handleLBG = {colors.gray}
+    ---@class style.scrollView.theme
     local scrollView_normal = {
         tC = colors.lime,
         tBG = colors.green,
@@ -400,6 +445,7 @@ function new(path)
             {"+"}
         }
     }
+    ---@type style.scrollView.theme
     local scrollView_disabled = {
         tC = colors.lightGray,
         tBG = colors.gray,
@@ -419,6 +465,7 @@ function new(path)
             {"+"}
         }
     }
+    ---@type style.scrollView.theme
     local scrollView_selected = {
         tC = colors.yellow,
         tBG = colors.green,
@@ -442,13 +489,17 @@ function new(path)
     scrollView.dTheme = scrollView_disabled
     scrollView.sTheme = scrollView_selected
     this.scrollView = scrollView
+
+    ---@class style.inputField
     local inputField = {}
     inputField.align = 1
+    ---@type style.label
     inputField.label = assets.extension.copyTable(this.label)
     inputField.label.nTheme.tC = colors.lime
     inputField.label.nTheme.tBG = colors.green
     inputField.label.sTheme.tC = colors.yellow
     inputField.label.sTheme.tBG = colors.green
+    ---@class style.inputField.theme
     local inputField_normal = {
         tC = colors.white,
         tBG = colors.black,
@@ -467,6 +518,7 @@ function new(path)
             {"+"}
         }
     }
+    ---@type style.inputField.theme
     local inputField_disabled = {
         tC = colors.lightGray,
         tBG = colors.gray,
@@ -485,6 +537,7 @@ function new(path)
             {"+"}
         }
     }
+    ---@type style.inputField.theme
     local inputField_selected = {
         tC = colors.yellow,
         tBG = colors.black,
@@ -509,8 +562,9 @@ function new(path)
     inputField.dTheme = inputField_disabled
     inputField.sTheme = inputField_selected
     this.inputField = inputField
-    this.getStyle = function(elementType, arguments)
-        local copiedStyle = assets.extension.copyTable(this[elementType], elementType)
+
+    function this:getStyle(elementType, arguments)
+        local copiedStyle = assets.extension.copyTable(self[elementType], elementType)
         if type(arguments) == "table" then
             for k, v in pairs(arguments) do
                 copiedStyle[k] = v
@@ -520,13 +574,16 @@ function new(path)
     end
     setmetatable(
         this,
-        {__call = function(t, type, arguments)
+        {
+            __call = function(t, type, arguments)
                 return t.getStyle(type, arguments)
-            end}
+            end
+        }
     )
     return this
 end
 function border(topLeft, topMiddle, topRight, middleLeft, middleRight, bottomLeft, bottomMiddle, bottomRight)
+    ---@class border
     return {
         topLeft or {},
         topMiddle or {},
