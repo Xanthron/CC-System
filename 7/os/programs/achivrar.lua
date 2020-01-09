@@ -79,7 +79,7 @@ local function save(path, paths, compress)
     end
 end
 local manager = ui.uiManager.new(_x, _y, _w, _h)
-ui.buffer.fillWithColor(manager.buffer, " ", colors.black, colors.white)
+ui.buffer.fill(manager.buffer, " ", colors.black, colors.white)
 local label1 = ui.label.new(manager, "Achivrar", theme.label1, 1, 1, _w - 3, 1)
 local button1 = ui.button.new(manager, "x", nil, theme.button2, _w - 2, 1, 3, 1)
 local tBox1 = ui.textBox.new(manager, "Files:", "", theme.tBox2, 1, 2, _w, _h - 8)

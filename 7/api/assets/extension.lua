@@ -1,4 +1,7 @@
 function copyTable(table, pr)
+    if not table then
+        error("no table", 2)
+    end
     if pr then
         print(pr)
     end

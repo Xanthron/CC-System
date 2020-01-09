@@ -74,8 +74,11 @@ local function errorHandler(text)
             y = 3,
             w = w - 4,
             h = h - 4,
-            button1 = {name = "Ok", func = function()
-                end}
+            button1 = {
+                name = "Ok",
+                func = function()
+                end
+            }
         }
     )
 end

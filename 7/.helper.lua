@@ -234,3 +234,73 @@ ui.selectionManager = {}
 ---@return selectionManager
 function ui.selectionManager.new()
 end
+---Select an element by direction
+---@param selectionGroup selectionGroup
+---@param direction string
+---@param source string
+---@return nil
+function ui.selectionManager._select(selectionGroup, direction, source)
+end
+---Switch the selection in a manager
+---@param selectionManager selectionManager
+---@param selectionGroup selectionGroup
+---@param source string
+---@param ... any
+---@return nil
+function ui.selectionManager._switch(selectionManager, selectionGroup, source, ...)
+end
+ui.slider = {}
+---@param parent element
+--TODO remove
+---@param onValueChange function
+---@param orientation "1 = vertical"|"2 = horizontal"
+---@param startValue integer
+---@param endValue integer
+---@param size integer
+---@param style style.slider
+---@param x integer
+---@param y integer
+---@param w integer
+---@param h integer
+---@return slider
+function ui.slider.new(parent, onValueChange, orientation, startValue, endValue, size, style, x, y, w, h)
+end
+
+ui.textBox = {}
+---@param parent element
+---@param label string|nil
+---@param text string
+---@param style style.textBox
+---@param x integer
+---@param y integer
+---@param w integer
+---@param h integer
+---@return textBox
+function ui.textBox.new(parent, label, text, style, x, y, w, h)
+end
+
+ui.toggleButton = {}
+---@param parent element
+--TODO edit to label?
+---@param text string
+---@param checked boolean
+--TODO remove
+---@param func function
+---@param style style.toggleButton
+---@param x integer
+---@param y integer
+---@param w integer
+---@param h integer
+---@return toggle
+function ui.toggleButton.new(parent, text, checked, func, style, x, y, w, h)
+end
+
+ui.uiManager = {}
+---Create a new uiManager
+---@param x integer
+---@param y integer
+---@param w integer
+---@param h integer
+---@return uiManager
+function ui.uiManager.new(x, y, w, h)
+end

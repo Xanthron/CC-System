@@ -167,11 +167,7 @@ function new(parent, label, text, multiLine, onSubmit, style, x, y, w, h)
             local completeLength = completeText:len()
             local offsetT = length - (width - left - right) + 1
             offsetT = math.min(offsetT, self.cursorOffset - width + left + right + 1)
-            local offsetC =
-                math.max(
-                0,
-                math.min(width - left - right - 3, completeLength, length + completeLength - width - left - right + 3)
-            )
+            local offsetC = math.max(0, math.min(width - left - right - 3, completeLength, length + completeLength - width - left - right + 3))
             offsetT = offsetT + offsetC
             offsetT = math.max(0, offsetT)
             self._cursorX = self.buffer.rect.x + left + self.cursorOffset - offsetT
@@ -182,35 +178,9 @@ function new(parent, label, text, multiLine, onSubmit, style, x, y, w, h)
             else
                 local text = self.text:sub(offsetT + 1, math.min(offsetT + width - left - right - offsetC, length))
                 ui.buffer.labelBox(self.buffer, text, theme.tC, theme.tBG, 1, theme.b[5][1], left, top, right, bottom)
-                ui.buffer.labelBox(
-                    self.buffer,
-                    completeText,
-                    theme.complC,
-                    theme.complBG,
-                    1,
-                    theme.b[5][1],
-                    left + self.cursorOffset - offsetT,
-                    top,
-                    right,
-                    bottom
-                )
-                text =
-                    self.text:sub(
-                    offsetT + width - left - right - offsetC,
-                    math.min(offsetT + width - left - right, length)
-                )
-                ui.buffer.labelBox(
-                    self.buffer,
-                    text,
-                    theme.tC,
-                    theme.tBG,
-                    1,
-                    theme.b[5][1],
-                    left + length + completeLength - offsetT,
-                    top,
-                    right,
-                    bottom
-                )
+                ui.buffer.labelBox(self.buffer, completeText, theme.complC, theme.complBG, 1, theme.b[5][1], left + self.cursorOffset - offsetT, top, right, bottom)
+                text = self.text:sub(offsetT + width - left - right - offsetC, math.min(offsetT + width - left - right, length))
+                ui.buffer.labelBox(self.buffer, text, theme.tC, theme.tBG, 1, theme.b[5][1], left + length + completeLength - offsetT, top, right, bottom)
             end
         end
     end
@@ -232,18 +202,7 @@ function new(parent, label, text, multiLine, onSubmit, style, x, y, w, h)
         ui.buffer.borderBox(self.buffer, theme.b, theme.bC, theme.bBG)
         if self.label then
             local yPos = math.max(0, math.floor((#theme.b[2] - 1) / 2))
-            ui.buffer.labelBox(
-                self.buffer,
-                self.label,
-                labelTheme.tC,
-                labelTheme.tBG,
-                self.style.label.align,
-                nil,
-                #theme.b[4],
-                yPos,
-                #theme.b[6],
-                self.buffer.rect.h - yPos
-            )
+            ui.buffer.labelBox(self.buffer, self.label, labelTheme.tC, labelTheme.tBG, self.style.label.align, nil, #theme.b[4], yPos, #theme.b[6], self.buffer.rect.h - yPos)
         end
         self:recalculateText()
     end
@@ -301,12 +260,7 @@ function new(parent, label, text, multiLine, onSubmit, style, x, y, w, h)
                     if self.repeatItem:call() then
                         local success = false
                         if #self.autoComplete > 0 then
-                            success, self.text, self.cursorOffset =
-                                self:onAutoCompletion(
-                                self.text,
-                                self.cursorOffset,
-                                self.autoComplete[self.autoCompleteIndex]
-                            )
+                            success, self.text, self.cursorOffset = self:onAutoCompletion(self.text, self.cursorOffset, self.autoComplete[self.autoCompleteIndex])
                         end
                         if not success then
                             self.cursorOffset = math.min(self.text:len(), self.cursorOffset + 1)
@@ -369,7 +323,7 @@ function new(parent, label, text, multiLine, onSubmit, style, x, y, w, h)
     ---@param w integer|optional
     ---@param h integer|optional
     ---@return element|nil
-    function this:_doPointerEvent(self, event, x, y, w, h)
+    function this:_doPointerEvent(event, x, y, w, h)
         x, y, w, h = ui.rect.overlaps(x, y, w, h, self.buffer.rect:getUnpacked())
         if event.name == "mouse_click" then
             if event.param2 >= x and event.param2 < x + w and event.param3 >= y and event.param3 < y + h then
@@ -379,31 +333,19 @@ function new(parent, label, text, multiLine, onSubmit, style, x, y, w, h)
                 return self
             end
         elseif event.name == "mouse_drag" then
-            if
-                self.mode == 4 and event.param2 >= x and event.param2 < x + w and event.param3 >= y and
-                    event.param3 < y + h
-             then
+            if self.mode == 4 and event.param2 >= x and event.param2 < x + w and event.param3 >= y and event.param3 < y + h then
                 self.mode = 3
                 self:recalculate()
                 self:repaint("this", x, y, w, h)
-            elseif
-                self.mode == 3 and
-                    (event.param2 < x or event.param2 >= x + w or event.param3 < y or event.param3 >= y + h)
-             then
+            elseif self.mode == 3 and (event.param2 < x or event.param2 >= x + w or event.param3 < y or event.param3 >= y + h) then
                 self.mode = 4
                 self:recalculate()
                 self:repaint("this", x, y, w, h)
             end
         elseif event.name == "mouse_up" then
-            if
-                self.mode == 3 and event.param2 >= x and event.param2 < x + w and event.param3 >= y and
-                    event.param3 < y + h
-             then
+            if self.mode == 3 and event.param2 >= x and event.param2 < x + w and event.param3 >= y and event.param3 < y + h then
                 return self
-            elseif
-                self.mode == 4 and
-                    (event.param2 < x or event.param2 >= x + w or event.param3 < y or event.param3 >= y + h)
-             then
+            elseif self.mode == 4 and (event.param2 < x or event.param2 >= x + w or event.param3 < y or event.param3 >= y + h) then
                 self.mode = 1
                 self:recalculate()
                 self:repaint("this", x, y, w, h)

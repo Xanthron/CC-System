@@ -27,9 +27,9 @@ if button1 then
         ui.button.new(
         textBox,
         button1.name,
-        function()
+        function(self)
             button1.func()
-            manager.exit()
+            manager:exit()
         end,
         button1.theme or theme.button1,
         x + w - right - 1 - length,
@@ -38,9 +38,9 @@ if button1 then
         1
     )
     if button2 then
-        button1.setGlobalRect(x + left, nil, nil, nil)
+        button1:setGlobalRect(x + left, nil, nil, nil)
     end
-    button1_selection = textBox.selectionGroup.addNewSelectionElement(button1)
+    button1_selection = textBox.selectionGroup:addNewSelectionElement(button1)
 end
 local button2_selection = nil
 if button2 then
@@ -48,9 +48,9 @@ if button2 then
         ui.button.new(
         textBox,
         button2.name,
-        function()
+        function(self)
             button2.func()
-            manager.exit = true
+            manager:exit()
         end,
         button2.theme or theme.button1,
         x + w - right - 1,
@@ -58,7 +58,7 @@ if button2 then
         button2.name:len() + 2,
         1
     )
-    button2_selection = textBox.selectionGroup.addNewSelectionElement(button2)
+    button2_selection = textBox.selectionGroup:addNewSelectionElement(button2)
 end
 if button2_selection then
     button2_selection.left = button1_selection
@@ -68,7 +68,7 @@ if button1_selection then
     button1_selection.right = button2_selection
     textBox.selectionGroup.currentSelectionElement = button1_selection
 end
-manager.selectionManager.addSelectionGroup(textBox.selectionGroup)
-manager.selectionManager.setCurrentSelectionGroup(textBox.selectionGroup, "code")
-manager.draw()
-manager.execute()
+manager.selectionManager:addSelectionGroup(textBox.selectionGroup)
+manager.selectionManager:setCurrentSelectionGroup(textBox.selectionGroup, "code")
+manager:draw()
+manager:execute()

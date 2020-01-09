@@ -61,8 +61,8 @@ function new()
     end
     ---Intern function fot waiting to stop
     ---@return nil
-    function this:_waitForChange(self)
-        while self._stop == false do
+    function this._waitForChange()
+        while this._stop == false do
             coroutine.yield()
         end
     end

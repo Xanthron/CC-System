@@ -232,7 +232,7 @@ function new(parent, x, y, w, h)
             x, y, w, h = self.buffer.rect:getUnpacked()
         end
         if self.isVisible then
-            buffer.contract(self.buffer, x, y, w, h)
+            buffer:contract(self.buffer, x, y, w, h)
             if self._elements == 0 then
                 return
             end

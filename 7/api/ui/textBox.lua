@@ -16,20 +16,7 @@ function new(parent, label, text, style, x, y, w, h)
     this._elements[1] = ui.element.new(this, this.stylePadding:getPaddedRect(this.buffer.rect:getUnpacked()))
     this._elements[1]._elements[1] = ui.label.new(this, text, style.text, this._elements[1]:getGlobalRect())
     local slideWidth = #style.slider.nTheme.handleL
-    this._elements[2] =
-        ui.slider.new(
-        this,
-        nil,
-        1,
-        0,
-        this._elements[1]._elements[1]:getHeight(),
-        this._elements[1]:getHeight(),
-        style.slider,
-        x + w - math.max(math.ceil((this.stylePadding.right + slideWidth) / 2), slideWidth),
-        y + this.stylePadding.top,
-        slideWidth,
-        h - this.stylePadding.top - this.stylePadding.bottom
-    )
+    this._elements[2] = ui.slider.new(this, nil, 1, 0, this._elements[1]._elements[1]:getHeight(), this._elements[1]:getHeight(), style.slider, x + w - math.max(math.ceil((this.stylePadding.right + slideWidth) / 2), slideWidth), y + this.stylePadding.top, slideWidth, h - this.stylePadding.top - this.stylePadding.bottom)
     ---@type string
     this.label = label
     ---@type style.textBox
@@ -40,12 +27,7 @@ function new(parent, label, text, style, x, y, w, h)
     ---Recalculate the buffer of this element
     ---@return nil
     function this:resetLayout()
-        self.stylePadding:set(
-            #self.style.nTheme.b[4],
-            #self.style.nTheme.b[2],
-            #self.style.nTheme.b[6],
-            #self.style.nTheme.b[8]
-        )
+        self.stylePadding:set(#self.style.nTheme.b[4], #self.style.nTheme.b[2], #self.style.nTheme.b[6], #self.style.nTheme.b[8])
         local x, y, w, h = self:getGlobalRect()
         local container = self._elements[1]
         container:setGlobalRect(self.stylePadding:getPaddedRect(self.buffer.rect:getUnpacked()))
@@ -56,12 +38,7 @@ function new(parent, label, text, style, x, y, w, h)
         local slider = self._elements[2]
         slider.style = self.style.slider
         local slideWidth = #self.style.slider.nTheme.handleL
-        slider:setLocalRect(
-            x + w - math.max(math.ceil((self.stylePadding.right + slideWidth) / 2), slideWidth),
-            y + self.stylePadding.top,
-            slideWidth,
-            h - self.stylePadding.top - self.stylePadding.bottom
-        )
+        slider:setLocalRect(x + w - math.max(math.ceil((self.stylePadding.right + slideWidth) / 2), slideWidth), y + self.stylePadding.top, slideWidth, h - self.stylePadding.top - self.stylePadding.bottom)
         slider.startValue = 0
         slider.endValue = h
         slider.size = label:getHeight()
@@ -81,14 +58,7 @@ function new(parent, label, text, style, x, y, w, h)
         local maxMove = 0
         local label = self._elements[1]._elements[1]
         if value > 0 then
-            maxMove =
-                math.max(
-                0,
-                math.min(
-                    value,
-                    label:getLocalPosY() + label:getHeight() - (this.getHeight() - this.stylePadding.bottom + 1)
-                )
-            )
+            maxMove = math.max(0, math.min(value, label:getLocalPosY() + label:getHeight() - (this.getHeight() - this.stylePadding.bottom + 1)))
         elseif value < 0 then
             maxMove = math.min(0, math.max(value, label:getLocalPosY() - self.stylePadding.top - 1))
         end
@@ -126,7 +96,7 @@ function new(parent, label, text, style, x, y, w, h)
     end
     ---Recalculate the buffer of this element
     ---@return nil
-    this.recalculate = function()
+    function this:recalculate()
         local theme
         local labelTheme
         if self.mode == 1 then
@@ -139,21 +109,10 @@ function new(parent, label, text, style, x, y, w, h)
             theme = self.style.sTheme
             labelTheme = self.style.label.sTheme
         end
-        ui.buffer.fillWithColor(self.buffer, " ", theme.sTC, theme.sTC)
+        ui.buffer.fill(self.buffer, " ", theme.sTC, theme.sTC)
         ui.buffer.borderBox(self.buffer, theme.b, theme.bC, theme.bBG)
         if self.label then
-            ui.buffer.labelBox(
-                self.buffer,
-                labelTheme.prefix .. self.label .. labelTheme.suffix,
-                labelTheme.tC,
-                labelTheme.tBG,
-                self.style.label.align,
-                nil,
-                self.stylePadding.left,
-                0,
-                self.stylePadding.right,
-                self.buffer.rect.h - self.stylePadding.top
-            )
+            ui.buffer.labelBox(self.buffer, labelTheme.prefix .. self.label .. labelTheme.suffix, labelTheme.tC, labelTheme.tBG, self.style.label.align, nil, self.stylePadding.left, 0, self.stylePadding.right, self.buffer.rect.h - self.stylePadding.top)
         end
     end
     ---Listener function of the selectionGroup
@@ -201,7 +160,7 @@ function new(parent, label, text, style, x, y, w, h)
         end
     end
 
-    ui.buffer.fillWithColor(this._elements[1].buffer, " ", this.style.nTheme.sTC, this.style.nTheme.sTC)
+    ui.buffer.fill(this._elements[1].buffer, " ", this.style.nTheme.sTC, this.style.nTheme.sTC)
     this.selectionGroup:addNewSelectionElement(this._elements[2])
     this._elements[2]._onValueChange = this._onValueChange
     this:recalculate()

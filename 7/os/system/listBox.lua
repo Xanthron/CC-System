@@ -1,5 +1,5 @@
 local args = ...
-local _x, _y, _w, _h = args.manager.getGlobalRect()
+local _x, _y, _w, _h = args.manager:getGlobalRect()
 args.anchor = args.anchor or 1
 args.listBoxStyle = args.listBoxStyle or theme.sView2
 args.listButtonStyle = args.listButtonStyle or theme.button3
@@ -43,7 +43,7 @@ local function getVertical(buttons, posY, border, anchor)
     return y, h
 end
 local function clearListBox(listBox)
-    local container = listBox.getContainer()
+    local container = listBox:getContainer()
     for i = 1, #container._elements do
         table.remove(container._elements, 1)
     end
@@ -52,13 +52,13 @@ local function clearListBox(listBox)
     end
 end
 local function setListBox(manager, listBox, buttons, indexes, x, y, w, h)
-    listBox.setGlobalRect(x, y, w, h)
+    listBox:setGlobalRect(x, y, w, h)
     local currentButtons = buttons
     for i = 1, #indexes do
         currentButtons = currentButtons[indexes[i]]
     end
     clearListBox(listBox)
-    local container = listBox.getContainer()
+    local container = listBox:getContainer()
     local selectionElements = {}
     if #indexes > 0 then
         local element = ui.button.new(container, " <<<", nil, args.listButtonStyle, args.x + listBoxLeft, args.y + listBoxTop, args.w - listBoxLeft - listBoxRight, 1)
@@ -67,27 +67,27 @@ local function setListBox(manager, listBox, buttons, indexes, x, y, w, h)
             if event.name == "mouse_up" then
                 select = false
             end
-            manager.callFunction(
+            manager:callFunction(
                 function()
-                    manager.parallelManager.removeFunction(element._pressAnimation)
+                    manager.parallelManager:removeFunction(element._pressAnimation)
                     table.remove(indexes, #indexes)
                     local button = buttons
                     for i = 1, #indexes do
                         button = button[indexes[i]]
                     end
-                    local x, y, w, h = listBox.getGlobalRect()
+                    local x, y, w, h = listBox:getGlobalRect()
                     x, w = getHorizontal(button, x, borderW, args.anchor)
                     y, h = getVertical(button, y, borderH + math.min(#indexes, 1), args.anchor)
                     setListBox(manager, listBox, buttons, indexes, x, y, w, h)
                     if select then
-                        manager.selectionManager.select(listBox.selectionGroup.currentSelectionElement.element)
+                        manager.selectionManager:select(listBox.selectionGroup.currentSelectionElement.element)
                     end
-                    manager.recalculate()
-                    manager.draw()
+                    manager:recalculate()
+                    manager:draw()
                 end
             )
         end
-        table.insert(selectionElements, listBox.selectionGroup.addNewSelectionElement(element))
+        table.insert(selectionElements, listBox.selectionGroup:addNewSelectionElement(element))
     end
     for i = 1, #currentButtons do
         local button = currentButtons[i]
@@ -99,23 +99,23 @@ local function setListBox(manager, listBox, buttons, indexes, x, y, w, h)
                 if event.name == "mouse_up" then
                     select = false
                 end
-                manager.callFunction(
+                manager:callFunction(
                     function()
-                        manager.parallelManager.removeFunction(element._pressAnimation)
+                        manager.parallelManager:removeFunction(element._pressAnimation)
                         table.insert(indexes, i)
-                        local x, y, w, h = listBox.getGlobalRect()
+                        local x, y, w, h = listBox:getGlobalRect()
                         x, w = getHorizontal(button, x, borderW, args.anchor)
                         y, h = getVertical(button, y, borderH + 1, args.anchor)
                         setListBox(manager, listBox, buttons, indexes, x, y, w, h)
                         if select then
-                            manager.selectionManager.select(listBox.selectionGroup.currentSelectionElement.element)
+                            manager.selectionManager:select(listBox.selectionGroup.currentSelectionElement.element)
                         end
-                        manager.recalculate()
-                        manager.draw()
+                        manager:recalculate()
+                        manager:draw()
                     end
                 )
             end
-            table.insert(selectionElements, listBox.selectionGroup.addNewSelectionElement(element))
+            table.insert(selectionElements, listBox.selectionGroup:addNewSelectionElement(element))
         else
             if button == "-" then
                 local element = ui.element.new(container, x, y, w, h)
@@ -131,13 +131,13 @@ local function setListBox(manager, listBox, buttons, indexes, x, y, w, h)
                 element._onClick = function(event)
                     table.insert(indexes, i)
                     select = (event.name ~= "mouse_up")
-                    manager.exit()
+                    manager:exit()
                 end
-                table.insert(selectionElements, listBox.selectionGroup.addNewSelectionElement(element))
+                table.insert(selectionElements, listBox.selectionGroup:addNewSelectionElement(element))
                 if button:sub(1, 1) == "*" then
                     element.text = button:sub(2)
                     element.mode = 2
-                    element.recalculate()
+                    element:recalculate()
                 end
             end
         end
@@ -146,8 +146,8 @@ local function setListBox(manager, listBox, buttons, indexes, x, y, w, h)
         selectionElements[i].up = selectionElements[i - 1]
         selectionElements[i].down = selectionElements[i + 1]
     end
-    listBox.resetLayout()
-    listBox.recalculate()
+    listBox:resetLayout()
+    listBox:recalculate()
     listBox.selectionGroup.currentSelectionElement = selectionElements[1]
 end
 if not args.w then
@@ -158,12 +158,12 @@ if not args.h then
 end
 local manager = ui.uiManager.new(_x, _y, _w, _h)
 manager.recalculate = function()
-    manager.buffer.contract(args.manager.buffer)
+    manager.buffer:contract(args.manager.buffer)
 end
-manager.recalculate()
+manager:recalculate()
 local listBox = ui.scrollView.new(manager, args.label, 3, args.listBoxStyle, args.x, args.y, args.w, args.h)
 setListBox(manager, listBox, args.buttons, indexes, args.x, args.y, args.w, args.h)
-listBox.selectionGroup.listener = function(name, source, ...)
+function listBox.selectionGroup:listener(name, source, ...)
     if name == "key_up" then
         local key = keys.getName(...)
         if key == "tab" or key == "e" or key == "q" then
@@ -173,22 +173,22 @@ listBox.selectionGroup.listener = function(name, source, ...)
     elseif name == "mouse" then
         local event = ...
         if event.name == "mouse_click" then
-            local x, y, w, h = listBox.getGlobalRect()
+            local x, y, w, h = listBox:getGlobalRect()
             if event.param2 < x or event.param2 > x + w or event.param3 < y or event.param3 > y + h then
                 select = false
-                manager.exit()
+                manager:exit()
             end
         end
     end
 end
-manager.selectionManager.addSelectionGroup(listBox.selectionGroup)
+manager.selectionManager:addSelectionGroup(listBox.selectionGroup)
 if args.select then
-    manager.selectionManager.setCurrentSelectionGroup(listBox.selectionGroup, "code")
+    manager.selectionManager:setCurrentSelectionGroup(listBox.selectionGroup, "code")
 else
     manager.selectionManager._currentSelectionGroup = listBox.selectionGroup
 end
-manager.draw()
-manager.execute()
+manager:draw()
+manager:execute()
 local name = args.buttons[indexes[1]]
 for i = 2, #indexes do
     name = name[indexes[i]]

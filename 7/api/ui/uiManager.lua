@@ -30,32 +30,29 @@ function new(x, y, w, h)
     end
     ---Intern function for execute to pass down the event to all elements
     ---@return nil
-    function this:_execute()
+    function this._execute()
         while true do
-            self._event:pull()
+            this._event:pull()
             term.setCursorBlink(false)
-            local eventName = self._event.name
-            if
-                eventName == "mouse_click" or eventName == "mouse_up" or eventName == "mouse_drag" or
-                    eventName == "monitor_touch"
-             then
-                local element = self:doPointerEvent(self._event, self:getSimpleMaskRect())
-                if #self.selectionManager.selectionGroups > 0 then
-                    self.selectionManager:mouseEvent(self._event, element)
+            local eventName = this._event.name
+            if eventName == "mouse_click" or eventName == "mouse_up" or eventName == "mouse_drag" or eventName == "monitor_touch" then
+                local element = this:doPointerEvent(this._event, this:getSimpleMaskRect())
+                if #this.selectionManager.selectionGroups > 0 then
+                    this.selectionManager:mouseEvent(this._event, element)
                 end
             else
-                if not self:doNormalEvent(self._event) then
+                if not this:doNormalEvent(this._event) then
                     if eventName == "key" or eventName == "key_up" then
-                        if #self.selectionManager.selectionGroups > 0 then
-                            self.selectionManager:keyEvent(self._event)
+                        if #this.selectionManager.selectionGroups > 0 then
+                            this.selectionManager:keyEvent(this._event)
                         end
                     end
                 end
             end
-            if self.getCursorPos then
-                local blinking, posX, posY, textColor = self.getCursorPos()
+            if this.getCursorPos then
+                local blinking, posX, posY, textColor = this.getCursorPos()
                 if blinking == nil then
-                    self.getCursorPos = nil
+                    this.getCursorPos = nil
                 else
                     term.setCursorPos(posX, posY)
                     term.setCursorBlink(blinking)
@@ -80,15 +77,15 @@ function new(x, y, w, h)
         self._exit = true
     end
     ---Start the uiManager loop
-    function this:execute(self)
-        while self._exit == false do
-            self.parallelManager:init()
-            if self._callFunction then
-                self._callFunction()
-                self._callFunction = nil
+    function this:execute()
+        while this._exit == false do
+            this.parallelManager:init()
+            if this._callFunction then
+                this._callFunction()
+                this._callFunction = nil
             end
         end
-        self.exit = false
+        this.exit = false
     end
 
     this.parallelManager:addFunction(this._execute)

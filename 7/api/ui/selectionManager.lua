@@ -53,15 +53,12 @@ function new()
             end
         end
     end
-    ---Handles kex events
+    ---Handles key events
     ---@param event event
     ---@return nil
     function this:keyEvent(event)
         if event.name == "key" then
-            if
-                self._currentSelectionGroup.listener and
-                    self._currentSelectionGroup:listener("key", "key", event.param1, event.param2) == false
-             then
+            if self._currentSelectionGroup.listener and self._currentSelectionGroup:listener("key", "key", event.param1, event.param2) == false then
                 return
             end
             if self.repeatItem:call() == false then
@@ -98,14 +95,7 @@ function new()
                         _select(self._currentSelectionGroup, "down", "key")
                     end
                 else
-                    if
-                        not self._currentSelectionGroup.listener or
-                            self._currentSelectionGroup:listener(
-                                "selection_reselect",
-                                "key",
-                                currentSelectionElement.element
-                            ) ~= false
-                     then
+                    if not self._currentSelectionGroup.listener or self._currentSelectionGroup:listener("selection_reselect", "key", currentSelectionElement.element) ~= false then
                         currentSelectionElement.element.mode = 3
                         if not currentSelectionElement.element._inAnimation then
                             currentSelectionElement.element:recalculate()
@@ -131,23 +121,23 @@ function new()
             end
         end
     end
-    this.mouseEvent = function(event, element)
-        if
-            (this._currentSelectionGroup.listener and
-                this._currentSelectionGroup:listener("mouse", "mouse", event) == false) or
-                event.name ~= "mouse_click"
-         then
+    ---Handles mouse events
+    ---@param event event
+    ---@param element element
+    ---@return nil
+    function this:mouseEvent(event, element)
+        if (self._currentSelectionGroup.listener and self._currentSelectionGroup:listener("mouse", "mouse", event) == false) or event.name ~= "mouse_click" then
             return
         end
         local currentElement = nil
-        if this._currentSelectionGroup.currentSelectionElement then
-            currentElement = this._currentSelectionGroup.currentSelectionElement.element
+        if self._currentSelectionGroup.currentSelectionElement then
+            currentElement = self._currentSelectionGroup.currentSelectionElement.element
         end
         if element then
-            for _, v in ipairs(this.selectionGroups) do
+            for _, v in ipairs(self.selectionGroups) do
                 local isManaging, managedSelectionElement = v:manageElement(element)
                 if isManaging then
-                    if v == this._currentSelectionGroup then
+                    if v == self._currentSelectionGroup then
                         if currentElement == element then
                             return
                         end
@@ -161,15 +151,7 @@ function new()
                             end
                             v.currentSelectionElement = managedSelectionElement
                         end
-                    elseif
-                        not this._currentSelectionGroup.listener or
-                            this._currentSelectionGroup:listener(
-                                "selection_lose_focus",
-                                "mouse",
-                                currentElement,
-                                element
-                            ) ~= false
-                     then
+                    elseif not self._currentSelectionGroup.listener or self._currentSelectionGroup:listener("selection_lose_focus", "mouse", currentElement, element) ~= false then
                         if currentElement and currentElement.mode == 3 then
                             currentElement.mode = 1
                             if not currentElement._inAnimation then
@@ -180,7 +162,7 @@ function new()
                         if v.listener then
                             v:listener("selection_get_focus", "mouse", currentElement, element)
                         end
-                        this._currentSelectionGroup = v
+                        self._currentSelectionGroup = v
                         if v.currentSelectionElement then
                             currentElement = v.currentSelectionElement.element
                         end
@@ -201,15 +183,9 @@ function new()
                     return
                 end
             end
-        elseif
-            this._currentSelectionGroup.currentSelectionElement and
-                this._currentSelectionGroup.currentSelectionElement.element.mode == 3
-         then
-            local currentElement = this._currentSelectionGroup.currentSelectionElement.element
-            if
-                not this._currentSelectionGroup.listener or
-                    this._currentSelectionGroup:listener("selection_lose_focus_mouse", currentElement, nil) ~= false
-             then
+        elseif self._currentSelectionGroup.currentSelectionElement and self._currentSelectionGroup.currentSelectionElement.element.mode == 3 then
+            local currentElement = self._currentSelectionGroup.currentSelectionElement.element
+            if not self._currentSelectionGroup.listener or self._currentSelectionGroup:listener("selection_lose_focus_mouse", currentElement, nil) ~= false then
                 currentElement.mode = 1
                 if not currentElement._inAnimation then
                     currentElement:recalculate()
@@ -218,20 +194,20 @@ function new()
             end
         end
     end
-    this.select = function(element, source)
+    ---Select an element and its corresponding group
+    ---@param element element
+    ---@param source string
+    function this:select(element, source)
         local currentElement = nil
-        if this._currentSelectionGroup.currentSelectionElement then
-            currentElement = this._currentSelectionGroup.currentSelectionElement.element
+        if self._currentSelectionGroup.currentSelectionElement then
+            currentElement = self._currentSelectionGroup.currentSelectionElement.element
         end
-        for _, v in ipairs(this.selectionGroups) do
+        for _, v in ipairs(self.selectionGroups) do
             local isManaging, managedSelectionElement = v:manageElement(element)
             if isManaging then
-                if v == this._currentSelectionGroup then
+                if v == self._currentSelectionGroup then
                     if currentElement == element then
-                        if
-                            not v.listener or
-                                v:listener("selection_reselect", source or "code", currentElement, element) ~= false
-                         then
+                        if not v.listener or v:listener("selection_reselect", source or "code", currentElement, element) ~= false then
                             if element.mode == 1 then
                                 element.mode = 3
                                 if not element._inAnimation then
@@ -240,10 +216,7 @@ function new()
                                 end
                             end
                         end
-                    elseif
-                        not v.listener or
-                            v:listener("selection_change", source or "code", currentElement, element) ~= false
-                     then
+                    elseif not v.listener or v:listener("selection_change", source or "code", currentElement, element) ~= false then
                         if currentElement and currentElement.mode == 3 then
                             currentElement.mode = 1
                             if not currentElement._inAnimation then
@@ -252,10 +225,7 @@ function new()
                             end
                         end
                         v.currentSelectionElement = managedSelectionElement
-                        if
-                            not v.listener or
-                                v:listener("selection_change", source or "code", currentElement, element) ~= false
-                         then
+                        if not v.listener or v:listener("selection_change", source or "code", currentElement, element) ~= false then
                             if element.mode == 1 then
                                 element.mode = 3
                                 if not element._inAnimation then
@@ -265,15 +235,7 @@ function new()
                             end
                         end
                     end
-                elseif
-                    not this._currentSelectionGroup.listener or
-                        this._currentSelectionGroup:listener(
-                            "selection_lose_focus",
-                            source or "code",
-                            currentElement,
-                            element
-                        ) ~= false
-                 then
+                elseif not self._currentSelectionGroup.listener or self._currentSelectionGroup:listener("selection_lose_focus", source or "code", currentElement, element) ~= false then
                     if currentElement and currentElement.mode == 3 then
                         currentElement.mode = 1
                         if not currentElement._inAnimation then
@@ -284,7 +246,7 @@ function new()
                     if v.listener then
                         v:listener("selection_get_focus", source or "code", currentElement, element)
                     end
-                    this._currentSelectionGroup = v
+                    self._currentSelectionGroup = v
                     if v.currentSelectionElement then
                         currentElement = v.currentSelectionElement.element
                     end
@@ -298,10 +260,7 @@ function new()
                                 end
                             end
                         end
-                    elseif
-                        not v.listener or
-                            v:listener("selection_change", source or "code", currentElement, element) ~= false
-                     then
+                    elseif not v.listener or v:listener("selection_change", source or "code", currentElement, element) ~= false then
                         if currentElement and currentElement.mode == 3 then
                             currentElement.mode = 1
                             if not currentElement._inAnimation then
@@ -325,7 +284,11 @@ function new()
     end
     return this
 end
----
+---Select an element by direction
+---@param selectionGroup selectionGroup
+---@param direction string
+---@param source string
+---@return nil
 function _select(selectionGroup, direction, source)
     local currentSelectionElement = selectionGroup.currentSelectionElement
     local newSelection = currentSelectionElement[direction]
@@ -333,15 +296,7 @@ function _select(selectionGroup, direction, source)
         newSelection = newSelection[direction]
     end
     if newSelection then
-        if
-            not selectionGroup.listener or
-                selectionGroup:listener(
-                    "selection_change",
-                    source,
-                    currentSelectionElement.element,
-                    newSelection.element
-                ) ~= false
-         then
+        if not selectionGroup.listener or selectionGroup:listener("selection_change", source, currentSelectionElement.element, newSelection.element) ~= false then
             if currentSelectionElement.element.mode > 2 then
                 currentSelectionElement.element.mode = 1
                 if not currentSelectionElement.element._inAnimation then
@@ -358,6 +313,12 @@ function _select(selectionGroup, direction, source)
         selectionGroup.currentSelectionElement = newSelection
     end
 end
+---Switch the selection in a manager
+---@param selectionManager selectionManager
+---@param selectionGroup selectionGroup
+---@param source string
+---@param ... any
+---@return nil
 function _switch(selectionManager, selectionGroup, source, ...)
     if selectionManager._currentSelectionGroup == selectionGroup or selectionGroup == nil then
         return
@@ -370,17 +331,7 @@ function _switch(selectionManager, selectionGroup, source, ...)
     if selectionGroup.currentSelectionElement then
         newElement = selectionGroup.currentSelectionElement.element
     end
-    if
-        selectionManager._currentSelectionGroup and
-            (not selectionManager._currentSelectionGroup.listener or
-                selectionManager._currentSelectionGroup:listener(
-                    "selection_lose_focus",
-                    source,
-                    currentElement,
-                    newElement,
-                    ...
-                ) ~= false)
-     then
+    if selectionManager._currentSelectionGroup and (not selectionManager._currentSelectionGroup.listener or selectionManager._currentSelectionGroup:listener("selection_lose_focus", source, currentElement, newElement, ...) ~= false) then
         if currentElement and currentElement.mode > 2 then
             currentElement.mode = 1
             if not currentElement._inAnimation then
@@ -389,10 +340,7 @@ function _switch(selectionManager, selectionGroup, source, ...)
             end
         end
     end
-    if
-        not selectionGroup.listener or
-            selectionGroup:listener("selection_get_focus", source, currentElement, newElement, ...) ~= false
-     then
+    if not selectionGroup.listener or selectionGroup:listener("selection_get_focus", source, currentElement, newElement, ...) ~= false then
         if newElement and (newElement.mode == 1 or newElement.mode == 4) then
             newElement.mode = 3
             if not newElement._inAnimation then

@@ -1,3 +1,4 @@
+---@return style
 function new(path)
     ---@class style
     local this = {}
@@ -576,7 +577,7 @@ function new(path)
         this,
         {
             __call = function(t, type, arguments)
-                return t.getStyle(type, arguments)
+                return t:getStyle(type, arguments)
             end
         }
     )

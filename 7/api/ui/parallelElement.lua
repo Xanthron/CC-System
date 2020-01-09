@@ -1,6 +1,6 @@
 local _parallelElement_metadata = {
     __call = function(self, ...)
-        return self.init()
+        return self:init(...)
     end
 }
 ---Create a new parallelElement
@@ -19,10 +19,10 @@ function new(caller, func, data)
     ---@type function
     this._func = func
     ---Call the given function
-    return nil
-    function this:init(self)
-        if self._func(self.data) == false then
-            self.caller:removeFunction(self)
+    ---@return nil
+    function this.init()
+        if this._func(this.data) == false then
+            this.caller:removeFunction(this)
         end
     end
     setmetatable(this, _padding_metatable)
