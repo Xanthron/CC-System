@@ -10,7 +10,7 @@
 function new(parent, text, style, x, y, w, h)
     ---A simple label without function
     ---@class label:element
-    local this = ui.element.new(parent, x, y, w, h)
+    local this = ui.element.new(parent, "label", x, y, w, h)
 
     ---@type style.label
     this.style = style

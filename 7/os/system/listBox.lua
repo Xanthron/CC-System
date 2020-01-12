@@ -42,24 +42,15 @@ local function getVertical(buttons, posY, border, anchor)
     end
     return y, h
 end
-local function clearListBox(listBox)
-    local container = listBox:getContainer()
-    for i = 1, #container._elements do
-        table.remove(container._elements, 1)
-    end
-    for i = 1, #listBox.selectionGroup.selectionElements do
-        listBox.selectionGroup.selectionElements[i] = nil
-    end
-end
 local function setListBox(manager, listBox, buttons, indexes, x, y, w, h)
     listBox:setGlobalRect(x, y, w, h)
     local currentButtons = buttons
     for i = 1, #indexes do
         currentButtons = currentButtons[indexes[i]]
     end
-    clearListBox(listBox)
+    listBox:clear()
     local container = listBox:getContainer()
-    local selectionElements = {}
+    local elements = {}
     if #indexes > 0 then
         local element = ui.button.new(container, " <<<", nil, args.listButtonStyle, args.x + listBoxLeft, args.y + listBoxTop, args.w - listBoxLeft - listBoxRight, 1)
         element._onClick = function(event)
@@ -80,14 +71,14 @@ local function setListBox(manager, listBox, buttons, indexes, x, y, w, h)
                     y, h = getVertical(button, y, borderH + math.min(#indexes, 1), args.anchor)
                     setListBox(manager, listBox, buttons, indexes, x, y, w, h)
                     if select then
-                        manager.selectionManager:select(listBox.selectionGroup.currentSelectionElement.element)
+                        manager.selectionManager:select(listBox.selectionGroup.current, "code", 3)
                     end
                     manager:recalculate()
                     manager:draw()
                 end
             )
         end
-        table.insert(selectionElements, listBox.selectionGroup:addNewSelectionElement(element))
+        table.insert(elements, element)
     end
     for i = 1, #currentButtons do
         local button = currentButtons[i]
@@ -108,17 +99,17 @@ local function setListBox(manager, listBox, buttons, indexes, x, y, w, h)
                         y, h = getVertical(button, y, borderH + 1, args.anchor)
                         setListBox(manager, listBox, buttons, indexes, x, y, w, h)
                         if select then
-                            manager.selectionManager:select(listBox.selectionGroup.currentSelectionElement.element)
+                            manager.selectionManager:select(listBox.selectionGroup.current)
                         end
                         manager:recalculate()
                         manager:draw()
                     end
                 )
             end
-            table.insert(selectionElements, listBox.selectionGroup:addNewSelectionElement(element))
+            table.insert(elements, element)
         else
             if button == "-" then
-                local element = ui.element.new(container, x, y, w, h)
+                local element = ui.element.new(container, "image", x, y, w, h)
                 for i = 1, w do
                     element.buffer.text[i] = "-"
                     element.buffer.textColor[i] = args.listButtonStyle.nTheme.tC
@@ -133,7 +124,7 @@ local function setListBox(manager, listBox, buttons, indexes, x, y, w, h)
                     select = (event.name ~= "mouse_up")
                     manager:exit()
                 end
-                table.insert(selectionElements, listBox.selectionGroup:addNewSelectionElement(element))
+                table.insert(elements, element)
                 if button:sub(1, 1) == "*" then
                     element.text = button:sub(2)
                     element.mode = 2
@@ -142,13 +133,12 @@ local function setListBox(manager, listBox, buttons, indexes, x, y, w, h)
             end
         end
     end
-    for i, value in ipairs(selectionElements) do
-        selectionElements[i].up = selectionElements[i - 1]
-        selectionElements[i].down = selectionElements[i + 1]
+    for i, value in ipairs(elements) do
+        listBox.selectionGroup:addElement(elements[i], nil, elements[i - 1], nil, elements[i + 1])
     end
     listBox:resetLayout()
     listBox:recalculate()
-    listBox.selectionGroup.currentSelectionElement = selectionElements[1]
+    listBox.selectionGroup.current = elements[1]
 end
 if not args.w then
     args.x, args.w = getHorizontal(args.buttons, args.x, borderW, args.anchor)
@@ -168,7 +158,7 @@ function listBox.selectionGroup:listener(name, source, ...)
         local key = keys.getName(...)
         if key == "tab" or key == "e" or key == "q" then
             select = true
-            manager.exit()
+            manager:exit()
         end
     elseif name == "mouse" then
         local event = ...
@@ -181,12 +171,12 @@ function listBox.selectionGroup:listener(name, source, ...)
         end
     end
 end
-manager.selectionManager:addSelectionGroup(listBox.selectionGroup)
-if args.select then
-    manager.selectionManager:setCurrentSelectionGroup(listBox.selectionGroup, "code")
-else
-    manager.selectionManager._currentSelectionGroup = listBox.selectionGroup
+manager.selectionManager:addGroup(listBox.selectionGroup)
+local mode = 3
+if select == false then
+    mode = 1
 end
+manager.selectionManager:select(listBox.selectionGroup, "code", mode)
 manager:draw()
 manager:execute()
 local name = args.buttons[indexes[1]]

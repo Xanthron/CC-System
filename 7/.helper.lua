@@ -95,21 +95,22 @@ ui.button = {}
 function ui.button.new(parent, text, func, style, x, y, w, h)
 end
 
-ui.elemen = {}
+ui.element = {}
 ---Create a new element
 ---@param parent element
 ---@param x integer
 ---@param y integer
 ---@param w integer
 ---@param h integer
+---@param name string
 ---@return element
-function ui.element.new(parent, x, y, w, h)
+function ui.element.new(parent, name, x, y, w, h)
 end
 
-ui.elemen = {}
+ui.event = {}
 ---Create a new event container
 ---@return event
-function ui.element.new()
+function ui.event.new()
 end
 
 ui.inputField = {}
@@ -207,6 +208,7 @@ ui.scrollView = {}
 ---@param y integer
 ---@param w integer
 ---@param h integer
+---@return scrollView
 function ui.scrollView.new(parent, label, mode, style, x, y, w, h)
 end
 
@@ -304,3 +306,8 @@ ui.uiManager = {}
 ---@return uiManager
 function ui.uiManager.new(x, y, w, h)
 end
+
+---@class selectElement
+local select = {}
+---@type element
+select.left, select.up, select.right, select.down = nil

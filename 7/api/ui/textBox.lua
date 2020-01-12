@@ -9,11 +9,11 @@
 ---@return textBox
 function new(parent, label, text, style, x, y, w, h)
     ---@class textBox:element
-    local this = ui.element.new(parent, x, y, w, h)
+    local this = ui.element.new(parent, "textBox", x, y, w, h)
 
     ---@type padding
     this.stylePadding = ui.padding.new(#style.nTheme.b[4], #style.nTheme.b[2], #style.nTheme.b[6], #style.nTheme.b[8])
-    this._elements[1] = ui.element.new(this, this.stylePadding:getPaddedRect(this.buffer.rect:getUnpacked()))
+    this._elements[1] = ui.element.new(this, "container", this.stylePadding:getPaddedRect(this.buffer.rect:getUnpacked()))
     this._elements[1]._elements[1] = ui.label.new(this, text, style.text, this._elements[1]:getGlobalRect())
     local slideWidth = #style.slider.nTheme.handleL
     this._elements[2] = ui.slider.new(this, nil, 1, 0, this._elements[1]._elements[1]:getHeight(), this._elements[1]:getHeight(), style.slider, x + w - math.max(math.ceil((this.stylePadding.right + slideWidth) / 2), slideWidth), y + this.stylePadding.top, slideWidth, h - this.stylePadding.top - this.stylePadding.bottom)
@@ -22,7 +22,7 @@ function new(parent, label, text, style, x, y, w, h)
     ---@type style.textBox
     this.style = style
     ---@type selectionGroup
-    this.selectionGroup = ui.selectionGroup.new(nil, nil, this._selectionGroupListener)
+    this.selectionGroup = ui.selectionGroup.new(nil, nil)
 
     ---Recalculate the buffer of this element
     ---@return nil
@@ -56,18 +56,18 @@ function new(parent, label, text, style, x, y, w, h)
     ---@return nil
     function this._onValueChange(value)
         local maxMove = 0
-        local label = self._elements[1]._elements[1]
+        local label = this._elements[1]._elements[1]
         if value > 0 then
-            maxMove = math.max(0, math.min(value, label:getLocalPosY() + label:getHeight() - (this.getHeight() - this.stylePadding.bottom + 1)))
+            maxMove = math.max(0, math.min(value, label:getLocalPosY() + label:getHeight() - (this:getHeight() - this.stylePadding.bottom + 1)))
         elseif value < 0 then
-            maxMove = math.min(0, math.max(value, label:getLocalPosY() - self.stylePadding.top - 1))
+            maxMove = math.min(0, math.max(value, label:getLocalPosY() - this.stylePadding.top - 1))
         end
         if maxMove ~= 0 then
-            local slider = self._elements[2]
+            local slider = this._elements[2]
             label:setLocalRect(nil, -maxMove, nil, nil)
             slider.value = slider.value + maxMove
             slider:recalculate()
-            self:repaint("this", self.buffer.rect:getUnpacked())
+            this:repaint("this", this.buffer.rect:getUnpacked())
         end
     end
     ---Assigned function for every event except events dedicated to the mouse
@@ -75,7 +75,7 @@ function new(parent, label, text, style, x, y, w, h)
     ---@return element|nil
     function this:_doNormalEvent(event)
         if self.mode == 3 and event.name == "mouse_scroll" then
-            self:_onValueChange(event.param1)
+            self._onValueChange(event.param1)
         end
     end
     ---Assigned function for every event dedicated to the mouse
@@ -89,7 +89,7 @@ function new(parent, label, text, style, x, y, w, h)
         if event.name == "mouse_click" and self.mode ~= 3 then
             x, y, w, h = ui.rect.overlaps(x, y, w, h, self.buffer.rect:getUnpacked())
             if event.param2 >= x and event.param2 < x + w and event.param3 >= y and event.param3 < y + h then
-                self:getManager().selectionManager:setCurrentSelectionGroup(self.selectionGroup, "mouse")
+                self:getManager().selectionManager:selct(self.selectionGroup, "mouse", 1)
                 return self
             end
         end
@@ -125,12 +125,12 @@ function new(parent, label, text, style, x, y, w, h)
             local key = ...
             if key == 200 or key == 17 then
                 if this._elements[2].repeatItem:call() then
-                    this:_onValueChange(-1)
+                    this._onValueChange(-1)
                 end
                 return false
             elseif key == 208 or key == 31 then
                 if this._elements[2].repeatItem:call() then
-                    this:_onValueChange(1)
+                    this._onValueChange(1)
                 end
                 return false
             end
@@ -141,15 +141,15 @@ function new(parent, label, text, style, x, y, w, h)
             if newElement == nil and source == "mouse" then
                 return false
             else
-                this.mode = 1
-                this:recalculate()
-                this:repaint("this", x, y, w, h)
+                this:changeMode(1)
             end
         elseif eventName == "selection_get_focus" then
-            this.mode = 3
-            this:recalculate()
-            this:repaint("this", x, y, w, h)
-            if source == "mouse" then
+            local currentElement, newElement = ...
+            this:changeMode(3)
+            if newElement == this then
+                if source ~= "mouse" then
+                    self.current:changeMode(3)
+                end
                 return false
             end
         elseif eventName == "selection_change" then
@@ -161,7 +161,7 @@ function new(parent, label, text, style, x, y, w, h)
     end
 
     ui.buffer.fill(this._elements[1].buffer, " ", this.style.nTheme.sTC, this.style.nTheme.sTC)
-    this.selectionGroup:addNewSelectionElement(this._elements[2])
+    this.selectionGroup:addElement(this._elements[2])
     this._elements[2]._onValueChange = this._onValueChange
     this:recalculate()
 

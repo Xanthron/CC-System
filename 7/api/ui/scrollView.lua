@@ -8,7 +8,7 @@
 ---@param h integer
 function new(parent, label, mode, style, x, y, w, h)
     ---@class scrollView:element
-    local this = ui.element.new(parent, x, y, w, h)
+    local this = ui.element.new(parent, "scrollView", x, y, w, h)
 
     ---@type string
     this.label = label
@@ -16,8 +16,8 @@ function new(parent, label, mode, style, x, y, w, h)
     this.style = style
     ---@type padding
     this.stylePadding = ui.padding.new(#style.nTheme.b[4], #style.nTheme.b[2], #style.nTheme.b[5], #style.nTheme.b[7])
-    this._elements[1] = ui.element.new(this, this.stylePadding:getPaddedRect(this.buffer.rect:getUnpacked()))
-    this._elements[1]._elements[1] = ui.element.new(this._elements[1], this.stylePadding:getPaddedRect(this.buffer.rect:getUnpacked()))
+    this._elements[1] = ui.element.new(this, "container", this.stylePadding:getPaddedRect(this.buffer.rect:getUnpacked()))
+    this._elements[1]._elements[1] = ui.element.new(this._elements[1], "container", this.stylePadding:getPaddedRect(this.buffer.rect:getUnpacked()))
     if mode == 1 or mode == 3 then
         local slideWidth = #style.sliderV.nTheme.handleL
         this._elements[2] = ui.slider.new(this, nil, 1, 0, this._elements[1]:getHeight(), this._elements[1]._elements[1]:getHeight(), style.sliderV, x + w - math.max(math.ceil((this.stylePadding.right + slideWidth) / 2), slideWidth), y + this.stylePadding.top, slideWidth, h - this.stylePadding.top - this.stylePadding.bottom)
@@ -27,27 +27,30 @@ function new(parent, label, mode, style, x, y, w, h)
         this._elements[3] = ui.slider.new(this, nil, 2, 0, this._elements[1]:getWidth(), this._elements[1]._elements[1]:getWidth(), style.sliderH, x + this.stylePadding.left, y + h - math.max(math.ceil((this.stylePadding.bottom + slideHeight) / 2), slideHeight), w - this.stylePadding.left - this.stylePadding.right, slideHeight)
     end
     ---@type selectionGroup
-    this.selectionGroup = ui.selectionGroup.new(nil, nil, this._selectionGroupListener)
+    this.selectionGroup = ui.selectionGroup.new()
 
     ---Get the container
     ---@return nil
     function this:getContainer()
         return self._elements[1]._elements[1]
     end
-    ---Resize container based on elements
+    ---Resize container based on elements.
     ---@return nil
-    this.resizeContainer = function()
-        local minX, minY, maxX, maxY = 10 ^ 10 ^ 10, 10 ^ 10 ^ 10, 0, 0
-        for index, value in ipairs(this._elements[1]._elements[1]._elements) do
-            if value.isVisible == true then
-                x, y, w, h = value:getGlobalRect()
+    function this:resizeContainer()
+        local container = self:getContainer()
+        local minX, minY, maxX, maxY = nil, nil, 0, 0
+        for _, v in ipairs(container._elements) do
+            if v.isVisible == true then
+                x, y, w, h = v:getGlobalRect()
                 minX = math.min(minX or x, x)
                 minY = math.min(minY or y, y)
                 maxX = math.max(maxX, x + w)
                 maxY = math.max(maxY, y + h)
             end
         end
-        this._elements[1]._elements[1].buffer.rect:set(minX, minY, maxX - minX, maxY - minY)
+        if minX then
+            container.buffer.rect:set(minX, minY, maxX - minX, maxY - minY)
+        end
     end
     ---Reset controlling elements layout
     ---@return nil
@@ -124,14 +127,14 @@ function new(parent, label, mode, style, x, y, w, h)
     ---Change vertical scroll by value
     ---@param valueY integer
     ---@return nil
-    function this:_onValueChangeVertical(valueY)
-        self:_onValueChange(nil, valueY)
+    function this._onValueChangeVertical(valueY)
+        this:_onValueChange(nil, valueY)
     end
     ---Change horizontal scroll by value
     ---@param valueX integer
     ---@return nil
-    function this:_onValueChangeHorizontal(valueX)
-        self:_onValueChange(valueX, nil)
+    function this._onValueChangeHorizontal(valueX)
+        this:_onValueChange(valueX, nil)
     end
     ---Assigned function for every event except events dedicated to the mouse
     ---@param event event
@@ -156,7 +159,7 @@ function new(parent, label, mode, style, x, y, w, h)
         if event.name == "mouse_click" and self.mode ~= 3 then
             x, y, w, h = ui.rect.overlaps(x, y, w, h, self.buffer.rect:getUnpacked())
             if event.param2 >= x and event.param2 < x + w and event.param3 >= y and event.param3 < y + h then
-                self:getManager().selectionManager:setCurrentSelectionGroup(self.selectionGroup, "mouse")
+                self:getManager().selectionManager:select(self.selectionGroup, "mouse", 3)
                 return self
             end
         end
@@ -190,47 +193,25 @@ function new(parent, label, mode, style, x, y, w, h)
     function this.selectionGroup:listener(eventName, source, ...)
         if eventName == "selection_lose_focus" then
             local currentElement, newElement = ...
-            if newElement == nil and source == "mouse" then
-                return false
-            else
-                this.mode = 1
-                this:recalculate()
-                this:repaint("this")
-            end
+            this:changeMode(1)
         elseif eventName == "selection_get_focus" then
-            if self.currentSelectionElement == nil then
-                local index = 0
-                if this._elements[2] then
-                    index = index + 1
-                end
-                if this._elements[3] then
-                    index = index + 1
-                end
-                if #self.selectionElements > index then
-                    local selectionElement = self.selectionElements[index + 1]
-                    local element = selectionElement.element
-                    self.currentSelectionElement = selectionElement
-                    if self:listener("selection_get_focus", "key", nil, element) ~= false then
-                        if element and element.mode ~= 3 then
-                            element.mode = 3
-                            if not element._inAnimation then
-                                element:recalculate()
-                                element:repaint("this")
-                            end
-                        end
-                        return false
-                    end
-                end
-            end
             local currentElement, newElement = ...
-            if newElement and (source == "key" or source == "code") then
-                this:focusElement(newElement)
-            end
-            this.mode = 3
-            this:recalculate()
-            this:repaint("this")
-            if source == "mouse" then
+            if newElement == this or newElement == this._elements[2] or newElement == this._elements[3] then
+                newElement = self.current or this:getContainer()._elements[1]
+                local mode = 3
+                if source == "mouse" then
+                    mode = 1
+                end
+                if newElement then
+                    --this:getManager().selectionManager:select(newElement, source, mode)
+                elseif currentElement then
+                    currentElement:changeMode(1)
+                end
                 return false
+            end
+            this:changeMode(3)
+            if newElement and source ~= "mouse" then
+                this:focusElement(newElement)
             end
         elseif eventName == "selection_reselect" then
             if source == "key" then
@@ -238,17 +219,32 @@ function new(parent, label, mode, style, x, y, w, h)
                 this:focusElement(element)
             end
         elseif eventName == "selection_change" then
+            ---@type element
             local currentElement, newElement = ...
             if newElement == this or newElement == this._elements[2] or newElement == this._elements[3] then
-                if currentElement and currentElement.mode == 3 then
-                    currentElement.mode = 1
-                    currentElement:recalculate()
-                    currentElement:repaint("this")
-                end
+                currentElement:changeMode(1)
                 return false
-            elseif newElement and (source == "key" or source == "code") then
+            elseif newElement and source ~= "mouse" then
                 this:focusElement(newElement)
             end
+        end
+    end
+
+    ---Clears all elements in container and in selection
+    ---@return nil
+    function this:clear()
+        local container = self:getContainer()
+        for i = 1, #container._elements do
+            container._elements[1]:setParent(nil)
+        end
+        local index = 2
+        for i = 2, 3 do
+            if self._elements[i] then
+                index = index + 1
+            end
+        end
+        for i = index, #self.selectionGroup.elements do
+            self.selectionGroup.elements[i] = nil
         end
     end
     ---Set an containing element to focus
@@ -262,13 +258,14 @@ function new(parent, label, mode, style, x, y, w, h)
         self:_onValueChange(eX - x - addW, eY - y - addH)
     end
 
+    this.selectionGroup:addElement(this)
     if this._elements[2] then
         this._elements[2]._onValueChange = this._onValueChangeVertical
-        this.selectionGroup:addNewSelectionElement(this._elements[2])
+        this.selectionGroup:addElement(this._elements[2])
     end
     if this._elements[3] then
         this._elements[3]._onValueChange = this._onValueChangeHorizontal
-        this.selectionGroup:addNewSelectionElement(this._elements[3])
+        this.selectionGroup:addElement(this._elements[3])
     end
     this:recalculate()
 

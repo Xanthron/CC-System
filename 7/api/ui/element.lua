@@ -4,11 +4,15 @@
 ---@param y integer
 ---@param w integer
 ---@param h integer
+---@param T string
 ---@return element
-function new(parent, x, y, w, h)
+function new(parent, name, x, y, w, h)
     ---Base of every ui element
-    ---@class element
-    local this = {}
+    ---@class element:class
+    local this = class.new("element")
+    if not name == false then
+        this:_addType(name)
+    end
 
     ---@type boolean
     this.isVisible = true
@@ -22,6 +26,22 @@ function new(parent, x, y, w, h)
     this._parent = nil
     ---@type padding
     this.maskPadding = nil
+
+    ---@type selectElement
+    this.select = {}
+
+    ---Changes the visual appearance of an element by changing its mode
+    ---@param self element
+    ---@return nil
+    function this:changeMode(mode, overwriteDeselection)
+        if mode > 0 and self.mode ~= mode and (overwriteDeselection or self.mode ~= 2) then
+            self.mode = mode
+            if not self._inAnimation then
+                self:recalculate()
+                self:repaint("this")
+            end
+        end
+    end
 
     ---Set the parent of an element
     ---@param element element

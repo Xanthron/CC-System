@@ -1,123 +1,150 @@
----Create a new selectionManager
----@return selectionManager
 function new()
-    ---Container and manager of selectionGroups
-    ---@class selectionManager
-    local this = {}
+    ---@class selectionManager:class
+    local this = class.new("selectionManager")
 
-    ---@type selectionGroup
-    this._currentSelectionGroup = nil
     ---@type selectionGroup[]
-    this.selectionGroups = {}
+    this.groups = {}
+    ---@type selectionGroup
+    this.current = nil
     ---@type repeatItem
     this.repeatItem = ui.repeatItem.new(0.8, 0.1, 0.8)
 
-    ---Set current selection group
-    ---@param selectionGroup selectionGroup
+    ---Select a group by passing it or any element of it. If wanted the element gets selected. --TODO add to listener description (Any current value gets set)
+    ---@param var1 element|selectionGroup
+    ---@param mode "0"|"1"|"3"
     ---@param source string
-    ---@param ... any
     ---@return nil
-    function this:setCurrentSelectionGroup(selectionGroup, source, ...)
-        _switch(self, selectionGroup, source, ...)
-    end
-    ---Get current selection group
-    ---@return selectionGroup
-    function this:getCurrentSelectionGroup()
-        return self._currentSelectionGroup
-    end
-    ---Add a selectionGroup to this container
-    ---@param selectionGroup selectionGroup
-    ---@return nil
-    function this:addSelectionGroup(selectionGroup)
-        table.insert(self.selectionGroups, selectionGroup)
-    end
-    ---Create and add a new selectionGroup to this container
-    ---@param previous selectionGroup
-    ---@param next selectionGroup
-    ---@param listener function
-    ---@return selectionGroup
-    function this:addNewSelectionGroup(previous, next, listener)
-        local selectionGroup = ui.selectionGroup.new(previous, next, listener)
-        table.insert(self.selectionGroups, selectionGroup)
-        return selectionGroup
-    end
-    ---Remove a selectionGroup
-    ---@param selectionGroup selectionGroup
-    ---@return nil
-    function this:removeSelectionGroup(selectionGroup)
-        for index, value in ipairs(self.selectionGroups) do
-            if value == selectionGroup then
-                self._currentSelectionGroup = selectionGroup.previous or selectionGroup.next
-                table.remove(self.selectionGroups, index)
+    function this:select(var1, source, mode)
+        local newElement = var1.current
+        ---@type element
+        local currentElement
+        if var1:isClass("element") then
+            ---@type selectionGroup
+            local newGroup
+            for i = 1, #self.groups do
+                local group = self.groups[i]
+                if group:hasElement(var1) then
+                    newGroup = group
+                    break
+                end
+            end
+            if newGroup and newGroup == self.current and newGroup.current ~= var1 then
+                if newGroup:callListener("selection_change", source, newGroup.current, var1) then
+                    newGroup.current:changeMode(1)
+                    newGroup.current = var1
+                    newGroup.current:changeMode(mode)
+                end
                 return
+            else
+                newElement = var1
+                var1 = newGroup
+            end
+        end
+        if self.current == var1 then
+            local current = var1.current
+            if var1:callListener("selection_reselect", source, current) then
+                current:changeMode(mode)
+            end
+        else
+            if self.current then
+                currentElement = self.current.current
+            end
+            if (not self.current or self.current:callListener("selection_lose_focus", source, currentElement, newElement)) and var1:callListener("selection_get_focus", source, currentElement, newElement) then
+                if currentElement then
+                    currentElement:changeMode(1)
+                end
+                self.current = var1
+                self.current.current = newElement
+                newElement:changeMode(mode)
             end
         end
     end
+
+    ---Deselects the current selected element
+    ---@param source string
+    ---@return nil
+    function this:deselect(source)
+        if self.current:callListener("selection_lose_focus", source, self.current.current) then
+            self.current.current:changeMode(1)
+        end
+    end
+
     ---Handles key events
     ---@param event event
     ---@return nil
     function this:keyEvent(event)
         if event.name == "key" then
-            if self._currentSelectionGroup.listener and self._currentSelectionGroup:listener("key", "key", event.param1, event.param2) == false then
+            if not self.current or not self.current:callListener("key", "key", event.param1, event.param2) or self.repeatItem:call() == false then
                 return
             end
-            if self.repeatItem:call() == false then
-                return
-            end
-            if not self._currentSelectionGroup then
-                return
-            end
-            local currentSelectionElement = self._currentSelectionGroup.currentSelectionElement
-            local currentElement = nil
-            if self._currentSelectionGroup.currentSelectionElement then
-                currentElement = self._currentSelectionGroup.currentSelectionElement.element
-            end
-            if self._currentSelectionGroup.currentSelectionElement then
-                currentElement = self._currentSelectionGroup.currentSelectionElement.element
-            end
-            if currentSelectionElement then
-                if currentElement.mode == 3 or currentElement.mode == 2 then
+
+            local currentGroup = self.current
+            local currentElement = self.current.current
+            if currentElement then
+                if currentElement.mode > 1 then
+                    ---@type string
+                    local direction
                     if event.param1 == 15 or event.param1 == 18 then
-                        if self._currentSelectionGroup.next then
-                            _switch(self, self._currentSelectionGroup.next, "key", event.param1)
+                        if currentGroup.next then
+                            self:select(currentGroup.next, "key", 3)
                         end
+                        return
                     elseif event.param1 == 16 then
-                        if self._currentSelectionGroup.previous then
-                            _switch(self, self._currentSelectionGroup.previous, "key", event.param1)
+                        if currentGroup.previous then
+                            self:select(currentGroup.previous, "key", 3)
                         end
+                        return
                     elseif event.param1 == 203 or event.param1 == 30 then
-                        _select(self._currentSelectionGroup, "left", "key")
+                        direction = "left"
                     elseif event.param1 == 200 or event.param1 == 17 then
-                        _select(self._currentSelectionGroup, "up", "key")
+                        direction = "up"
                     elseif event.param1 == 205 or event.param1 == 32 then
-                        _select(self._currentSelectionGroup, "right", "key")
+                        direction = "right"
                     elseif event.param1 == 208 or event.param1 == 31 then
-                        _select(self._currentSelectionGroup, "down", "key")
+                        direction = "down"
+                    end
+                    if direction then
+                        ---@type element|selectionGroup
+                        local newElement = currentElement.select[direction]
+                        if newElement and newElement:isType("selectionGroup") then
+                            newElement = newElement.current
+                        end
+                        while newElement and newElement.mode == 2 do
+                            newElement = newElement.select[direction]
+                            if newElement and newElement:isType("selectionGroup") then
+                                newElement = newElement.current
+                            end
+                        end
+                        if newElement then
+                            if newElement:isType("selectionGroup") or not currentGroup:hasElement(newElement) then
+                                self:select(newElement, "key", 3)
+                            elseif currentGroup:callListener("selection_change", "key", currentElement, newElement) then
+                                currentElement:changeMode(1)
+                                currentGroup.current = newElement
+                                newElement:changeMode(3)
+                            end
+                        end
                     end
                 else
-                    if not self._currentSelectionGroup.listener or self._currentSelectionGroup:listener("selection_reselect", "key", currentSelectionElement.element) ~= false then
-                        currentSelectionElement.element.mode = 3
-                        if not currentSelectionElement.element._inAnimation then
-                            currentSelectionElement.element:recalculate()
-                            currentSelectionElement.element:repaint("this")
-                        end
+                    if currentGroup:callListener("selection_reselect", "key", currentElement) then
+                        currentGroup.current:changeMode(3)
                     end
                 end
             else
                 if event.param1 == 15 or event.param1 == 18 then
-                    if self._currentSelectionGroup.next then
-                        _switch(self, self._currentSelectionGroup.next, "key", event.param1)
+                    if currentGroup.next then
+                        self:select(currentGroup.next, "key", 3)
                     end
                 elseif event.param1 == 16 then
-                    if self._currentSelectionGroup.previous then
-                        _switch(self, self._currentSelectionGroup.previous, "key", event.param1)
+                    if currentGroup.previous then
+                        self:select(currentGroup.previous, "key", 3)
                     end
                 end
             end
         elseif event.name == "key_up" then
             self.repeatItem:reset()
-            if self._currentSelectionGroup.listener then
-                self._currentSelectionGroup:listener("key_up", "key", event.param1)
+            if self.current then
+                self.current:callListener("key_up", "key", event.param1)
             end
         end
     end
@@ -126,228 +153,44 @@ function new()
     ---@param element element
     ---@return nil
     function this:mouseEvent(event, element)
-        if (self._currentSelectionGroup.listener and self._currentSelectionGroup:listener("mouse", "mouse", event) == false) or event.name ~= "mouse_click" then
+        if not self.current or not self.current:callListener("mouse", "mouse", event) or event.name ~= "mouse_click" then
             return
         end
-        local currentElement = nil
-        if self._currentSelectionGroup.currentSelectionElement then
-            currentElement = self._currentSelectionGroup.currentSelectionElement.element
-        end
         if element then
-            for _, v in ipairs(self.selectionGroups) do
-                local isManaging, managedSelectionElement = v:manageElement(element)
-                if isManaging then
-                    if v == self._currentSelectionGroup then
-                        if currentElement == element then
-                            return
-                        end
-                        if not v.listener or v:listener("selection_change", "mouse", currentElement, element) ~= false then
-                            if currentElement and currentElement.mode == 3 then
-                                currentElement.mode = 1
-                                if not currentElement._inAnimation then
-                                    currentElement:recalculate()
-                                    currentElement:repaint("this")
-                                end
-                            end
-                            v.currentSelectionElement = managedSelectionElement
-                        end
-                    elseif not self._currentSelectionGroup.listener or self._currentSelectionGroup:listener("selection_lose_focus", "mouse", currentElement, element) ~= false then
-                        if currentElement and currentElement.mode == 3 then
-                            currentElement.mode = 1
-                            if not currentElement._inAnimation then
-                                currentElement:recalculate()
-                                currentElement:repaint("this")
-                            end
-                        end
-                        if v.listener then
-                            v:listener("selection_get_focus", "mouse", currentElement, element)
-                        end
-                        self._currentSelectionGroup = v
-                        if v.currentSelectionElement then
-                            currentElement = v.currentSelectionElement.element
-                        end
-                        if currentElement == element then
-                            return
-                        end
-                        if not v.listener or v:listener("selection_change", "mouse", currentElement, element) ~= false then
-                            if currentElement and currentElement.mode == 3 then
-                                currentElement.mode = 1
-                                if not currentElement._inAnimation then
-                                    currentElement:recalculate()
-                                    currentElement:repaint("this")
-                                end
-                            end
-                            v.currentSelectionElement = managedSelectionElement
-                        end
-                    end
-                    return
-                end
-            end
-        elseif self._currentSelectionGroup.currentSelectionElement and self._currentSelectionGroup.currentSelectionElement.element.mode == 3 then
-            local currentElement = self._currentSelectionGroup.currentSelectionElement.element
-            if not self._currentSelectionGroup.listener or self._currentSelectionGroup:listener("selection_lose_focus_mouse", currentElement, nil) ~= false then
-                currentElement.mode = 1
-                if not currentElement._inAnimation then
-                    currentElement:recalculate()
-                    currentElement:repaint("this")
-                end
-            end
+            self:select(element, "mouse", 0)
+        else
+            self:deselect("mouse")
         end
     end
-    ---Select an element and its corresponding group
-    ---@param element element
-    ---@param source string
-    function this:select(element, source)
-        local currentElement = nil
-        if self._currentSelectionGroup.currentSelectionElement then
-            currentElement = self._currentSelectionGroup.currentSelectionElement.element
-        end
-        for _, v in ipairs(self.selectionGroups) do
-            local isManaging, managedSelectionElement = v:manageElement(element)
-            if isManaging then
-                if v == self._currentSelectionGroup then
-                    if currentElement == element then
-                        if not v.listener or v:listener("selection_reselect", source or "code", currentElement, element) ~= false then
-                            if element.mode == 1 then
-                                element.mode = 3
-                                if not element._inAnimation then
-                                    element:recalculate()
-                                    element:repaint("this")
-                                end
-                            end
-                        end
-                    elseif not v.listener or v:listener("selection_change", source or "code", currentElement, element) ~= false then
-                        if currentElement and currentElement.mode == 3 then
-                            currentElement.mode = 1
-                            if not currentElement._inAnimation then
-                                currentElement:recalculate()
-                                currentElement:repaint("this")
-                            end
-                        end
-                        v.currentSelectionElement = managedSelectionElement
-                        if not v.listener or v:listener("selection_change", source or "code", currentElement, element) ~= false then
-                            if element.mode == 1 then
-                                element.mode = 3
-                                if not element._inAnimation then
-                                    element:recalculate()
-                                    element:repaint("this")
-                                end
-                            end
-                        end
-                    end
-                elseif not self._currentSelectionGroup.listener or self._currentSelectionGroup:listener("selection_lose_focus", source or "code", currentElement, element) ~= false then
-                    if currentElement and currentElement.mode == 3 then
-                        currentElement.mode = 1
-                        if not currentElement._inAnimation then
-                            currentElement:recalculate()
-                            currentElement:repaint("this")
-                        end
-                    end
-                    if v.listener then
-                        v:listener("selection_get_focus", source or "code", currentElement, element)
-                    end
-                    self._currentSelectionGroup = v
-                    if v.currentSelectionElement then
-                        currentElement = v.currentSelectionElement.element
-                    end
-                    if currentElement == element then
-                        if element.mode == 1 then
-                            if not v.listener or v:listener("selection_reselect", source or "code", element) ~= false then
-                                element.mode = 3
-                                if not element._inAnimation then
-                                    currentElement:recalculate()
-                                    currentElement:repaint("this")
-                                end
-                            end
-                        end
-                    elseif not v.listener or v:listener("selection_change", source or "code", currentElement, element) ~= false then
-                        if currentElement and currentElement.mode == 3 then
-                            currentElement.mode = 1
-                            if not currentElement._inAnimation then
-                                currentElement:recalculate()
-                                currentElement:repaint("this")
-                            end
-                        end
-                        v.currentSelectionElement = managedSelectionElement
-                        if element.mode == 1 then
-                            element.mode = 3
-                            if not element._inAnimation then
-                                element:recalculate()
-                                element:repaint("this")
-                            end
-                        end
-                    end
-                end
+
+    ---Add a selectionGroup to this container
+    ---@param group selectionGroup
+    ---@return nil
+    function this:addGroup(group)
+        table.insert(self.groups, group)
+    end
+    ---Create and add a new selectionGroup to this container
+    ---@param previous selectionGroup|optional
+    ---@param next selectionGroup|optional
+    ---@param listener function|optional
+    ---@return selectionGroup
+    function this:addNewGroup(previous, next, listener)
+        local group = ui.selectionGroup.new(previous, next, listener)
+        table.insert(self.groups, group)
+        return group
+    end
+    ---Remove a selectionGroup
+    ---@param group selectionGroup
+    ---@return nil
+    function this:removeGroup(group)
+        for i, v in ipairs(self.groups) do
+            if v == group then
+                self.current = group.previous or group.next
+                table.remove(self.groups, i)
                 return
             end
         end
     end
+
     return this
-end
----Select an element by direction
----@param selectionGroup selectionGroup
----@param direction string
----@param source string
----@return nil
-function _select(selectionGroup, direction, source)
-    local currentSelectionElement = selectionGroup.currentSelectionElement
-    local newSelection = currentSelectionElement[direction]
-    while newSelection and newSelection.element.mode == 2 do
-        newSelection = newSelection[direction]
-    end
-    if newSelection then
-        if not selectionGroup.listener or selectionGroup:listener("selection_change", source, currentSelectionElement.element, newSelection.element) ~= false then
-            if currentSelectionElement.element.mode > 2 then
-                currentSelectionElement.element.mode = 1
-                if not currentSelectionElement.element._inAnimation then
-                    currentSelectionElement.element:recalculate()
-                    currentSelectionElement.element:repaint("this")
-                end
-            end
-            newSelection.element.mode = 3
-            if not newSelection.element._inAnimation then
-                newSelection.element:recalculate()
-                newSelection.element:repaint("this")
-            end
-        end
-        selectionGroup.currentSelectionElement = newSelection
-    end
-end
----Switch the selection in a manager
----@param selectionManager selectionManager
----@param selectionGroup selectionGroup
----@param source string
----@param ... any
----@return nil
-function _switch(selectionManager, selectionGroup, source, ...)
-    if selectionManager._currentSelectionGroup == selectionGroup or selectionGroup == nil then
-        return
-    end
-    local currentElement = nil
-    if selectionManager._currentSelectionGroup and selectionManager._currentSelectionGroup.currentSelectionElement then
-        currentElement = selectionManager._currentSelectionGroup.currentSelectionElement.element
-    end
-    local newElement = nil
-    if selectionGroup.currentSelectionElement then
-        newElement = selectionGroup.currentSelectionElement.element
-    end
-    if selectionManager._currentSelectionGroup and (not selectionManager._currentSelectionGroup.listener or selectionManager._currentSelectionGroup:listener("selection_lose_focus", source, currentElement, newElement, ...) ~= false) then
-        if currentElement and currentElement.mode > 2 then
-            currentElement.mode = 1
-            if not currentElement._inAnimation then
-                currentElement:recalculate()
-                currentElement:repaint("this")
-            end
-        end
-    end
-    if not selectionGroup.listener or selectionGroup:listener("selection_get_focus", source, currentElement, newElement, ...) ~= false then
-        if newElement and (newElement.mode == 1 or newElement.mode == 4) then
-            newElement.mode = 3
-            if not newElement._inAnimation then
-                newElement:recalculate()
-                newElement:repaint("this")
-            end
-        end
-    end
-    selectionManager._currentSelectionGroup = selectionGroup
 end

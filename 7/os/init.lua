@@ -19,7 +19,17 @@ local browserButton =
     ui.button.new(
     manager,
     "Browser",
-    function()
+    function(self, event)
+        manager:callFunction(
+            function()
+                local select = true
+                if event.name == "mouse_up" then
+                    select = false
+                end
+                assert(loadfile("os/system/execute.lua"))("os/system/download/manager.lua", {select = select})
+                manager:draw()
+            end
+        )
     end,
     theme.button1,
     1,
@@ -31,10 +41,14 @@ local explorerButton =
     ui.button.new(
     manager,
     "Explorer",
-    function()
+    function(self, event)
         manager:callFunction(
             function()
-                assert(loadfile("os/system/execute.lua"))("os/system/explorer/explorer.lua", {select = true})
+                local select = true
+                if event.name == "mouse_up" then
+                    select = false
+                end
+                assert(loadfile("os/system/execute.lua"))("os/system/explorer/explorer.lua", {select = select})
                 manager:draw()
             end
         )
@@ -76,19 +90,15 @@ local exitButton =
     3,
     1
 )
-local menuSelectionGroup = manager.selectionManager:addNewSelectionGroup()
-local browserButton_selection = menuSelectionGroup:addNewSelectionElement(browserButton)
-local explorerButton_selection = menuSelectionGroup:addNewSelectionElement(explorerButton)
-local optionButton_selection = menuSelectionGroup:addNewSelectionElement(optionButton)
-local exitButton_selection = menuSelectionGroup:addNewSelectionElement(exitButton)
-browserButton_selection.right = explorerButton_selection
-explorerButton_selection.right = optionButton_selection
-optionButton_selection.right = exitButton_selection
-exitButton_selection.left = optionButton_selection
-optionButton_selection.left = explorerButton_selection
-explorerButton_selection.left = browserButton_selection
-menuSelectionGroup.currentSelectionElement = browserButton_selection
+local menuSelectionGroup = manager.selectionManager:addNewGroup()
 local listView = ui.scrollView.new(manager, nil, 3, theme.sView1, 1, 2, width, height - 1)
+
+menuSelectionGroup:addElement(browserButton, nil, nil, explorerButton, listView.selectionGroup)
+menuSelectionGroup:addElement(explorerButton, browserButton, nil, optionButton, listView.selectionGroup)
+menuSelectionGroup:addElement(optionButton, explorerButton, nil, exitButton, listView.selectionGroup)
+menuSelectionGroup:addElement(exitButton, optionButton, nil, nil, listView.selectionGroup)
+menuSelectionGroup.current = browserButton
+
 local backgroundListView = listView._elements[1]
 local backgroundListViewBuffer = backgroundListView.buffer
 for i = 1, height - 1 do
@@ -108,18 +118,18 @@ end
 local function updateListView()
     local programs = fs.list("os/programs/")
     local container = listView:getContainer()
-    table.remove(container._elements)
-    local programSelectionElements = {}
-    for i, value in ipairs(programs) do
+    table.remove(container._elements) --TODO remove!
+    local elements = {}
+    for i, v in ipairs(programs) do
         local startFunction
         local startupFunction
         local delFunction
-        if fs.isDir("os/programs/" .. value) then
+        if fs.isDir("os/programs/" .. v) then
         else
             startFunction = function()
                 manager:callFunction(
                     function()
-                        assert(loadfile("os/system/execute.lua"))("os/programs/" .. value)
+                        assert(loadfile("os/system/execute.lua"))("os/programs/" .. v)
                         manager:draw()
                     end
                 )
@@ -127,7 +137,7 @@ local function updateListView()
         end
         local buttonWidth = width - 12
         local name =
-            (value:sub(1, 1):upper() .. value:sub(2)):gsub("%.[^%.]*$", ""):gsub(
+            (v:sub(1, 1):upper() .. v:sub(2)):gsub("%.[^%.]*$", ""):gsub(
             "%l%u",
             function(text)
                 return text:sub(1, 1) .. " " .. text:sub(2, 2)
@@ -137,7 +147,7 @@ local function updateListView()
             name = name:sub(1, width - 3) .. "..."
         end
         local programButton = ui.button.new(container, name, startFunction, theme.button3, 1, i + 1, buttonWidth, 1)
-        table.insert(programSelectionElements, listView.selectionGroup:addNewSelectionElement(programButton))
+        table.insert(elements, programButton)
         local startupButton =
             ui.button.new(
             container,
@@ -150,7 +160,7 @@ local function updateListView()
             3,
             1
         )
-        table.insert(programSelectionElements, listView.selectionGroup:addNewSelectionElement(startupButton))
+        table.insert(elements, startupButton)
         local delButton =
             ui.button.new(
             container,
@@ -163,20 +173,14 @@ local function updateListView()
             5,
             1
         )
-        table.insert(programSelectionElements, listView.selectionGroup:addNewSelectionElement(delButton))
+        table.insert(elements, delButton)
     end
-    for i = 1, #programSelectionElements, 3 do
-        programSelectionElements[i].up = programSelectionElements[i - 3]
-        programSelectionElements[i + 1].up = programSelectionElements[i - 3 + 1]
-        programSelectionElements[i + 2].up = programSelectionElements[i - 3 + 2]
-        programSelectionElements[i].down = programSelectionElements[i + 3]
-        programSelectionElements[i + 1].down = programSelectionElements[i + 3 + 1]
-        programSelectionElements[i + 2].down = programSelectionElements[i + 3 + 2]
-        programSelectionElements[i + 1].left = programSelectionElements[i]
-        programSelectionElements[i + 2].left = programSelectionElements[i + 1]
-        programSelectionElements[i].right = programSelectionElements[i + 1]
-        programSelectionElements[i + 1].right = programSelectionElements[i + 2]
+    for i = 1, #elements, 3 do
+        listView.selectionGroup:addElement(elements[i], nil, elements[i - 3], elements[i + 1], elements[i + 3])
+        listView.selectionGroup:addElement(elements[i + 1], elements[i], elements[i - 4], elements[i + 2], elements[i + 4])
+        listView.selectionGroup:addElement(elements[i + 2], elements[i + 1], elements[i - 5], nil, elements[i + 5])
     end
+    listView.selectionGroup.current = listView:getContainer()._elements[1]
     listView:resetLayout()
 end
 updateListView()
@@ -184,7 +188,9 @@ menuSelectionGroup.next = listView.selectionGroup
 menuSelectionGroup.previous = listView.selectionGroup
 listView.selectionGroup.next = menuSelectionGroup
 listView.selectionGroup.previous = menuSelectionGroup
-manager.selectionManager:addSelectionGroup(listView.selectionGroup)
-manager.selectionManager:setCurrentSelectionGroup(listView.selectionGroup, "mouse")
+manager.selectionManager:addGroup(listView.selectionGroup)
+listView:getContainer()._elements[1].select.up = exitButton
+manager.selectionManager:select(listView.selectionGroup, "key", 3)
 manager:draw()
+--print(listView.selectionGroup.current.mode)
 manager:execute()

@@ -11,8 +11,6 @@ else
 end
 local label = args.label
 local text = args.text
-local button1 = args.button1
-local button2 = args.button2
 local textBoxTheme = args.theme or theme.tBox1
 local manager = ui.uiManager.new(x, y, w, h)
 local textBox = ui.textBox.new(manager, label, text, textBoxTheme, x, y, w, h)
@@ -20,55 +18,59 @@ local left = #textBox.style.nTheme.b[4]
 local top = #textBox.style.nTheme.b[2]
 local right = #textBox.style.nTheme.b[6]
 local bottom = #textBox.style.nTheme.b[8]
-local button1_selection = nil
-if button1 then
-    local length = button1.name:len() + 2
-    local button1 =
+local ret
+
+if not args.button1 then
+    args.button1 = args.button2
+    args.button2 = nil
+end
+
+local button1, button2
+
+if args.button1 then
+    local length = args.button1:len() + 2
+    button1 =
         ui.button.new(
         textBox,
-        button1.name,
+        args.button1,
         function(self)
-            button1.func()
+            ret = 1
             manager:exit()
         end,
-        button1.theme or theme.button1,
+        args.buttonTheme or theme.button1,
         x + w - right - 1 - length,
         y + h - math.floor(bottom / 2) - 1,
         length,
         1
     )
-    if button2 then
-        button1:setGlobalRect(x + left, nil, nil, nil)
+    if args.button2 then
+        button1:setGlobalRect(x + left, nil, nil, nil, nil)
     end
-    button1_selection = textBox.selectionGroup:addNewSelectionElement(button1)
+    textBox.selectionGroup:addElement(button1)
 end
-local button2_selection = nil
-if button2 then
-    local button2 =
+if args.button2 then
+    local length = args.button2:len() + 2
+    button2 =
         ui.button.new(
         textBox,
-        button2.name,
+        args.button2,
         function(self)
-            button2.func()
+            ret = 2
             manager:exit()
         end,
-        button2.theme or theme.button1,
-        x + w - right - 1,
+        args.button2Theme or theme.button1,
+        x + w - right - 1 - length,
         y + h - math.floor(bottom / 2) - 1,
-        button2.name:len() + 2,
+        length,
         1
     )
-    button2_selection = textBox.selectionGroup:addNewSelectionElement(button2)
+    textBox.selectionGroup:addNewSelectionElement(button2, button1, nil, nil, nil, true)
 end
-if button2_selection then
-    button2_selection.left = button1_selection
-    textBox.selectionGroup.currentSelectionElement = button2_selection
-end
-if button1_selection then
-    button1_selection.right = button2_selection
-    textBox.selectionGroup.currentSelectionElement = button1_selection
-end
-manager.selectionManager:addSelectionGroup(textBox.selectionGroup)
-manager.selectionManager:setCurrentSelectionGroup(textBox.selectionGroup, "code")
+manager.selectionManager:addGroup(textBox.selectionGroup)
+manager.selectionManager:select(button1, "code", 3)
 manager:draw()
 manager:execute()
+
+return ret
+--TODO return select
+--TODO error handling

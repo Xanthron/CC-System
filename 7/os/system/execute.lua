@@ -74,11 +74,7 @@ local function errorHandler(text)
             y = 3,
             w = w - 4,
             h = h - 4,
-            button1 = {
-                name = "Ok",
-                func = function()
-                end
-            }
+            button1 = "Ok"
         }
     )
 end
@@ -91,5 +87,8 @@ local function executionHandler()
     term.clear()
     assert(loadfile(file))(table.unpack(args, 2, #args))
 end
+
 local status, err, ret = xpcall(executionHandler, errorHandler)
 return status, ret
+--TODO select return
+--TODO error checking

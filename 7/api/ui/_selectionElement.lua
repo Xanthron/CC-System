@@ -5,7 +5,7 @@
 ---@param down selectionElement|optional
 ---@return selectionElement
 function new(element, left, up, right, down)
-    ---@class selectionElement
+    ---class selectionElement
     local this = {}
 
     ---@type element

@@ -1,4 +1,5 @@
 local args = ...
+
 local set = dofile("os/system/explorer/default.lua")
 if type(args) == "table" then
     for key, value in pairs(args) do
@@ -7,6 +8,7 @@ if type(args) == "table" then
 else
     error("An argument table is missing as argument")
 end
+
 local function checkType(name, kind)
     local value = set[name]
     local valueType = type(value)
@@ -18,6 +20,7 @@ local function checkType(name, kind)
         error(("'%s' is not set. (expected '%s' got 'nil')"):format(name, kind), 3)
     end
 end
+
 checkType("icons", "boolean")
 checkType("hidden", "boolean")
 checkType("extensions", "boolean")
@@ -31,7 +34,7 @@ end
 checkType("files", "boolean")
 set.folders = set.folders or true
 checkType("folders", "boolean")
-set.mode = set.mode or "browse"
+set.mode = set.mode or ""
 checkType("mode", "string")
 set.path = set.path or ""
 checkType("path", "string")
@@ -55,10 +58,12 @@ if set.manager then
 else
     _x, _y, _w, _h = 1, 1, term.getSize()
 end
+
 local isSelected
 local addSelection
 local removeSelection
 local updateSelectionLabel
+
 if set.mode == "save" then
     set.save = set.save or ""
     checkType("save", "string")
@@ -93,13 +98,17 @@ elseif set.mode == "select_many" then
         element:repaint("this")
     end
 end
-local pathsIndex, paths = 1, {set.path}
+local pathsIndex, paths = 0, {}
 local ret = {}
 local rename, move, duplicate, delete, create
+
 local function getCurrentPath()
     return paths[pathsIndex]
 end
+
+---@param path string
 local function addPath(path)
+    path = path:gsub("/+$", "")
     for _ = pathsIndex + 1, #paths do
         table.remove(paths, pathsIndex + 1)
     end
@@ -109,6 +118,7 @@ local function addPath(path)
     table.insert(paths, path)
     pathsIndex = math.min(pathsIndex + 1, set.pathsSize)
 end
+
 local function updatePath()
     if not fs.isDir(getCurrentPath()) then
         paths[pathsIndex] = set.path
@@ -117,6 +127,7 @@ local function updatePath()
         end
     end
 end
+
 local function updateButton(manager)
     local upButton, backButton, forwardButton, inputField = table.unpack(manager._elements, 3, 6)
     if pathsIndex == 1 then
@@ -179,15 +190,7 @@ local function updateButton(manager)
     inputField:setText(path)
     inputField:recalculate("this")
 end
-local function clearListView(listView)
-    local container = listView:getContainer()
-    for i = 1, #container._elements do
-        container._elements[1]:setParent(nil)
-    end
-    for i = 1, #listView.selectionGroup.selectionElements do
-        listView.selectionGroup.selectionElements[i] = nil
-    end
-end
+
 local function getNameAndIconKeyExtension(name)
     local startI, endI = name:find("%.[^%.]*$")
     local extension = nil
@@ -213,6 +216,7 @@ local function getNameAndIconKeyExtension(name)
     end
     return name, extension
 end
+
 local function getPathElements(folder)
     local list = fs.list(folder)
     local dirs = {}
@@ -247,8 +251,9 @@ local function getPathElements(folder)
     end
     return dirs, files
 end
+
 local function extensionIcon(parent, ext, x, y)
-    local element = ui.element.new(parent, x, y, 3, 1)
+    local element = ui.element.new(parent, "image", x, y, 3, 1)
     local buffer = element.buffer
     for i = 1, 3 do
         buffer.text[i] = ext[1][i]
@@ -257,15 +262,17 @@ local function extensionIcon(parent, ext, x, y)
     end
     return element
 end
+
 local function updateListView(manager, listView)
-    clearListView(listView)
+    listView:clear()
     local dirs, files = getPathElements(getCurrentPath())
     local x, w, y = listView:getGlobalPosX() + #listView.style.nTheme.b[4], listView:getWidth() - #listView.style.nTheme.b[4] - #listView.style.nTheme.b[6] - 1, 3
     if set.icons then
         x = x + 4
         w = w - 4
     end
-    local selectionElements = {}
+    ---@type element[]
+    local elements = {}
     local container = listView:getContainer()
     for i = 1, #dirs, 2 do
         if set.icons then
@@ -314,6 +321,7 @@ local function updateListView(manager, listView)
                                     manager.parallelManager:removeFunction(self._pressAnimation)
                                     rename(manager, listView, self, dirs[i])
                                 elseif name == "Move" then
+                                    manager.parallelManager:removeFunction(self._pressAnimation)
                                     if move(manager, listView, dirs[i], select) then
                                         manager:draw()
                                     end
@@ -353,16 +361,16 @@ local function updateListView(manager, listView)
                 updateListView(manager, listView)
                 updateButton(manager)
                 if event.name ~= "mouse_up" then
-                    if listView.selectionGroup.selectionElements[1] then
-                        manager.selectionManager:select(listView.selectionGroup.selectionElements[1].element, "key")
+                    if listView:getContainer()._elements[1] then
+                        manager.selectionManager:select(listView.selectionGroup, "key", 3)
                     else
-                        manager.selectionManager:select(manager.selectionManager.selectionGroups[2].selectionElements[1], "key")
+                        manager.selectionManager:select(manager.selectionManager.groups[2].elements[1], "key", 3)
                     end
                 end
                 manager:draw()
             end
         end
-        table.insert(selectionElements, listView.selectionGroup:addNewSelectionElement(button))
+        table.insert(elements, button)
         y = y + 1
     end
     for i = 1, #files, 3 do
@@ -403,6 +411,7 @@ local function updateListView(manager, listView)
                                     manager.parallelManager:removeFunction(self._pressAnimation)
                                     rename(manager, listView, self, files[i])
                                 elseif name == "Move" then
+                                    manager.parallelManager:removeFunction(self._pressAnimation)
                                     if move(manager, listView, files[i], select) then
                                         manager:draw()
                                     end
@@ -448,34 +457,65 @@ local function updateListView(manager, listView)
                 end
             end
         end
-        table.insert(selectionElements, listView.selectionGroup:addNewSelectionElement(button))
+        table.insert(elements, button)
         y = y + 1
     end
-    for i = 1, #selectionElements do
-        selectionElements[i].up = selectionElements[i - 1]
-        selectionElements[i].down = selectionElements[i + 1]
+    if #elements > 0 then
+        for i = 1, #elements do
+            listView.selectionGroup:addElement(elements[i], nil, elements[i - 1], nil, elements[i + 1])
+        end
+        elements[1].select.up = manager.selectionManager.groups[3]
+        local pathGroup = manager.selectionManager.groups[3]
+        pathGroup.elements[1].select.down = elements[1]
+        pathGroup.next = listView.selectionGroup
+        if set.mode ~= "" then --TODO change to bool has second menu or something else
+            local underMenuGroup = manager.selectionManager.groups[4]
+            elements[#elements].select.down = underMenuGroup
+            underMenuGroup.previous = listView.selectionGroup
+            for i = 1, #underMenuGroup.elements do
+                underMenuGroup.elements[i].select.up = elements[#elements]
+            end
+        end
+    else
+        local pathGroup = manager.selectionManager.groups[3]
+        if set.mode ~= "" then --TODO change to bool has second menu or something else
+            local underMenuGroup = manager.selectionManager.groups[4]
+
+            pathGroup.next = underMenuGroup
+            underMenuGroup.previous = pathGroup
+
+            pathGroup.elements[1].select.down = underMenuGroup
+            for i = 1, #underMenuGroup.elements do
+                underMenuGroup.elements[i].select.up = pathGroup
+            end
+        else
+            local menuGroup = manager.selectionManager.groups[2]
+            pathGroup.next = menuGroup
+            pathGroup.current.select.down = nil
+            menuGroup.previous = pathGroup
+        end
     end
-    listView.selectionGroup.currentSelectionElement = selectionElements[1]
-    listView:recalculate()
+    listView.selectionGroup.current = elements[1]
+    listView:recalculate() --elements[1]
     listView:resetLayout()
 end
 local function nameItem(manager, text, submit, x, y, w, h)
     local field = ui.inputField.new(manager, "", text, false, nil, theme.iField1, x, y, w, h)
-    local selectionGroup = manager.selectionManager:addNewSelectionGroup(manager.selectionManager._currentSelectionGroup, manager.selectionManager._currentSelectionGroup)
-    local field_selection = selectionGroup:addNewSelectionElement(field)
-    selectionGroup.currentSelectionElement = field_selection
+    local selectionGroup = manager.selectionManager:addNewGroup(manager.selectionManager.current, manager.selectionManager.current)
+    selectionGroup:addElement(field)
+    --selectionGroup.current = field
     function selectionGroup:listener(eventName, source, ...)
         if eventName == "selection_lose_focus" then
             local current, new = ...
             field.mode = 1
             field:setParent(nil)
-            manager.selectionManager:removeSelectionGroup(selectionGroup)
+            manager.selectionManager:removeGroup(selectionGroup)
             manager:repaint("this")
             return true
         end
     end
     field._onSubmit = submit
-    manager.selectionManager:setCurrentSelectionGroup(selectionGroup, "code")
+    manager.selectionManager:select(field, "code", 3)
 end
 rename = function(manager, listView, element, path)
     local name = fs.getName(path)
@@ -488,11 +528,11 @@ rename = function(manager, listView, element, path)
         updateListView(manager, listView)
         for _, e in ipairs(listView:getContainer()._elements) do
             if e.path == newPath then
-                manager.selectionManager:select(e, "code")
+                manager.selectionManager:select(e, "code", 3)
                 return
             end
         end
-        manager.selectionManager:setCurrentSelectionGroup(listView.selectionGroup, "code")
+        manager.selectionManager:select(listView.selectionGroup, "code", 3)
     end
     nameItem(manager, name, submit, element:getGlobalRect())
 end
@@ -510,11 +550,11 @@ create = function(manager, listView, name, path, isDir)
         updateListView(manager, listView)
         for _, e in ipairs(listView:getContainer()._elements) do
             if e.path == newPath then
-                manager.selectionManager:select(e, "code")
+                manager.selectionManager:select(e, "code", 3)
                 return
             end
         end
-        manager.selectionManager:setCurrentSelectionGroup(listView.selectionGroup, "code")
+        manager.selectionManager:select(listView.selectionGroup, "code", 3)
     end
     nameItem(manager, name, submit, 1, 2, _w, 1)
 end
@@ -522,10 +562,10 @@ delete = function(manager, listView, path, select)
     fs.delete(path)
     updateListView(manager, listView)
     if select then
-        if listView.selectionGroup.selectionElements[1] then
-            manager.selectionManager:select(listView.selectionGroup.selectionElements[1].element, "key")
+        if listView:getContainer()._elements[1] then
+            manager.selectionManager:select(listView.selectionGroup, "key", 3)
         else
-            manager.selectionManager:select(manager.selectionManager.selectionGroups[2].selectionElements[1], "key")
+            manager.selectionManager:select(manager.selectionManager.groups[2].elements[1], "key", 3)
         end
     end
     manager:draw()
@@ -534,7 +574,7 @@ move = function(manager, listView, path, select)
     local isDir = fs.isDir(path)
     local name = fs.getName(path)
     local path = path:sub(1, path:len() - name:len())
-    local save = assert(loadfile("os/system/explorer/explorer.lua"))({select = select, mode = "move", files = false, path = path, move = name, edit = false})
+    local save = assert(loadfile("os/system/explorer/explorer.lua"))({select = true, mode = "move", files = false, path = path, move = name, edit = false})
     if save then
         local newPath = fs.combine(save, name)
         local startPath = path .. name
@@ -550,6 +590,8 @@ move = function(manager, listView, path, select)
         return true
     end
 end
+
+addPath(set.path)
 local manager = ui.uiManager.new(1, 1, _w, _h)
 local index
 for i = 1, _w * _h do
@@ -588,27 +630,26 @@ for i = 1, _h - 1 do
     backgroundListViewBuffer.textColor[index] = colors.black
     backgroundListViewBuffer.textBackgroundColor[index] = colors.white
 end
-pathField.onSuggestCompletion = function(text, offset)
+function pathField:onSuggestCompletion(text, offset)
     if text:len() == offset then
         local startI, endI = text:match("%/.*$")
         if startI == nil or endI == nil then
-            return fs.complete(text, "", false, false)
+            self.autoComplete = fs.complete(text, "", false, false)
         else
-            print(startI, endI)
-            return fs.complete(text:sub(endI), text:sub(1, startI), false, true)
+            self.autoComplete = fs.complete(text:sub(endI), text:sub(1, startI), false, true)
         end
     else
-        return {}
+        self.autoComplete = {}
     end
 end
-pathField.onAutoCompletion = function(text, offset, completion)
+function pathField:onAutoCompletion(text, offset, completion)
     if offset == text:len() then
         return true, text .. completion, text:len() + completion:len()
     else
         return false
     end
 end
-pathField._onSubmit = function(event, text)
+function pathField:_onSubmit(event, text)
     if text == "root" then
         text = ""
     end
@@ -629,7 +670,7 @@ pathField._onSubmit = function(event, text)
     end
     manager:draw()
 end
-fileButton._onClick = function(event)
+function fileButton:_onClick(event)
     local select = true
     if event.name == "mouse_up" then
         select = false
@@ -659,28 +700,49 @@ fileButton._onClick = function(event)
         end
     )
 end
-upButton._onClick = function()
+function upButton:_onClick(event)
     addPath(fs.getDir(getCurrentPath()))
     updatePath()
     updateButton(manager)
+    if self.mode == 2 then
+        local group = manager.selectionManager.groups[2]
+        group.current = fileButton
+        if event.neme ~= "mouse_up" then
+            manager.selectionManager:select(group, "code", 3)
+        end
+    end
     updateListView(manager, listView)
     manager:draw()
 end
-backButton._onClick = function()
+function backButton:_onClick(event)
     pathsIndex = pathsIndex - 1
     updatePath()
     updateButton(manager)
+    if self.mode == 2 then
+        local group = manager.selectionManager.groups[2]
+        group.current = fileButton
+        if event.neme ~= "mouse_up" then
+            manager.selectionManager:select(group, "code", 3)
+        end
+    end
     updateListView(manager, listView)
     manager:draw()
 end
-forwardButton._onClick = function()
+function forwardButton:_onClick(event)
     pathsIndex = pathsIndex + 1
     updatePath()
     updateButton(manager)
+    if self.mode == 2 then
+        local group = manager.selectionManager.groups[2]
+        group.current = fileButton
+        if event.neme ~= "mouse_up" then
+            manager.selectionManager:select(group, "code", 3)
+        end
+    end
     updateListView(manager, listView)
     manager:draw()
 end
-exitButton._onClick = function(self, event)
+function exitButton:_onClick(event)
     term.setCursorPos(1, 1)
     if term.isColor() then
         term.setBackgroundColor(colors.black)
@@ -689,38 +751,31 @@ exitButton._onClick = function(self, event)
     term.clear()
     manager:exit()
 end
-manager.selectionManager:addSelectionGroup(listView.selectionGroup)
-local menuGroup = manager.selectionManager:addNewSelectionGroup()
-local fileButton_selection = menuGroup:addNewSelectionElement(fileButton)
-local upButton_selection = menuGroup:addNewSelectionElement(upButton)
-local backButton_selection = menuGroup:addNewSelectionElement(backButton)
-local forwardButton_selection = menuGroup:addNewSelectionElement(forwardButton)
-local exitButton_selection = menuGroup:addNewSelectionElement(exitButton)
-local pathField_selection = menuGroup:addNewSelectionElement(pathField)
-fileButton_selection.right = upButton_selection
-upButton_selection.right = backButton_selection
-backButton_selection.right = forwardButton_selection
-forwardButton_selection.right = exitButton_selection
-exitButton_selection.left = forwardButton_selection
-forwardButton_selection.left = backButton_selection
-backButton_selection.left = upButton_selection
-upButton_selection.left = fileButton_selection
-menuGroup.currentSelectionElement = fileButton_selection
-fileButton_selection.down = pathField_selection
-upButton_selection.down = pathField_selection
-backButton_selection.down = pathField_selection
-forwardButton_selection.down = pathField_selection
-exitButton_selection.down = pathField_selection
-pathField_selection.up = fileButton_selection
-menuGroup.next = listView.selectionGroup
+
+manager.selectionManager:addGroup(listView.selectionGroup)
+local menuGroup = manager.selectionManager:addNewGroup(listView.selectionGroup)
+local pathGroup = manager.selectionManager:addNewGroup(menuGroup, listView.selectionGroup)
+
+menuGroup.next = pathGroup
 menuGroup.previous = listView.selectionGroup
 listView.selectionGroup.next = menuGroup
-listView.selectionGroup.previous = menuGroup
+listView.selectionGroup.previous = pathGroup
+
+menuGroup:addElement(fileButton, nil, nil, upButton, pathGroup)
+menuGroup:addElement(upButton, fileButton, nil, backButton, pathGroup)
+menuGroup:addElement(backButton, upButton, nil, forwardButton, pathGroup)
+menuGroup:addElement(forwardButton, backButton, nil, exitButton, pathGroup)
+menuGroup:addElement(exitButton, forwardButton, nil, nil, pathGroup)
+pathGroup:addElement(pathField, nil, menuGroup, nil, listView.selectionGroup)
+
+menuGroup.current = fileButton
+pathGroup.current = pathField
+
 if set.mode == "save" then
     listView:setGlobalRect(nil, nil, nil, listView:getHeight() - 1)
     listView:resetLayout()
     local saveField = ui.inputField.new(manager, set.save, set.save, false, nil, theme.iField1, 1, _h, _w - 6, 1)
-    saveField._onSubmit = function(event, text)
+    function saveField:_onSubmit(event, text)
         if saveField ~= "" then
             table.insert(ret, getCurrentPath() .. "/" .. text)
         end
@@ -731,32 +786,30 @@ if set.mode == "save" then
     saveButton._onClick = function(event)
         saveField:_onSubmit(event, saveField.text)
     end
-    local saveMenuGroup = manager.selectionManager:addNewSelectionGroup()
-    local saveField_selection = saveMenuGroup:addNewSelectionElement(saveField)
-    local saveButton_selection = saveMenuGroup:addNewSelectionElement(saveButton)
-    saveField_selection.right = saveButton_selection
-    saveButton_selection.left = saveField_selection
-    saveMenuGroup.currentSelectionElement = saveField_selection
-    saveMenuGroup.previous = listView.selectionGroup
-    saveMenuGroup.next = menuGroup
+    local saveMenuGroup = manager.selectionManager:addNewGroup(listView.selectionGroup, menuGroup)
     menuGroup.previous = saveMenuGroup
     listView.selectionGroup.next = saveMenuGroup
+
+    saveMenuGroup:addElement(saveField, nil, nil, nil, nil)
+    saveMenuGroup:addElement(saveButton, saveField, nil, nil, nil)
+
+    saveMenuGroup.current = saveField
 elseif set.mode == "move" then
     listView:setGlobalRect(nil, nil, nil, listView:getHeight() - 1)
     listView:resetLayout()
     local label = ui.label.new(manager, set.move, theme.label1, 1, _h, _w - 6, 1)
     local moveButton = ui.button.new(manager, "Move", nil, theme.button1, _w - 5, _h, 6, 1)
-    moveButton._onClick = function(event)
+    function moveButton:_onClick(event)
         table.insert(ret, getCurrentPath())
         manager:exit()
     end
-    local moveMenuGroup = manager.selectionManager:addNewSelectionGroup()
-    local moveButton_selection = moveMenuGroup:addNewSelectionElement(moveButton)
-    moveMenuGroup.currentSelectionElement = moveButton_selection
-    moveMenuGroup.previous = listView.selectionGroup
-    moveMenuGroup.next = menuGroup
+    local moveMenuGroup = manager.selectionManager:addNewGroup(listView.selectionGroup, menuGroup)
     menuGroup.previous = moveMenuGroup
     listView.selectionGroup.next = moveMenuGroup
+
+    moveMenuGroup:addElement(moveButton, nil, nil, nil)
+
+    moveMenuGroup.current = moveButton
 elseif set.mode == "select_many" then
     listView:setGlobalRect(nil, nil, nil, listView:getHeight() - 1)
     listView:resetLayout()
@@ -775,30 +828,26 @@ elseif set.mode == "select_many" then
         table.insert(ret, set.items)
         manager:exit()
     end
-    local selectionMenuGroup = manager.selectionManager:addNewSelectionGroup()
-    local clearSelectionButton_selection = selectionMenuGroup:addNewSelectionElement(clearSelectionButton)
-    local selectSelectionButton_selection = selectionMenuGroup:addNewSelectionElement(selectSelectionButton)
-    clearSelectionButton_selection.right = selectSelectionButton_selection
-    selectSelectionButton_selection.left = clearSelectionButton_selection
-    selectionMenuGroup.currentSelectionElement = selectSelectionButton_selection
-    selectionMenuGroup.previous = listView.selectionGroup
-    selectionMenuGroup.next = menuGroup
+    local selectionMenuGroup = manager.selectionManager:addNewGroup(listView.selectionGroup, menuGroup)
     menuGroup.previous = selectionMenuGroup
     listView.selectionGroup.next = selectionMenuGroup
+
+    selectionMenuGroup:addElement(clearSelectionButton, nil, nil, selectSelectionButton, nil)
+    selectionMenuGroup:addElement(selectSelectionButton, clearSelectionButton, nil, nil, nil)
+
+    selectionMenuGroup.current = selectSelectionButton
 end
 updateButton(manager)
 updateListView(manager, listView)
-if listView.selectionGroup.selectionElements[1] then
-    manager.selectionManager._currentSelectionGroup = listView.selectionGroup
-    if set.select then
-        manager.selectionManager:select(listView.selectionGroup.selectionElements[1].element, "code")
-    end
-else
-    manager.selectionManager._currentSelectionGroup = menuGroup
-    if set.select then
-        manager.selectionManager:select(menuGroup.currentSelectionElement.element, "code")
-    end
+local mode = 3
+if set.select == false then
+    mode = 1
 end
+-- if listView:getContainer()._elements[1] then
+--     manager.selectionManager:select(listView.selectionGroup, "code", mode)
+-- else
+manager.selectionManager:select(menuGroup, "code", mode)
+--end
 manager:draw()
 manager:execute()
 return table.unpack(ret)

@@ -15,7 +15,7 @@
 function new(parent, label, text, multiLine, onSubmit, style, x, y, w, h)
     ---Input field
     ---@class inputField:element
-    local this = ui.element.new(parent, x, y, w, h)
+    local this = ui.element.new(parent, "inputField", x, y, w, h)
 
     ---@type style.inputField
     this.style = style
@@ -41,6 +41,8 @@ function new(parent, label, text, multiLine, onSubmit, style, x, y, w, h)
     this.onSuggestCompletion = nil
     ---@type function
     this.onAutoCompletion = nil
+    ---@type function
+    this.onTextEdit = nil
     ---@type string[]
     this.ignoreKeys = {
         "tab",
@@ -116,10 +118,7 @@ function new(parent, label, text, multiLine, onSubmit, style, x, y, w, h)
     ---@return nil
     function this:getAutoComplete()
         if self.onSuggestCompletion then
-            while #self.autoComplete > 0 do
-                table.remove(self.autoComplete)
-            end
-            self.autoComplete = self:onSuggestCompletion(self.text, self.cursorOffset)
+            self:onSuggestCompletion(self.text, self.cursorOffset)
         end
         self.autoCompleteIndex = 1
     end
@@ -212,8 +211,13 @@ function new(parent, label, text, multiLine, onSubmit, style, x, y, w, h)
     function this:_doNormalEvent(event)
         if self.mode == 3 then
             if event.name == "char" then
-                self.text = self.text:sub(1, self.cursorOffset) .. event.param1 .. self.text:sub(self.cursorOffset + 1)
-                self.cursorOffset = self.cursorOffset + 1
+                local char = event.param1
+                if self.onTextEdit then
+                    char = self:onTextEdit("char", char)
+                end
+
+                self.text = self.text:sub(1, self.cursorOffset) .. char .. self.text:sub(self.cursorOffset + 1)
+                self.cursorOffset = self.cursorOffset + char:len()
                 self:getAutoComplete()
                 self:recalculateText()
                 self:repaint("this")
@@ -221,7 +225,7 @@ function new(parent, label, text, multiLine, onSubmit, style, x, y, w, h)
             elseif event.name == "key" then
                 local key = keys.getName(event.param1)
                 if key == "backspace" then
-                    if self.cursorOffset > 0 and self.repeatItem:call() then
+                    if self.cursorOffset > 0 and self.repeatItem:call() and (not self.onTextEdit or self:onTextEdit("delete", self.cursorOffset)) then
                         self.text = self.text:sub(1, self.cursorOffset - 1) .. self.text:sub(self.cursorOffset + 1)
                         self.cursorOffset = self.cursorOffset - 1
                         self:getAutoComplete()
@@ -230,10 +234,12 @@ function new(parent, label, text, multiLine, onSubmit, style, x, y, w, h)
                     end
                 elseif key == "delete" then
                     if self.cursorOffset < self.text:len() and self.repeatItem.call() then
-                        self.text = self.text:sub(1, self.cursorOffset) .. self.text:sub(self.cursorOffset + 2)
-                        self:getAutoComplete()
-                        self:recalculateText()
-                        self:repaint("this")
+                        if not self.onTextEdit or self:onTextEdit("delete", self.cursorOffset) then
+                            self.text = self.text:sub(1, self.cursorOffset) .. self.text:sub(self.cursorOffset + 2)
+                            self:getAutoComplete()
+                            self:recalculateText()
+                            self:repaint("this")
+                        end
                     end
                 elseif key == "home" then
                     if self.repeatItem:call() and self.cursorOffset > 0 then
@@ -260,7 +266,12 @@ function new(parent, label, text, multiLine, onSubmit, style, x, y, w, h)
                     if self.repeatItem:call() then
                         local success = false
                         if #self.autoComplete > 0 then
-                            success, self.text, self.cursorOffset = self:onAutoCompletion(self.text, self.cursorOffset, self.autoComplete[self.autoCompleteIndex])
+                            local text
+                            success, text, self.cursorOffset = self:onAutoCompletion(self.text, self.cursorOffset, self.autoComplete[self.autoCompleteIndex])
+                            if self.onTextEdit then
+                                text = self:onTextEdit("autocomplete", text)
+                            end
+                            self.text = text
                         end
                         if not success then
                             self.cursorOffset = math.min(self.text:len(), self.cursorOffset + 1)

@@ -1,5 +1,6 @@
 --TODO error message when file cant be moved
 --TODO error message, when file already exist to protect override
+--TODO cant rename and create disk in root folder
 
 --TODO rename doPointerEvent, doNormalEvent, _doPointerEvent, _doNormalEvent in event class
 --TODO replace |nil with |"nil" and change optional to nil

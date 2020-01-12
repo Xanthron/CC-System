@@ -14,7 +14,7 @@
 function new(parent, text, func, style, x, y, w, h)
     ---A simple button
     ---@class button:element
-    local this = ui.element.new(parent, x, y, w, h)
+    local this = ui.element.new(parent, "button", x, y, w, h)
 
     ---@type style.button
     this.style = style

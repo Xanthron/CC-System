@@ -7,7 +7,7 @@
 function new(x, y, w, h)
     ---Base Manager to handel drawing end events
     ---@class uiManager:element
-    local this = ui.element.new(nil, x, y, w, h)
+    local this = ui.element.new(nil, "uiManager", x, y, w, h)
     ---@type parallelManager
     this.parallelManager = ui.parallelManager.new()
     ---@type selectionManager
@@ -37,13 +37,13 @@ function new(x, y, w, h)
             local eventName = this._event.name
             if eventName == "mouse_click" or eventName == "mouse_up" or eventName == "mouse_drag" or eventName == "monitor_touch" then
                 local element = this:doPointerEvent(this._event, this:getSimpleMaskRect())
-                if #this.selectionManager.selectionGroups > 0 then
+                if #this.selectionManager.groups > 0 then
                     this.selectionManager:mouseEvent(this._event, element)
                 end
             else
                 if not this:doNormalEvent(this._event) then
                     if eventName == "key" or eventName == "key_up" then
-                        if #this.selectionManager.selectionGroups > 0 then
+                        if #this.selectionManager.groups > 0 then
                             this.selectionManager:keyEvent(this._event)
                         end
                     end

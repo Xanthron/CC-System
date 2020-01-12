@@ -169,7 +169,16 @@ activatedButton.dTheme.tC = colors.lightGray
 activatedButton.dTheme.tBG = colors.gray
 activatedButton.dTheme.bC = colors.lightGray
 activatedButton.dTheme.bBG = colors.gray
+---@type style.toggleButton
 local toggle1 = style("toggleButton")
+if term.isColor() then
+    toggle1.dTheme.checkedL = {" ", "X", " "}
+    toggle1.dTheme.checkedLC = {colors.white, colors.white, colors.white}
+    toggle1.dTheme.checkedLBG = {colors.white, colors.gray, colors.white}
+    toggle1.dTheme.uncheckedL = {" ", "O", " "}
+    toggle1.dTheme.uncheckedLC = {colors.white, colors.white, colors.white}
+    toggle1.dTheme.uncheckedLBG = {colors.white, colors.gray, colors.white}
+end
 local sView1 = style("scrollView")
 sView1.nTheme.b = {{}, {}, {}, {}, {" "}, {" "}, {}, {}, {}}
 sView1.sTheme.b = {{}, {}, {}, {}, {" "}, {" "}, {}, {}, {}}
