@@ -1,2 +1,3 @@
-local test = "12345"
-print(test:rep())
+for key, value in pairs(os) do
+    print(key, value)
+end

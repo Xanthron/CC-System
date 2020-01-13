@@ -1,0 +1,8 @@
+def square(n):
+	if n < 0:
+		print("??????")
+	else:
+		for k in range(0,n):
+			print(k*k)
+
+square(9)

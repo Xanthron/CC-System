@@ -1,3 +1,23 @@
+--[[
+Settings:
+    mode = "save","move","select_many"
+        "save":
+            save = start save name
+            override = allow to select existing files
+        "move":
+            move = label
+        "select_many":
+
+    path = start Path "" when not exists
+
+    icons = boolean
+    hidden = boolean
+    extensions = boolean
+    neatNames = boolean
+    pathsSize = integer
+    type = "" set for mode save to "/" for only folders
+    edit = boolean
+]]
 local args = ...
 
 local set = dofile("os/system/explorer/default.lua")
@@ -102,6 +122,8 @@ local pathsIndex, paths = 0, {}
 local ret = {}
 local rename, move, duplicate, delete, create
 
+local hasUnderMenu = false
+
 local function getCurrentPath()
     return paths[pathsIndex]
 end
@@ -199,20 +221,7 @@ local function getNameAndIconKeyExtension(name)
         name = name:sub(1, startI - 1)
     end
     if set.neatNames == true then
-        name =
-            name:gsub(
-            "[._]+.",
-            function(text)
-                return text:sub(text:len()):upper()
-            end
-        )
-        name =
-            (name:sub(1, 1):upper() .. name:sub(2)):gsub(
-            "%l%u",
-            function(text)
-                return text:sub(1, 1) .. " " .. text:sub(2, 2)
-            end
-        )
+        name = assets.extension.getNeatName(name)
     end
     return name, extension
 end
@@ -304,7 +313,7 @@ local function updateListView(manager, listView)
                             table.insert(options, "Select All")
                             table.insert(options, "Remove All")
                         end
-                        if set.mode == "save" then
+                        if set.mode == "save" and set.type == "/" then
                             if #options > 0 then
                                 table.insert(options, "-")
                             end
@@ -440,13 +449,16 @@ local function updateListView(manager, listView)
                         self:repaint("this")
                     end
                 elseif set.mode == "save" then
-                    local element = manager._elements[8]
-                    element:setText(fs.getName(files[i]))
-                    if event.name ~= "mouse" then
-                        manager.selectionManager:select(manager._elements[8], "key")
+                    if set.type ~= "/" then
+                        local element = manager._elements[8]
+                        element:setText(fs.getName(files[i]))
+                        manager.selectionManager:select(element, "key", 3)
+                        element:recalculateText()
+                        element:repaint("this")
                     end
-                    element:recalculateText()
-                    element:repaint("this")
+                elseif set.mode == "select_one" then
+                    ret = {files[i]}
+                    manager:exit()
                 else
                     manager:callFunction(
                         function()
@@ -468,7 +480,7 @@ local function updateListView(manager, listView)
         local pathGroup = manager.selectionManager.groups[3]
         pathGroup.elements[1].select.down = elements[1]
         pathGroup.next = listView.selectionGroup
-        if set.mode ~= "" then --TODO change to bool has second menu or something else
+        if hasUnderMenu then
             local underMenuGroup = manager.selectionManager.groups[4]
             elements[#elements].select.down = underMenuGroup
             underMenuGroup.previous = listView.selectionGroup
@@ -478,7 +490,7 @@ local function updateListView(manager, listView)
         end
     else
         local pathGroup = manager.selectionManager.groups[3]
-        if set.mode ~= "" then --TODO change to bool has second menu or something else
+        if hasUnderMenu then
             local underMenuGroup = manager.selectionManager.groups[4]
 
             pathGroup.next = underMenuGroup
@@ -774,17 +786,54 @@ pathGroup.current = pathField
 if set.mode == "save" then
     listView:setGlobalRect(nil, nil, nil, listView:getHeight() - 1)
     listView:resetLayout()
-    local saveField = ui.inputField.new(manager, set.save, set.save, false, nil, theme.iField1, 1, _h, _w - 6, 1)
+    local saveField = ui.inputField.new(manager, "", set.save, false, nil, theme.iField1, 1, _h, _w - 6, 1)
+    local saveButton = ui.button.new(manager, "Save", nil, theme.button1, _w - 5, _h, 6, 1)
+
+    local function checkButton(text)
+        if text:len() > 0 and (set.override == true or not fs.exists(getCurrentPath() .. "/" .. text)) then
+            return true
+        else
+            return false
+        end
+    end
+
     function saveField:_onSubmit(event, text)
+        if checkButton(text) then
+            saveButton:_onClick(event)
+        end
+    end
+    function saveField:onTextEdit(event, ...)
+        if event == "char" or event == "paste" then
+            local var1 = ...
+            local text = self.text:sub(1, self.cursorOffset) .. var1 .. self.text:sub(self.cursorOffset + 1)
+            if checkButton(text) then
+                saveButton:changeMode(1, true)
+            else
+                saveButton:changeMode(2, true)
+            end
+            return var1
+        elseif event == "text" then
+            local text = ...
+            if checkButton(text) then
+                saveButton:changeMode(1, true)
+            else
+                saveButton:changeMode(2, true)
+            end
+            return text
+        elseif event == "delete" then
+            if checkButton(self.text) then
+                saveButton:changeMode(1, true)
+            else
+                saveButton:changeMode(2, true)
+            end
+        end
+    end
+    function saveButton:_onClick(event)
         if saveField ~= "" then
-            table.insert(ret, getCurrentPath() .. "/" .. text)
+            table.insert(ret, getCurrentPath() .. "/" .. saveField.text)
         end
         saveField.mode = 1
         manager:exit()
-    end
-    local saveButton = ui.button.new(manager, "Save", nil, theme.button1, _w - 5, _h, 6, 1)
-    saveButton._onClick = function(event)
-        saveField:_onSubmit(event, saveField.text)
     end
     local saveMenuGroup = manager.selectionManager:addNewGroup(listView.selectionGroup, menuGroup)
     menuGroup.previous = saveMenuGroup
@@ -794,6 +843,7 @@ if set.mode == "save" then
     saveMenuGroup:addElement(saveButton, saveField, nil, nil, nil)
 
     saveMenuGroup.current = saveField
+    hasUnderMenu = true
 elseif set.mode == "move" then
     listView:setGlobalRect(nil, nil, nil, listView:getHeight() - 1)
     listView:resetLayout()
@@ -810,6 +860,7 @@ elseif set.mode == "move" then
     moveMenuGroup:addElement(moveButton, nil, nil, nil)
 
     moveMenuGroup.current = moveButton
+    hasUnderMenu = true
 elseif set.mode == "select_many" then
     listView:setGlobalRect(nil, nil, nil, listView:getHeight() - 1)
     listView:resetLayout()
@@ -836,6 +887,7 @@ elseif set.mode == "select_many" then
     selectionMenuGroup:addElement(selectSelectionButton, clearSelectionButton, nil, nil, nil)
 
     selectionMenuGroup.current = selectSelectionButton
+    hasUnderMenu = true
 end
 updateButton(manager)
 updateListView(manager, listView)

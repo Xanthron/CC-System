@@ -1,3 +1,4 @@
+--TODO Cursor stays by scroll move
 ---Create a new inputField
 ---@param parent element
 ---@param label string|nil
@@ -92,7 +93,7 @@ function new(parent, label, text, multiLine, onSubmit, style, x, y, w, h)
 
     this.getCursorPos = function()
         if this.mode == 3 then
-            return true, this._cursorX, this._cursorY, colors.red
+            return true, this:getGlobalPosX() + this._cursorX, this:getGlobalPosY() + this._cursorY, colors.red
         end
     end
 
@@ -102,6 +103,12 @@ function new(parent, label, text, multiLine, onSubmit, style, x, y, w, h)
     ---@return nil
     function this:setText(text, index)
         self.text = text
+        if self.onTextEdit then
+            local text = self:onTextEdit("text", text)
+            if text then
+                self.text = text
+            end
+        end
         if index == -1 then
             index = self.cursorOffset
         end
@@ -169,8 +176,8 @@ function new(parent, label, text, multiLine, onSubmit, style, x, y, w, h)
             local offsetC = math.max(0, math.min(width - left - right - 3, completeLength, length + completeLength - width - left - right + 3))
             offsetT = offsetT + offsetC
             offsetT = math.max(0, offsetT)
-            self._cursorX = self.buffer.rect.x + left + self.cursorOffset - offsetT
-            self._cursorY = self.buffer.rect.y + top
+            self._cursorX = self.buffer.rect.x + left + self.cursorOffset - offsetT - self:getGlobalPosX()
+            self._cursorY = self.buffer.rect.y + top - self:getGlobalPosY()
             if completeText == "" then
                 local text = self.text:sub(offsetT + 1, math.min(offsetT + width - left - right, length))
                 ui.buffer.labelBox(self.buffer, text, theme.tC, theme.tBG, 1, theme.b[5][1], left, top, right, bottom)
@@ -211,13 +218,29 @@ function new(parent, label, text, multiLine, onSubmit, style, x, y, w, h)
     function this:_doNormalEvent(event)
         if self.mode == 3 then
             if event.name == "char" then
-                local char = event.param1
+                local char
                 if self.onTextEdit then
-                    char = self:onTextEdit("char", char)
+                    char = self:onTextEdit("char", event.param1, self.text:sub(1, self.cursorOffset) .. event.param1 .. self.text:sub(self.cursorOffset + 1))
                 end
-
+                if not char then
+                    char = event.param1
+                end
                 self.text = self.text:sub(1, self.cursorOffset) .. char .. self.text:sub(self.cursorOffset + 1)
                 self.cursorOffset = self.cursorOffset + char:len()
+                self:getAutoComplete()
+                self:recalculateText()
+                self:repaint("this")
+                return self
+            elseif event.name == "paste" then
+                local paste
+                if self.onTextEdit then
+                    paste = self:onTextEdit("paste", event.param1)
+                end
+                if not paste then
+                    paste = event.param1
+                end
+                self.text = self.text:sub(1, self.cursorOffset) .. paste .. self.text:sub(self.cursorOffset + 1)
+                self.cursorOffset = self.cursorOffset + paste:len()
                 self:getAutoComplete()
                 self:recalculateText()
                 self:repaint("this")
@@ -225,7 +248,7 @@ function new(parent, label, text, multiLine, onSubmit, style, x, y, w, h)
             elseif event.name == "key" then
                 local key = keys.getName(event.param1)
                 if key == "backspace" then
-                    if self.cursorOffset > 0 and self.repeatItem:call() and (not self.onTextEdit or self:onTextEdit("delete", self.cursorOffset)) then
+                    if self.cursorOffset > 0 and self.repeatItem:call() and (not self.onTextEdit or not (self:onTextEdit("delete", self.cursorOffset) == false)) then
                         self.text = self.text:sub(1, self.cursorOffset - 1) .. self.text:sub(self.cursorOffset + 1)
                         self.cursorOffset = self.cursorOffset - 1
                         self:getAutoComplete()
@@ -233,8 +256,8 @@ function new(parent, label, text, multiLine, onSubmit, style, x, y, w, h)
                         self:repaint("this")
                     end
                 elseif key == "delete" then
-                    if self.cursorOffset < self.text:len() and self.repeatItem.call() then
-                        if not self.onTextEdit or self:onTextEdit("delete", self.cursorOffset) then
+                    if self.cursorOffset < self.text:len() and self.repeatItem:call() then
+                        if not self.onTextEdit or not (self:onTextEdit("delete", self.cursorOffset) == false) then
                             self.text = self.text:sub(1, self.cursorOffset) .. self.text:sub(self.cursorOffset + 2)
                             self:getAutoComplete()
                             self:recalculateText()

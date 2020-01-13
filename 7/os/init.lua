@@ -116,7 +116,12 @@ for i = 1, height - 1 do
     backgroundListViewBuffer.textBackgroundColor[index] = colors.white
 end
 local function updateListView()
-    local programs = fs.list("os/programs/")
+    local programs
+    if fs.exists("os/programs/") then
+        programs = fs.list("os/programs/")
+    else
+        programs = {}
+    end
     local container = listView:getContainer()
     table.remove(container._elements) --TODO remove!
     local elements = {}
@@ -189,8 +194,11 @@ menuSelectionGroup.previous = listView.selectionGroup
 listView.selectionGroup.next = menuSelectionGroup
 listView.selectionGroup.previous = menuSelectionGroup
 manager.selectionManager:addGroup(listView.selectionGroup)
-listView:getContainer()._elements[1].select.up = exitButton
-manager.selectionManager:select(listView.selectionGroup, "key", 3)
+if #listView:getContainer()._elements > 0 then
+    manager.selectionManager:select(listView.selectionGroup, "key", 3)
+else
+    manager.selectionManager:select(menuSelectionGroup)
+end
 manager:draw()
 --print(listView.selectionGroup.current.mode)
 manager:execute()

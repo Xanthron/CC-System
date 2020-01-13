@@ -2,7 +2,8 @@ local _x, _y, _w, _h = 1, 1, term.getSize()
 local selected = {}
 local savePath = "/"
 local code = ""
-local function save(path, paths, compress)
+
+local function pathsToText(paths, compress)
     local files = {}
     for i = 1, #paths do
         if fs.exists(paths[i]) then
@@ -33,7 +34,7 @@ local function save(path, paths, compress)
                         table.insert(s, t)
                         return ("s%s" .. "@"):format(#s)
                     end
-                ):gsub("%-%-[^\n]+%[%[", "--"):gsub("%-%-%[%[.*%]%]+", ""):gsub("%-%-.-\n+", "\n"):gsub("\n%s+", "\n"):gsub("[%a%d_]%s[^%a%d_]", emptySpace):gsub("[^%d%a_]%s+[%a%d_]", emptySpace):gsub(
+                ):gsub("%-%-[^\n]+%[%[", "--"):gsub("%-%-%[%[.-%]%]+", ""):gsub("%-%-.-\n+", "\n"):gsub("\n%s+", "\n"):gsub("[%a%d_]%s[^%a%d_]", emptySpace):gsub("[^%d%a_]%s+[%a%d_]", emptySpace):gsub(
                     "s[0-9]+@",
                     function(t)
                         local i = tonumber(t:sub(2, t:len() - 1))
@@ -56,62 +57,61 @@ local function save(path, paths, compress)
         table.insert(strings, string.format('["%s"] = "%s"', key, value))
     end
     local filesText = string.format("{ %s }", table.concat(strings, ","))
-    local text = string.format('for key, value in pairs(%s) do\nlocal s, e = key:find(".*/")\nif s then\nlocal path = key:sub(s, e)\nif not fs.exists(path) then\nfs.makeDir(path)\nend\nend\nlocal file = io.open(key, "w+")\nfile:write(value)\nfile:close()\nend', filesText)
-    if path == true then
-        local key = "0ec2eb25b6166c0c27a394ae118ad829"
-        local response = http.post("https://pastebin.com/api/api_post.php", "api_option=paste&" .. "api_dev_key=" .. key .. "&" .. "api_paste_format=lua&" .. "api_paste_name=" .. textutils.urlEncode("file") .. "&" .. "api_paste_code=" .. textutils.urlEncode(text))
-        if response then
-            local responseText = response.readAll()
-            response.close()
-            code = string.match(responseText, "[^/]+$")
-            return true
-        else
-            return false
-        end
-    else
-        if path:sub(path:len() - 3) ~= ".avr" then
-            path = path .. ".avr"
-        end
-        local file = io.open(path, "w+")
-        file:write(text)
-        file:close()
-        return true
-    end
+    return string.format('for key, value in pairs(%s) do\nlocal s, e = key:find(".*/")\nif s then\nlocal path = key:sub(s, e)\nif not fs.exists(path) then\nfs.makeDir(path)\nend\nend\nlocal file = io.open(key, "w+")\nfile:write(value)\nfile:close()\nend', filesText)
 end
+
+local function saveText(text, path)
+    if path:sub(path:len() - 3) ~= ".avr" then
+        path = path .. ".avr"
+    end
+    local file = io.open(path, "w+")
+    file:write(text)
+    file:close()
+    return true
+end
+
+local function uploadText(text)
+    assert(loadfile("os/system/download/fileLoader.lua"))({mode = "upload", file = text})
+end
+
 local manager = ui.uiManager.new(_x, _y, _w, _h)
 ui.buffer.fill(manager.buffer, " ", colors.black, colors.white)
-local label1 = ui.label.new(manager, "Achivrar", theme.label1, 1, 1, _w - 3, 1)
-local button1 = ui.button.new(manager, "x", nil, theme.button2, _w - 2, 1, 3, 1)
-local tBox1 = ui.textBox.new(manager, "Files:", "", theme.tBox2, 1, 2, _w, _h - 8)
-local button2 = ui.button.new(tBox1, "Edit", nil, theme.button1, _w - 5, _h - 7, 6, 1)
-local toggle1 = ui.toggleButton.new(manager, "Compress", true, nil, theme.toggle1, 1, _h - 5, _w, 1)
-local toggle2 = ui.toggleButton.new(manager, "Upload to PasteBin", false, nil, theme.toggle1, 1, _h - 3, _w, 1)
-local label2 = ui.label.new(manager, "Save: /", theme.label2, 1, _h - 2, _w - 6, 1)
-local button3 = ui.button.new(manager, "Edit", nil, theme.button1, _w - 5, _h - 2, 6, 1)
-local label3 = ui.label.new(manager, "", theme.label1, 1, _h, _w - 6, 1)
-local button4 = ui.button.new(manager, "Save", nil, theme.button1, _w - 5, _h, 6, 1)
+local label_title = ui.label.new(manager, "Achivrar", theme.label1, 1, 1, _w - 3, 1)
+local button_exit = ui.button.new(manager, "<", nil, theme.button2, _w - 2, 1, 3, 1)
+local tBox_files = ui.textBox.new(manager, "Files:", "", theme.tBox2, 1, 2, _w, _h - 8)
+local button_files = ui.button.new(tBox_files, "Edit", nil, theme.button1, _w - 5, _h - 7, 6, 1)
+local toggle_compress = ui.toggleButton.new(manager, "Compress", true, nil, theme.toggle1, 1, _h - 5, _w, 1)
+local toggle_upload = ui.toggleButton.new(manager, "Upload to PasteBin", false, nil, theme.toggle1, 1, _h - 3, _w, 1)
+local label_savePath = ui.label.new(manager, "Save: /", theme.label2, 1, _h - 2, _w - 6, 1)
+local button_savePath = ui.button.new(manager, "Edit", nil, theme.button1, _w - 5, _h - 2, 6, 1)
+local label_info = ui.label.new(manager, "", theme.label1, 1, _h, _w - 6, 1)
+local button_start = ui.button.new(manager, "Save", nil, theme.button1, _w - 5, _h, 6, 1)
+
 local function updateSaveButton()
-    if #selected > 0 and (toggle2._checked == true or fs.exists(fs.getDir(savePath))) then
-        button4.mode = 1
+    if #selected > 0 and (toggle_upload._checked == true or fs.exists(fs.getDir(savePath))) then
+        button_start.mode = 1
     else
-        button4.mode = 2
+        button_start.mode = 2
     end
-    button4.recalculate()
+    button_start:recalculate()
 end
+
 updateSaveButton()
+
 local function updateLabelText()
-    if toggle2._checked then
-        label2.text = "Code: " .. code
+    if toggle_upload._checked then
+        label_savePath.text = "Code: " .. code
     else
-        label2.text = "Save: " .. savePath
+        label_savePath.text = "Save: " .. savePath
     end
-    label2.recalculate()
+    label_savePath:recalculate()
 end
-button1._onClick = function(event)
-    manager.exit()
+
+function button_exit:_onClick(event)
+    manager:exit()
 end
-button2._onClick = function(event)
-    manager.callFunction(
+function button_files:_onClick(event)
+    manager:callFunction(
         function()
             local select = true
             if event.name == "mouse_up" then
@@ -121,14 +121,14 @@ button2._onClick = function(event)
             if s then
                 selected = s
             end
-            tBox1.setText(table.concat(selected, "\n"))
+            tBox_files:setText(table.concat(selected, "\n"))
             updateSaveButton()
-            manager.draw()
+            manager:draw()
         end
     )
 end
-local button3_save = function(event)
-    manager.callFunction(
+function button_savePath:_onClick(event)
+    manager:callFunction(
         function()
             local select = true
             if event.name == "mouse_up" then
@@ -142,84 +142,54 @@ local button3_save = function(event)
             if not fs.exists(path) then
                 path = ""
             end
-            path = assert(loadfile("os/system/explorer/explorer.lua"))({select = true, mode = "save", type = "avr", path = path, save = name, select = select})
+            path = assert(loadfile("os/system/explorer/explorer.lua"))({select = true, mode = "save", override = true, type = "avr", path = path, save = name, select = select})
             if path then
                 savePath = path
             end
             updateLabelText()
             updateSaveButton()
-            manager.draw()
+            manager:draw()
         end
     )
 end
-local button3_pasteBin = function(event)
-end
-button3._onClick = button3_save
-toggle2._onToggle = function(event, toggle)
+function toggle_upload:_onToggle(event, toggle)
     if toggle then
         updateLabelText()
-        button3._onClick = button3_pasteBin
-        button3.text = "Copy"
-        if code == "" then
-            button3.mode = 2
-        else
-            button3.mode = 1
-        end
+        button_savePath.isVisible = false
     else
         updateLabelText()
-        button3._onClick = button3_save
-        button3.text = "Edit"
-        button3.mode = 1
+        button_savePath.isVisible = true
     end
-    button3.recalculate()
+    --button_savePath:recalculate()
     updateSaveButton()
-    manager.draw()
+    manager:draw()
 end
-button4._onClick = function(event)
-    manager.callFunction(
+function button_start:_onClick(event)
+    manager:callFunction(
         function()
-            if toggle2._checked then
-                label3.text = "Start Upload"
-                label3.recalculate()
-                label3.repaint("this")
-                if save(true, selected, toggle1._checked) then
-                    updateLabelText()
-                    updateSaveButton()
-                    button3.mode = 1
-                    button3.recalculate()
-                    label3.text = "Upload succeeded"
-                else
-                    label3.text = "Upload failed"
-                end
-                label3.recalculate()
-                manager.draw()
+            if toggle_upload._checked then
+                uploadText(pathsToText(selected, toggle_compress._checked))
             else
-                if save(savePath, selected, toggle1._checked) then
-                    label3.text = "File created"
+                if saveText(pathsToText(selected, toggle_compress._checked), savePath) then
+                    label_info.text = "File created"
                 else
-                    label3.text = "File creation Failed"
+                    label_info.text = "File creation Failed"
                 end
-                label3.recalculate()
-                manager.draw()
+                label_info:recalculate()
             end
+            manager:draw()
         end
     )
 end
-local selectionGroup = manager.selectionManager.addNewSelectionGroup()
-local items = {}
-table.insert(items, selectionGroup.addNewSelectionElement(button1))
-table.insert(items, selectionGroup.addNewSelectionElement(button2))
-table.insert(items, selectionGroup.addNewSelectionElement(toggle1))
-table.insert(items, selectionGroup.addNewSelectionElement(toggle2))
-table.insert(items, selectionGroup.addNewSelectionElement(button3))
-table.insert(items, selectionGroup.addNewSelectionElement(button4))
-for i = 1, #items do
-    items[i].up = items[i - 1]
-    items[i].down = items[i + 1]
-end
-selectionGroup.currentSelectionElement = items[2]
-manager.selectionManager.addSelectionGroup(tBox1.selectionGroup)
-manager.selectionManager.setCurrentSelectionGroup(selectionGroup)
+local group_menu = manager.selectionManager:addNewGroup()
+group_menu:addElement(button_exit, nil, nil, nil, button_files)
+group_menu:addElement(button_files, nil, button_exit, nil, toggle_compress)
+group_menu:addElement(toggle_compress, nil, button_files, nil, toggle_upload)
+group_menu:addElement(toggle_upload, nil, toggle_compress, nil, button_savePath)
+group_menu:addElement(button_savePath, nil, toggle_upload, nil, button_start)
+group_menu:addElement(button_start, nil, button_savePath, nil, nil)
+manager.selectionManager:addGroup(tBox_files.selectionGroup)
+manager.selectionManager:select(button_files, "code", 3)
 
-manager.draw()
-manager.execute()
+manager:draw()
+manager:execute()

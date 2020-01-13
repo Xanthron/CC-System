@@ -14,44 +14,14 @@ local defaultPasteBin = "ZbWvc7x9"
 ---@type integer
 local _x, _y, _w, _h = 1, 1, term.getSize()
 ---@type table
-local official, unofficial
+local official, unofficial, updateSView
 --[[
     ####################################################################################################################
     Functions
     ####################################################################################################################
 ]]
 local function downloadScreen(...)
-    parallel.waitForAny(
-        function()
-            local x, y = term.getSize()
-            x = math.floor((x - 9) / 2)
-            y = math.floor((y - 4) / 2)
-
-            local pos = {x + 4, y + 2, x + 5, y + 2, x + 6, y + 2, x + 6, y + 3, x + 6, y + 4, x + 5, y + 4, x + 4, y + 4, x + 4, y + 3}
-            local char = {"o", "O", "o"}
-
-            local step = 1
-
-            while true do
-                if term.isColor() then
-                    term.setBackgroundColor(colors.white)
-                    term.setTextColor(colors.orange)
-                end
-                term.clear()
-                term.setCursorPos(x, y)
-                term.write("Downloading")
-                for i = 1, #char do
-                    local index = ((step + i) % math.floor(#pos / 2) + 1) * 2 - 1
-                    term.setCursorPos(pos[index], pos[index + 1])
-                    term.write(char[#char - i + 1])
-                end
-
-                step = step + 1
-                sleep(0.2)
-            end
-        end,
-        ...
-    )
+    assert(loadfile("os/system/wait.lua"))("Downloading", ...)
 end
 
 local function updateFiles()
@@ -76,7 +46,7 @@ local function createSViewButton(manager, sView, official, data, elements, x, y,
         image.buffer.textColor[1] = colors.green
         image.buffer.textBackgroundColor[1] = colors.white
     else
-        image.buffer.text[1] = "x"
+        image.buffer.text[1] = "<"
         image.buffer.textColor[1] = colors.red
         image.buffer.textBackgroundColor[1] = colors.white
     end
@@ -87,24 +57,33 @@ local function createSViewButton(manager, sView, official, data, elements, x, y,
     function button_item:_onClick(event)
         manager:callFunction(
             function()
+                local success, content, text
                 downloadScreen(
                     function()
-                        local success, content
                         if data.path == "run" then
                             if data.url:len() == 8 then
                                 success, content = www.pasteBinRun(data.url)
                             else
                                 success, content = www.run(data.url)
                             end
+                            text = ("Run\n%s\n"):format(data.name)
                         else
                             if data.url:len() == 8 then
                                 success, content = www.pasteBinSave(data.url, data.path, true)
                             else
                                 success, content = www.save(data.url, data.path, true)
                             end
+                            text = ("Save\n%s\nat\n%s\n"):format(data.name, data.path)
                         end
                     end
                 )
+                if success then
+                    text = text .. "Succeeded."
+                    assert(loadfile("os/system/infoBox.lua"))({label = "Information", text = text, x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, button1 = "Ok", select = event.name ~= "mouse_up"})
+                else
+                    text = text .. "failed.\n\n" .. content
+                    assert(loadfile("os/system/infoBox.lua"))({label = "Information", text = text, x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, button1 = "Ok", select = event.name ~= "mouse_up"})
+                end
                 manager:draw()
             end
         )
@@ -132,11 +111,22 @@ local function createSViewButton(manager, sView, official, data, elements, x, y,
         local text = string.format("%s\n\n%s\n\nColor: %s\n Type:  %s\n\n\nSource:\n%s", name, data.description, color, table.concat(types, ", "), data.url)
         local button2
         if not official then
-        --button2 = "Remove" --TODO delete!
+            button2 = "Remove"
         end
+        manager.parallelManager:removeFunction(self._pressAnimation)
         manager:callFunction(
             function()
                 local number, select = assert(loadfile("os/system/infoBox.lua"))({label = "Information", text = text, x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, button1 = "Ok", button2 = button2, select = event.name ~= "mouse_up"})
+                if number == 2 then
+                    for i = 1, #unofficial do
+                        if unofficial[i] == data then
+                            table.remove(unofficial, i)
+                            break
+                        end
+                    end
+                    assets.variables.save("os/system/download/unofficial", unofficial)
+                    updateSView(manager, sView)
+                end
                 manager:draw()
             end
         )
@@ -148,7 +138,7 @@ end
 
 ---@param manager uiManager
 ---@param sView scrollView
-local function updateSView(manager, sView)
+function updateSView(manager, sView)
     sView:clear()
     local container = sView:getContainer()
     ---@type element[]
@@ -192,6 +182,8 @@ local function updateSView(manager, sView)
             group_menu.elements[i].select.down = nil
         end
     end
+
+    sView:recalculate()
 end
 --[[
     ####################################################################################################################
@@ -253,7 +245,19 @@ end
 function button_download:_onClick(event)
     manager:callFunction(
         function()
-            assert(loadfile("os/system/download/fileLoader.lua"))()
+            assert(loadfile("os/system/download/fileLoader.lua"))({mode = "download"})
+            unofficial = dofile("os/system/download/unofficial")
+            updateSView(manager, sView_list)
+            manager:draw()
+        end
+    )
+end
+function button_upload:_onClick(event)
+    manager:callFunction(
+        function()
+            assert(loadfile("os/system/download/fileLoader.lua"))({mode = "upload"})
+            unofficial = dofile("os/system/download/unofficial")
+            updateSView(manager, sView_list)
             manager:draw()
         end
     )

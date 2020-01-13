@@ -43,9 +43,6 @@ if args.button1 then
         length,
         1
     )
-    if args.button2 then
-        button1:setGlobalRect(x + left, nil, nil, nil, nil)
-    end
     textBox.selectionGroup:addElement(button1)
 end
 if args.button2 then
@@ -58,13 +55,13 @@ if args.button2 then
             ret = 2
             manager:exit()
         end,
-        args.button2Theme or theme.button1,
-        x + w - right - 1 - length,
+        args.buttonTheme or theme.button1,
+        x + left + 1,
         y + h - math.floor(bottom / 2) - 1,
         length,
         1
     )
-    textBox.selectionGroup:addNewSelectionElement(button2, button1, nil, nil, nil, true)
+    textBox.selectionGroup:addElement(button2, nil, nil, button1, nil, true)
 end
 manager.selectionManager:addGroup(textBox.selectionGroup)
 manager.selectionManager:select(button1, "code", 3)

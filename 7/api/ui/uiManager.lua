@@ -32,6 +32,18 @@ function new(x, y, w, h)
     ---@return nil
     function this._execute()
         while true do
+            if this.getCursorPos then
+                local blinking, posX, posY, textColor = this.getCursorPos()
+                if blinking == nil then
+                    this.getCursorPos = nil
+                else
+                    term.setCursorPos(posX, posY)
+                    term.setCursorBlink(blinking)
+                    if textColor and term.isColor() then
+                        term.setTextColor(textColor)
+                    end
+                end
+            end
             this._event:pull()
             term.setCursorBlink(false)
             local eventName = this._event.name
@@ -46,18 +58,6 @@ function new(x, y, w, h)
                         if #this.selectionManager.groups > 0 then
                             this.selectionManager:keyEvent(this._event)
                         end
-                    end
-                end
-            end
-            if this.getCursorPos then
-                local blinking, posX, posY, textColor = this.getCursorPos()
-                if blinking == nil then
-                    this.getCursorPos = nil
-                else
-                    term.setCursorPos(posX, posY)
-                    term.setCursorBlink(blinking)
-                    if textColor and term.isColor() then
-                        term.setTextColor(textColor)
                     end
                 end
             end
