@@ -6,3 +6,5 @@
 --TODO replace |nil with |"nil" and change optional to nil
 
 --TODO sometimes scrollView etc. dose not scroll reason: not selected
+
+--TODO Update Init list after explorer and browser

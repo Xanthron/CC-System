@@ -1,5 +1,9 @@
-local args = {...}
-local file = args[1]
+local set = {...}
+
+utility.checkType(set, "file", "string", true)
+utility.checkType(set, "args", "table", false)
+utility.checkType(set, "select", "boolean", true)
+
 local function getFilesWithName(path, name, tab)
     local paths = fs.list(path)
     for key, value in pairs(paths) do
@@ -85,10 +89,9 @@ local function executionHandler()
         term.setTextColor(colors.white)
     end
     term.clear()
-    assert(loadfile(file))(table.unpack(args, 2, #args))
+    local button, select = assert(loadfile(set.file))(table.unpack(set.args))
+    return select
 end
 
-local status, err, ret = xpcall(executionHandler, errorHandler)
-return status, ret
---TODO select return
---TODO error checking
+local ret = {xpcall(executionHandler, errorHandler)}
+return table.unpack(ret)

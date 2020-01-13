@@ -26,7 +26,12 @@ local browserButton =
                 if event.name == "mouse_up" then
                     select = false
                 end
-                assert(loadfile("os/system/execute.lua"))("os/system/download/manager.lua", {select = select})
+                local success, select = assert(loadfile("os/system/execute.lua"))({file = "os/system/download/manager.lua", select = event ~= "mouse_up", args = {select = select}})
+                if select then
+                    manager.selectionManager.select(self, "code", 3)
+                else
+                    manager.selectionManager.deselect("code")
+                end
                 manager:draw()
             end
         )
@@ -48,7 +53,12 @@ local explorerButton =
                 if event.name == "mouse_up" then
                     select = false
                 end
-                assert(loadfile("os/system/execute.lua"))("os/system/explorer/explorer.lua", {select = select})
+                local success, select = assert(loadfile("os/system/execute.lua"))({file = "os/system/explorer/explorer.lua", select = event ~= "mouse_up", args = {select = select}})
+                if select then
+                    manager.selectionManager.select(self, "code", 3)
+                else
+                    manager.selectionManager.deselect("code")
+                end
                 manager:draw()
             end
         )
@@ -123,7 +133,7 @@ local function updateListView()
         programs = {}
     end
     local container = listView:getContainer()
-    table.remove(container._elements) --TODO remove!
+    listView:clear()
     local elements = {}
     for i, v in ipairs(programs) do
         local startFunction
@@ -131,10 +141,15 @@ local function updateListView()
         local delFunction
         if fs.isDir("os/programs/" .. v) then
         else
-            startFunction = function()
+            startFunction = function(self, event)
                 manager:callFunction(
                     function()
-                        assert(loadfile("os/system/execute.lua"))("os/programs/" .. v)
+                        local success, select = assert(loadfile("os/system/execute.lua"))({file = "os/programs/" .. v, select = event ~= "mouse_up", args = {select = select}})
+                        if select then
+                            manager.selectionManager.select(self, "code", 3)
+                        else
+                            manager.selectionManager.deselect("code")
+                        end
                         manager:draw()
                     end
                 )

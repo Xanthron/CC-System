@@ -1,5 +1,4 @@
 ---@param parent element
---TODO edit to label?
 ---@param text string
 ---@param checked boolean
 --TODO remove

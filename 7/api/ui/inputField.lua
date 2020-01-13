@@ -1,4 +1,3 @@
---TODO Cursor stays by scroll move
 ---Create a new inputField
 ---@param parent element
 ---@param label string|nil

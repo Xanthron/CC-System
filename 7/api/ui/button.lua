@@ -1,7 +1,6 @@
 ---Create a new button
 ---@return button
 ---@param parent element
---TODO rename to label
 ---@param text string
 --TODO remove
 ---@param func function

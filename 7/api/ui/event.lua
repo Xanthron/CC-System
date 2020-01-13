@@ -23,8 +23,7 @@ function new()
     ---@param name string|"nil"
     ---@return nil
     function this:pullRaw(name)
-        self.name, self.param1, self.param2, self.param3, self.param4, self.param5 = os.pullEvent(name)
-        --TODO only os.pullEvent
+        self.name, self.param1, self.param2, self.param3, self.param4, self.param5 = os.pullRawEvent(name)
     end
     return this
 end

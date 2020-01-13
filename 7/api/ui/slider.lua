@@ -18,9 +18,9 @@ function new(parent, onValueChange, orientation, startValue, endValue, size, sty
     this.style = style
     ---@type integer
     this.orientation = orientation
-    ---TODO hidden
+    ---@private
     ---@type integer
-    this.pressedButton = 0
+    this._pressedButton = 0
     ---@type repeatItem
     this.repeatItem = ui.repeatItem.new(0.8, 0.05, 0.7)
     ---@type integer
@@ -40,7 +40,7 @@ function new(parent, onValueChange, orientation, startValue, endValue, size, sty
         function(data)
             while true do
                 if this.mode == 4 and this.repeatItem:call() == true then
-                    if this.pressedButton == 1 then
+                    if this._pressedButton == 1 then
                         if this._onValueChange then
                             this._onValueChange(-1)
                         end
@@ -95,7 +95,7 @@ function new(parent, onValueChange, orientation, startValue, endValue, size, sty
                     index = index + 1
                 end
             else
-                if self.pressedButton == 1 and self.mode == 4 then
+                if self._pressedButton == 1 and self.mode == 4 then
                     for i = 1, width do
                         buffer.text[index] = theme.buttonP.sTheme.t[i]
                         buffer.textColor[index] = theme.buttonP.sTheme.tC[i]
@@ -134,7 +134,7 @@ function new(parent, onValueChange, orientation, startValue, endValue, size, sty
                     index = index + 1
                 end
             else
-                if self.pressedButton == 2 and self.mode == 4 then
+                if self._pressedButton == 2 and self.mode == 4 then
                     for i = 1, width do
                         buffer.text[index] = theme.buttonN.sTheme.t[i]
                         buffer.textColor[index] = theme.buttonN.sTheme.tC[i]
@@ -176,7 +176,7 @@ function new(parent, onValueChange, orientation, startValue, endValue, size, sty
                     index = index + width
                 end
             else
-                if self.pressedButton == 1 and self.mode == 4 then
+                if self._pressedButton == 1 and self.mode == 4 then
                     for i = 1, height do
                         buffer.text[index] = theme.buttonP.sTheme.t[i]
                         buffer.textColor[index] = theme.buttonP.sTheme.tC[i]
@@ -217,7 +217,7 @@ function new(parent, onValueChange, orientation, startValue, endValue, size, sty
                     index = index + width
                 end
             else
-                if self.pressedButton == 2 and self.mode == 4 then
+                if self._pressedButton == 2 and self.mode == 4 then
                     for i = 1, height do
                         buffer.text[index] = theme.buttonN.sTheme.t[i]
                         buffer.textColor[index] = theme.buttonN.sTheme.tC[i]
@@ -250,14 +250,14 @@ function new(parent, onValueChange, orientation, startValue, endValue, size, sty
                 if event.param2 >= x and event.param2 < x + w then
                     if y == rectY and event.param3 == y then
                         self.mode = 4
-                        self.pressedButton = 1
+                        self._pressedButton = 1
                         self:recalculate()
                         self:repaint("this", x, y, w, h)
                         self:getManager().parallelManager:addFunction(self._repeatButtonPressElement)
                         return self
                     elseif y + h == rectY + rectH and event.param3 == y + h - 1 then
                         self.mode = 4
-                        self.pressedButton = 2
+                        self._pressedButton = 2
                         self:recalculate()
                         self:repaint("this", x, y, w, h)
                         self:getManager().parallelManager:addFunction(self._repeatButtonPressElement)
@@ -272,13 +272,13 @@ function new(parent, onValueChange, orientation, startValue, endValue, size, sty
                     end
                 end
             elseif event.name == "mouse_drag" then
-                if event.param2 >= x and event.param2 < x + w and self.mode == 3 and ((self.pressedButton == 1 and event.param3 == y) or (self.pressedButton == 2 and event.param3 == y + h - 1)) then
+                if event.param2 >= x and event.param2 < x + w and self.mode == 3 and ((self._pressedButton == 1 and event.param3 == y) or (self._pressedButton == 2 and event.param3 == y + h - 1)) then
                     self.mode = 4
                     self:recalculate()
                     self:repaint("this", x, y, w, h)
                     return self
                 elseif self.mode == 4 then
-                    if self.pressedButton == 0 then
+                    if self._pressedButton == 0 then
                         local newPos = math.max(0, math.min(rectH - 2, event.param3 - rectY - 1))
                         local totalSize = self.endValue - self.startValue
                         local newValue = math.floor((newPos / (rectH - 3)) * (totalSize - self.size + self.startValue))
@@ -298,7 +298,7 @@ function new(parent, onValueChange, orientation, startValue, endValue, size, sty
                     self:repaint("this", x, y, w, h)
                     self.repeatItem:reset()
                     self:getManager().parallelManager:removeFunction(self._repeatButtonPressElement)
-                    self.pressedButton = 0
+                    self._pressedButton = 0
                     return self
                 end
             end
@@ -307,14 +307,14 @@ function new(parent, onValueChange, orientation, startValue, endValue, size, sty
                 if event.param3 >= y and event.param3 < y + h then
                     if x == rectX and event.param2 == x then
                         self.mode = 4
-                        self.pressedButton = 1
+                        self._pressedButton = 1
                         self:recalculate()
                         self:repaint("this", x, y, w, h)
                         self:getManager().parallelManager:addFunction(self._repeatButtonPressElement)
                         return self
                     elseif x + w == rectX + rectW and event.param2 == x + w - 1 then
                         self.mode = 4
-                        self.pressedButton = 2
+                        self._pressedButton = 2
                         self:recalculate()
                         self:repaint("this", x, y, w, h)
                         self:getManager().parallelManager:addFunction(self._repeatButtonPressElement)
@@ -329,13 +329,13 @@ function new(parent, onValueChange, orientation, startValue, endValue, size, sty
                     end
                 end
             elseif event.name == "mouse_drag" then
-                if event.param3 >= y and event.param3 < y + h and self.mode == 3 and ((self.pressedButton == 1 and event.param2 == x) or (self.pressedButton == 2 and event.param2 == x + w - 1)) then
+                if event.param3 >= y and event.param3 < y + h and self.mode == 3 and ((self._pressedButton == 1 and event.param2 == x) or (self._pressedButton == 2 and event.param2 == x + w - 1)) then
                     self.mode = 4
                     self:recalculate()
                     self:repaint("this", x, y, w, h)
                     return self
                 elseif self.mode == 4 then
-                    if self.pressedButton == 0 then
+                    if self._pressedButton == 0 then
                         local newPos = math.max(0, math.min(rectW - 2, event.param2 - rectX - 1))
                         local totalSize = self.endValue - self.startValue
                         local newValue = math.floor((newPos / (rectW - 3)) * (totalSize - self.size + self.startValue))
@@ -355,7 +355,7 @@ function new(parent, onValueChange, orientation, startValue, endValue, size, sty
                     self:repaint("this", x, y, w, h)
                     self.repeatItem:reset()
                     self:getManager().parallelManager:removeFunction(self._repeatButtonPressElement)
-                    self.pressedButton = 0
+                    self._pressedButton = 0
                     return self
                 end
             end
