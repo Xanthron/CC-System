@@ -20,7 +20,7 @@ Settings:
 ]]
 local args = ...
 
-local set = dofile("os/system/explorer/default.lua")
+local set = dofile("os/sys/explorer/default.lua")
 if type(args) == "table" then
     for key, value in pairs(args) do
         set[key] = value
@@ -67,10 +67,10 @@ if set.pathsSize < 1 then
     error(("pathsSize' is set but the value is to low. (expected value > 0 got %s)"):format(set.pathsSize), 3)
 end
 checkType("select", "boolean")
-local ignorePaths = dofile("os/system/explorer/excludedPaths.lua")
+local ignorePaths = dofile("os/sys/explorer/excludedPaths.lua")
 local ext = {}
-for _, v in ipairs(fs.list("os/system/explorer/extensions")) do
-    ext[v] = dofile("os/system/explorer/extensions/" .. v)
+for _, v in ipairs(fs.list("os/sys/explorer/extensions")) do
+    ext[v] = dofile("os/sys/explorer/extensions/" .. v)
 end
 local _x, _y, _w, _h
 if set.manager then
@@ -221,7 +221,7 @@ local function getNameAndIconKeyExtension(name)
         name = name:sub(1, startI - 1)
     end
     if set.neatNames == true then
-        name = assets.extension.getNeatName(name)
+        name = textutils.getNeatName(name)
     end
     return name, extension
 end
@@ -324,7 +324,7 @@ local function updateListView(manager, listView)
                             if y + #options + 3 > _h + _y then
                                 y = y - 3 - #options
                             end
-                            local name, indexes, select = assert(loadfile("os/system/listBox.lua"))({x = self:getGlobalPosX(), y = y, manager = manager, label = "File", select = select, buttons = options})
+                            local name, indexes, select = assert(loadfile("os/sys/listBox.lua"))({x = self:getGlobalPosX(), y = y, manager = manager, label = "File", select = select, buttons = options})
                             if name then
                                 if name == "Rename" then
                                     manager.parallelManager:removeFunction(self._pressAnimation)
@@ -339,14 +339,14 @@ local function updateListView(manager, listView)
                                     manager.parallelManager:removeFunction(self._pressAnimation)
                                     delete(manager, listView, dirs[i], select)
                                 elseif name == "Select All" then
-                                    for _, p in ipairs(assets.extension.getAllFilePaths(dirs[i])) do
+                                    for _, p in ipairs(fs.listAll(dirs[i])) do
                                         if isSelected(p) == false then
                                             addSelection(p)
                                         end
                                     end
                                     updateSelectionLabel(manager)
                                 elseif name == "Remove All" then
-                                    for _, p in ipairs(assets.extension.getAllFilePaths(dirs[i])) do
+                                    for _, p in ipairs(fs.listAll.getAllFilePaths(dirs[i])) do
                                         removeSelection(p)
                                     end
                                     updateSelectionLabel(manager)
@@ -414,7 +414,7 @@ local function updateListView(manager, listView)
                             if y + #options + 3 > _h + _y then
                                 y = y - 3 - #options
                             end
-                            local name, indexes, select = assert(loadfile("os/system/listBox.lua"))({x = self:getGlobalPosX(), y = y, manager = manager, label = "File", select = select, buttons = options})
+                            local name, indexes, select = assert(loadfile("os/sys/listBox.lua"))({x = self:getGlobalPosX(), y = y, manager = manager, label = "File", select = select, buttons = options})
                             if name then
                                 if name == "Rename" then
                                     manager.parallelManager:removeFunction(self._pressAnimation)
@@ -462,7 +462,7 @@ local function updateListView(manager, listView)
                 else
                     manager:callFunction(
                         function()
-                            assert(loadfile("os/system/execute.lua"))(ext[4] or "rom/programs/edit.lua", files[i])
+                            assert(loadfile("os/sys/execute.lua"))(ext[4] or "rom/programs/edit.lua", files[i])
                             manager:draw()
                         end
                     )
@@ -586,7 +586,7 @@ move = function(manager, listView, path, select)
     local isDir = fs.isDir(path)
     local name = fs.getName(path)
     local path = path:sub(1, path:len() - name:len())
-    local save = assert(loadfile("os/system/explorer/explorer.lua"))({select = true, mode = "move", files = false, path = path, move = name, edit = false})
+    local save = assert(loadfile("os/sys/explorer/main.lua"))({select = true, mode = "move", files = false, path = path, move = name, edit = false})
     if save then
         local newPath = fs.combine(save, name)
         local startPath = path .. name
@@ -699,7 +699,7 @@ function fileButton:_onClick(event)
                 table.insert(options, "New Folder")
             end
             if #options > 0 then
-                local name = assert(loadfile("os/system/listBox.lua"))({x = 1, y = 1, manager = manager, label = "File", select = select, buttons = options})
+                local name = assert(loadfile("os/sys/listBox.lua"))({x = 1, y = 1, manager = manager, label = "File", select = select, buttons = options})
                 if name then
                     if name == "New Folder" then
                         create(manager, listView, "New Folder", getCurrentPath(), true)

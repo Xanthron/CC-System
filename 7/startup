@@ -1,8 +1,49 @@
-local function loadAPI(input,dir)local apiFiles=fs.list(dir)for i=1, #apiFiles do
-local path=dir.."/"..apiFiles[i]if fs.isDir(path) ==false then
-local name=string.gmatch(apiFiles[i],"[^.]+")()os.loadAPI(path)local temp=_G[name]os.unloadAPI(name)input[name] =temp
-else
-input[apiFiles[i]] = {}loadAPI(input[apiFiles[i]],path)end
+local function loadAPI(input, dir, rootPath)
+    rootPath = rootPath or dir
+    local apiFiles = fs.list(dir)
+    local fs, os = fs, os
+    for i = 1, #apiFiles do
+        local path = dir .. "/" .. apiFiles[i]
+
+        if fs.isDir(path) == false then
+            local name = string.match(apiFiles[i], "^[^%.]+")
+            local root
+            if _G[name] then
+                root = _G[name]
+            end
+            os.loadAPI(path)
+            if root then
+                if fs.getDir(path) ~= rootPath then
+                    temp = _G[name]
+                    os.unloadAPI(name)
+                    input[name] = temp
+                    _G[name] = root
+                else
+                    if type(root) ~= "table" then
+                        error(("%s could not be be loaded"):format(path))
+                    end
+                    for k, v in pairs(_G[name]) do
+                        root[k] = v
+                    end
+                    os.unloadAPI(name)
+                    input[name] = root
+                end
+            else
+                temp = _G[name]
+                os.unloadAPI(name)
+                input[name] = temp
+            end
+        else
+            input[apiFiles[i]] = {}
+            loadAPI(input[apiFiles[i]], path, rootPath)
+        end
+    end
 end
-end
-loadAPI(_G,"api")shell.run("os/init")
+
+loadAPI(_G, "os/api")
+
+local success
+success, _G.theme = ui.theme.load("main.lua")
+_G.shell = shell
+
+shell.run("os/init")

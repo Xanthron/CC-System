@@ -15,7 +15,7 @@ local pathSave, pathUpload = args.savePath, args.filePath
     ####################################################################################################################
 ]]
 local function loadScreen(label, ...)
-    assert(loadfile("os/system/wait.lua"))(label, ...)
+    assert(loadfile("os/sys/wait.lua"))(label, ...)
 end
 --[[
     ####################################################################################################################
@@ -147,14 +147,14 @@ if mode == "Upload" then
                 if pathUpload then
                     path = fs.getDir(pathUpload)
                 end
-                path = assert(loadfile("os/system/explorer/explorer.lua"))({mode = "select_one", path = path, edit = false, select = event.name ~= "mouse_up"})
+                path = assert(loadfile("os/sys/explorer/main.lua"))({mode = "select_one", path = path, edit = false, select = event.name ~= "mouse_up"})
                 if path then
                     pathUpload = path
                     label_uploadPath.text = pathUpload
                     label_uploadPath:recalculate()
                     if wasSame then
                         if pathSave then
-                            wasSame = iField_name.text == assets.extension.getNeatName(pathSave)
+                            wasSame = iField_name.text == textutils.getNeatName(pathSave)
                         else
                             wasSame = true
                         end
@@ -162,7 +162,7 @@ if mode == "Upload" then
                         label_savePath.text = pathUpload
                         label_savePath:recalculate()
                         if wasSame then
-                            iField_name:setText(assets.extension.getNeatName(pathSave))
+                            iField_name:setText(textutils.getNeatName(pathSave))
                             iField_name:recalculate()
                             iField_name:repaint("this")
                         end
@@ -209,17 +209,17 @@ function button_savePath:_onClick(event)
                 name = fs.getName(pathSave)
                 path = fs.getDir(pathSave)
             end
-            path = assert(loadfile("os/system/explorer/explorer.lua"))({mode = "save", save = name, path = path, edit = false, override = true, select = event.name ~= "mouse_up"})
+            path = assert(loadfile("os/sys/explorer/main.lua"))({mode = "save", save = name, path = path, edit = false, override = true, select = event.name ~= "mouse_up"})
             if path then
                 local wasSame = true
                 if pathSave then
-                    wasSame = iField_name.text == assets.extension.getNeatName(pathSave)
+                    wasSame = iField_name.text == textutils.getNeatName(pathSave)
                 end
                 pathSave = path
                 label_savePath.text = pathSave
                 label_savePath:recalculate()
                 if wasSame then
-                    iField_name:setText(assets.extension.getNeatName(pathSave))
+                    iField_name:setText(textutils.getNeatName(pathSave))
                     iField_name:recalculate()
                     iField_name:repaint("this")
                 end
@@ -368,7 +368,7 @@ function button_load:_onClick(event)
 
                     local data = {name = iField_name.text, description = iField_description.text, color = toggle_color._checked, type = table.concat(types, ""), url = code, path = path}
 
-                    local datas = dofile("os/system/download/unofficial")
+                    local datas = dofile("os/sys/browser/unofficial")
                     for i, v in ipairs(datas) do
                         if v.name == iField_name.text then
                             table.remove(datas, i)
@@ -377,10 +377,10 @@ function button_load:_onClick(event)
                     end
                     table.insert(datas, data)
 
-                    assets.variables.save("os/system/download/unofficial", datas)
+                    table.save(datas, "os/sys/browser/unofficial")
                 end
                 --error("lol")
-                assert(loadfile("os/system/infoBox.lua"))(
+                assert(loadfile("os/sys/infoBox.lua"))(
                     {
                         x = _x + 2,
                         y = _y + 2,
@@ -393,7 +393,7 @@ function button_load:_onClick(event)
                     }
                 )
             else
-                assert(loadfile("os/system/infoBox.lua"))(
+                assert(loadfile("os/sys/infoBox.lua"))(
                     {
                         x = _x + 2,
                         y = _y + 2,

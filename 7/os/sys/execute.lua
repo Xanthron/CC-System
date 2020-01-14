@@ -1,8 +1,8 @@
-local set = {...}
+local set = ...
 
-utility.checkType(set, "file", "string", true)
-utility.checkType(set, "args", "table", false)
-utility.checkType(set, "select", "boolean", true)
+table.checkType(set, "file", "string", true)
+table.checkType(set, "args", "table", false)
+table.checkType(set, "select", "boolean", true)
 
 local function getFilesWithName(path, name, tab)
     local paths = fs.list(path)
@@ -70,7 +70,7 @@ local function errorHandler(text)
         end
         message = message .. "\n\n\n" .. debug.traceback()
     end
-    assert(loadfile("os/system/infoBox.lua"))(
+    assert(loadfile("os/sys/infoBox.lua"))(
         {
             label = "Error",
             text = message,
@@ -78,7 +78,8 @@ local function errorHandler(text)
             y = 3,
             w = w - 4,
             h = h - 4,
-            button1 = "Ok"
+            button1 = "Ok",
+            select = set.select
         }
     )
 end

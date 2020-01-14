@@ -297,4 +297,4 @@ label1.align = 1
 label1.nTheme.tBG = colors.green
 label1.nTheme.tC = colors.black
 local label2 = style("label")
-assets.variables.save("os/theme/main.lua", {button1 = button1, button2 = button2, button3 = button3, button4 = button4, toggle1 = toggle1, activatedButton = activatedButton, deactivatedButton = deactivatedButton, sView1 = sView1, sView2 = sView2, tBox1 = tBox1, tBox2 = tBox2, iField2 = iField2, iField1 = iField1, label1 = label1, label2 = label2})
+table.save({button1 = button1, button2 = button2, button3 = button3, button4 = button4, toggle1 = toggle1, activatedButton = activatedButton, deactivatedButton = deactivatedButton, sView1 = sView1, sView2 = sView2, tBox1 = tBox1, tBox2 = tBox2, iField2 = iField2, iField1 = iField1, label1 = label1, label2 = label2}, "os/theme/main.lua")

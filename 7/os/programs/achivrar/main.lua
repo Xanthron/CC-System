@@ -71,7 +71,7 @@ local function saveText(text, path)
 end
 
 local function uploadText(text)
-    assert(loadfile("os/system/download/fileLoader.lua"))({mode = "upload", file = text})
+    assert(loadfile("os/sys/browser/loader.lua"))({mode = "upload", file = text})
 end
 
 local manager = ui.uiManager.new(_x, _y, _w, _h)
@@ -117,7 +117,7 @@ function button_files:_onClick(event)
             if event.name == "mouse_up" then
                 select = false
             end
-            local s = assert(loadfile("os/system/explorer/explorer.lua"))({select = true, mode = "select_many", select = select, edit = false})
+            local s = assert(loadfile("os/sys/explorer/main.lua"))({select = true, mode = "select_many", select = select, edit = false})
             if s then
                 selected = s
             end
@@ -142,7 +142,7 @@ function button_savePath:_onClick(event)
             if not fs.exists(path) then
                 path = ""
             end
-            path = assert(loadfile("os/system/explorer/explorer.lua"))({select = true, mode = "save", override = true, type = "avr", path = path, save = name, select = select})
+            path = assert(loadfile("os/sys/explorer/main.lua"))({select = true, mode = "save", override = true, type = "avr", path = path, save = name, select = select})
             if path then
                 savePath = path
             end

@@ -21,17 +21,17 @@ local official, unofficial, updateSView
     ####################################################################################################################
 ]]
 local function downloadScreen(...)
-    assert(loadfile("os/system/wait.lua"))("Downloading", ...)
+    assert(loadfile("os/sys/wait.lua"))("Downloading", ...)
 end
 
 local function updateFiles()
-    local success, content = www.pasteBinSave(defaultPasteBin, "os/system/download/official", true)
+    local success, content = www.pasteBinSave(defaultPasteBin, "os/sys/browser/official", true)
     if success then
-        official = dofile("os/system/download/official")
+        official = dofile("os/sys/browser/official")
     else
         official = {}
     end
-    unofficial = dofile("os/system/download/unofficial")
+    unofficial = dofile("os/sys/browser/unofficial")
 end
 
 ---@param manager uiManager
@@ -79,10 +79,10 @@ local function createSViewButton(manager, sView, official, data, elements, x, y,
                 )
                 if success then
                     text = text .. "Succeeded."
-                    assert(loadfile("os/system/infoBox.lua"))({label = "Information", text = text, x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, button1 = "Ok", select = event.name ~= "mouse_up"})
+                    assert(loadfile("os/sys/infoBox.lua"))({label = "Information", text = text, x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, button1 = "Ok", select = event.name ~= "mouse_up"})
                 else
                     text = text .. "failed.\n\n" .. content
-                    assert(loadfile("os/system/infoBox.lua"))({label = "Information", text = text, x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, button1 = "Ok", select = event.name ~= "mouse_up"})
+                    assert(loadfile("os/sys/infoBox.lua"))({label = "Information", text = text, x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, button1 = "Ok", select = event.name ~= "mouse_up"})
                 end
                 manager:draw()
             end
@@ -116,7 +116,7 @@ local function createSViewButton(manager, sView, official, data, elements, x, y,
         manager.parallelManager:removeFunction(self._pressAnimation)
         manager:callFunction(
             function()
-                local number, select = assert(loadfile("os/system/infoBox.lua"))({label = "Information", text = text, x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, button1 = "Ok", button2 = button2, select = event.name ~= "mouse_up"})
+                local number, select = assert(loadfile("os/sys/infoBox.lua"))({label = "Information", text = text, x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, button1 = "Ok", button2 = button2, select = event.name ~= "mouse_up"})
                 if number == 2 then
                     for i = 1, #unofficial do
                         if unofficial[i] == data then
@@ -124,7 +124,7 @@ local function createSViewButton(manager, sView, official, data, elements, x, y,
                             break
                         end
                     end
-                    assets.variables.save("os/system/download/unofficial", unofficial)
+                    table.save(unofficial, "os/sys/browser/unofficial")
                     updateSView(manager, sView)
                 end
                 manager:draw()
@@ -245,8 +245,8 @@ end
 function button_download:_onClick(event)
     manager:callFunction(
         function()
-            assert(loadfile("os/system/download/fileLoader.lua"))({mode = "download"})
-            unofficial = dofile("os/system/download/unofficial")
+            assert(loadfile("os/sys/browser/loader.lua"))({mode = "download"})
+            unofficial = dofile("os/sys/browser/unofficial")
             updateSView(manager, sView_list)
             manager:draw()
         end
@@ -255,8 +255,8 @@ end
 function button_upload:_onClick(event)
     manager:callFunction(
         function()
-            assert(loadfile("os/system/download/fileLoader.lua"))({mode = "upload"})
-            unofficial = dofile("os/system/download/unofficial")
+            assert(loadfile("os/sys/browser/loader.lua"))({mode = "upload"})
+            unofficial = dofile("os/sys/browser/unofficial")
             updateSView(manager, sView_list)
             manager:draw()
         end

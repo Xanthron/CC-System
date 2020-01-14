@@ -233,7 +233,7 @@ function new(path)
     ---@class style.textBox
     local textBox = {}
     ---@type style.label
-    textBox.label = assets.extension.copyTable(this.label)
+    textBox.label = table.copy(this.label)
     textBox.label.nTheme.tBG = colors.green
     textBox.label.nTheme.tC = colors.lime
     textBox.label.dTheme.tBG = colors.gray
@@ -245,7 +245,7 @@ function new(path)
     textBox.label.sTheme.prefix = ">"
     textBox.label.sTheme.suffix = "<"
     ---@type style.label
-    textBox.text = assets.extension.copyTable(this.label)
+    textBox.text = table.copy(this.label)
     textBox.text.nTheme.tBG = colors.white
     textBox.text.nTheme.tC = colors.black
     textBox.text.dTheme.tBG = colors.white
@@ -253,7 +253,7 @@ function new(path)
     textBox.text.sTheme.tBG = colors.white
     textBox.text.sTheme.tC = colors.black
     ---@type style.slider
-    textBox.slider = assets.extension.copyTable(this.slider)
+    textBox.slider = table.copy(this.slider)
     textBox.slider.nTheme.buttonP.nTheme.t = {string.char(30)}
     textBox.slider.nTheme.buttonP.nTheme.tC = {colors.white}
     textBox.slider.nTheme.buttonP.nTheme.tBG = {colors.lime}
@@ -349,9 +349,9 @@ function new(path)
     ---@class style.scrollView
     local scrollView = {}
     ---@type style.label
-    scrollView.label = assets.extension.copyTable(this.label)
+    scrollView.label = table.copy(this.label)
     ---@type style.slider
-    scrollView.sliderV = assets.extension.copyTable(this.slider)
+    scrollView.sliderV = table.copy(this.slider)
     scrollView.sliderV.nTheme.buttonP.nTheme.t = {string.char(30)}
     scrollView.sliderV.nTheme.buttonP.nTheme.tC = {colors.white}
     scrollView.sliderV.nTheme.buttonP.nTheme.tBG = {colors.lime}
@@ -389,7 +389,7 @@ function new(path)
     scrollView.sliderV.dTheme.handleLC = {colors.gray}
     scrollView.sliderV.dTheme.handleLBG = {colors.gray}
     ---@type style.slider
-    scrollView.sliderH = assets.extension.copyTable(this.slider)
+    scrollView.sliderH = table.copy(this.slider)
     scrollView.sliderH.nTheme.buttonP.nTheme.t = {string.char(17)}
     scrollView.sliderH.nTheme.buttonP.nTheme.tC = {colors.white}
     scrollView.sliderH.nTheme.buttonP.nTheme.tBG = {colors.lime}
@@ -495,7 +495,7 @@ function new(path)
     local inputField = {}
     inputField.align = 1
     ---@type style.label
-    inputField.label = assets.extension.copyTable(this.label)
+    inputField.label = table.copy(this.label)
     inputField.label.nTheme.tC = colors.lime
     inputField.label.nTheme.tBG = colors.green
     inputField.label.sTheme.tC = colors.yellow
@@ -565,7 +565,7 @@ function new(path)
     this.inputField = inputField
 
     function this:getStyle(elementType, arguments)
-        local copiedStyle = assets.extension.copyTable(self[elementType], elementType)
+        local copiedStyle = table.copy(self[elementType], elementType)
         if type(arguments) == "table" then
             for k, v in pairs(arguments) do
                 copiedStyle[k] = v

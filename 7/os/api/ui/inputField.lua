@@ -120,6 +120,11 @@ function new(parent, label, text, multiLine, onSubmit, style, x, y, w, h)
             self:getAutoComplete()
         end
     end
+
+    function this:combinedText(text)
+        return self.text:sub(1, self.cursorOffset) .. text .. self.text:sub(self.cursorOffset + 1)
+    end
+
     ---Intern function to insert in the autocompletion table
     ---@return nil
     function this:getAutoComplete()
@@ -219,12 +224,12 @@ function new(parent, label, text, multiLine, onSubmit, style, x, y, w, h)
             if event.name == "char" then
                 local char
                 if self.onTextEdit then
-                    char = self:onTextEdit("char", event.param1, self.text:sub(1, self.cursorOffset) .. event.param1 .. self.text:sub(self.cursorOffset + 1))
+                    char = self:onTextEdit("char", event.param1)
                 end
                 if not char then
                     char = event.param1
                 end
-                self.text = self.text:sub(1, self.cursorOffset) .. char .. self.text:sub(self.cursorOffset + 1)
+                self.text = self:combinedText(char)
                 self.cursorOffset = self.cursorOffset + char:len()
                 self:getAutoComplete()
                 self:recalculateText()
