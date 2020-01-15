@@ -1,4 +1,3 @@
-local moves = {}
 local list = {
     "minecraft:lapis_ore",
     "minecraft:diamond_ore",
@@ -7,16 +6,134 @@ local list = {
     "minecraft:iron_ore",
     "minecraft:gold_ore"
 }
-local function InspectMineDig(direction)
+local todo = {}
+local done = {}
+local start = vector.new(0, 0, 0)
+local base = vector.new(0, 0, 0)
+local current = vector.new(0, 0, 0)
+local facing = vector.new(1, 0, 0)
+
+local function setCurrent(v)
+    current = v
+    print(current:tostring())
 end
-local function Check(mode)
-    local success, data
-    if mode == 1 then
-        success, data = turtle.inspectUp()
-    elseif mode == 2 then
-        success, data = turtle.inspect()
+
+local function getVector(dir, v)
+    if dir == 1 then --     forward
+        return v + facing
+    elseif dir == 2 then -- up
+        return vector.new(v.x, v.y, v.z + 1)
+    elseif dir == 3 then -- down
+        return vector.new(v.x, v.y, v.z - 1)
+    elseif dir == 4 then -- right
+        return vector.new(v.x + facing.y, v.y - facing.x, v.z)
+    elseif dir == 5 then -- left
+        return vector.new(v.x - facing.y, v.y + facing.x, v.z)
+    elseif dir == 6 then -- back
+        return v - facing
     else
+        error("enter a valid direction", 2)
+    end
+end
+
+local function addVectorLists(v)
+    for i = 1, #done do
+        local d = done[i]
+        if v.x == d.x and v.y == d.y and v.z == d.z then
+            return false
+        end
+    end
+    table.insert(todo, 1)
+    table.insert(done, 1)
+    return true
+end
+local function clearVectorLists()
+    table.clear(todo)
+    table.clear(done)
+end
+local function orderVectorList()
+    table.orderComplex(
+        todo,
+        function(v)
+            return (v.x - current.x) ^ 2 + (v.y - current.y) ^ 2 + (v.z - current.z) ^ 2, -((v.x - base.x) ^ 2 +
+                (v.y - base.y) ^ 2 +
+                (v.z - base.z) ^ 2)
+        end
+    )
+end
+
+local function turnLeft()
+    turtle.turnLeft()
+    if facing.x == 1 then
+        facing.x = 0
+        facing.y = -1
+    elseif facing.x == -1 then
+        facing.x = 0
+        facing.y = 1
+    elseif facing.y == 1 then
+        facing.x = 1
+        facing.y = 0
+    elseif facing.y == -1 then
+        facing.x = -1
+        facing.y = 0
+    end
+end
+local function turnRight()
+    turtle.turnRight()
+    if facing.x == 1 then
+        facing.x = 0
+        facing.y = 1
+    elseif facing.x == -1 then
+        facing.x = 0
+        facing.y = -1
+    elseif facing.y == 1 then
+        facing.x = -1
+        facing.y = 0
+    elseif facing.y == -1 then
+        facing.x = 1
+        facing.y = 0
+    end
+end
+local function move(dir)
+    if dir == 1 then
+        if turtle.forward() then
+            setCurrent(vector.new(current.x + current.x * facing.x, current.y + current.y * facing.y, current.z))
+            return true
+        end
+    elseif dir == 2 then
+        if turtle.up() then
+            setCurrent(vector.new(current.x, current.y, current.z + 1))
+            return true
+        end
+    elseif dir == 3 then
+        if turtle.down() then
+            setCurrent(vector.new(current.x, current.y, current.z - 1))
+            return true
+        end
+    elseif dir == 4 then
+        turnRight()
+        return true
+    elseif dir == 5 then
+        turnLeft()
+        return true
+    elseif dir == 6 then
+        if turtle.back() then
+            setCurrent(vector.new(current.x + current.x * facing.x, current.y + current.y * facing.y, current.z))
+            return true
+        end
+    else
+        error("enter a valid direction", 2)
+    end
+end
+
+local function Check(direction)
+    local success, data
+    if direction == "down" then
         success, data = turtle.inspectDown()
+    elseif direction == "forward" then
+        success, data = turtle.inspect()
+    elseif direction == "up" then
+        success, data = turtle.inspectUp()
     end
     if success then
         for _, v in ipairs(list) do
@@ -27,63 +144,74 @@ local function Check(mode)
     end
     return false
 end
-local function CheckAround(start)
-    --forward down up left right
-    if start == 1 then
-        --if Check(2) then
-        turtle.dig()
-        turtle.forward()
-        table.insert(moves, 1)
-        CheckAround(1)
-        turtle.back()
-        table.remove(moves)
-        --end
-        start = 2
+local function addAround(forward)
+    if forward then
+        addVectorLists(getVector("front", current))
     end
-    if start == 2 then
-        if Check(1) then
-            turtle.digDown()
-            turtle.down()
-            table.insert(moves, 2)
-            CheckAround(1)
-            turtle.up()
-            table.remove(moves)
+    addVectorLists(getVector("up", current))
+    addVectorLists(getVector("down", current))
+    addVectorLists(getVector("right", current))
+    addVectorLists(getVector("left", current))
+end
+local function getNearest(v)
+    local newV, minD
+    for i = 1, 6 do
+        local tempV = getVector(i, v)
+        local newD = (tempV.x - v.x) ^ 2 + (tempV.x - v.x) ^ 2 + (tempV.x - v.x) ^ 2
+        if not minD or minD < newD then
+            newV = tempV
+            minD = newD
         end
-        start = start + 1
     end
-    if start == 3 then
-        if Check(2) then
-            turtle.digUp()
-            turtle.up()
-            table.insert(moves, 3)
-            CheckAround(1)
-            turtle.down()
-            table.remove(moves)
-        end
-        start = start + 1
+    return newV
+end
+local function goTo(v)
+    local to = v - current
+    local x = to.x * facing.x + to.y * facing.y
+    local y = to.x * facing.y + to.y * facing.x
+    local z = to.z
+    local turn = 0
+
+    while z > 0 do
+        move(2)
+        z = z - 1
     end
-    if start == 4 then
-        turtle.turnLeft()
-        table.insert(moves, 4)
-        if Check(1) then
-            CheckAround(1)
-            start = start + 1
-        end
-        turtle.turnRight()
-        table.remove(moves)
+    while z < 0 do
+        move(3)
+        z = z + 1
     end
-    if start == 5 then
-        turtle.turnRight()
-        table.insert(moves, 5)
-        if Check(1) then
-            CheckAround(1)
+
+    while x > 0 do
+        move(1)
+        x = x - 1
+    end
+    if x < 0 then
+        move(4)
+        move(4)
+        while x < 0 do
+            move(1)
+            x = x + 1
         end
-        turtle.turnLeft()
-        table.remove(moves)
+    end
+
+    if y > 0 then
+        move(4)
+        while y > 0 do
+            move(1)
+            y = y - 1
+        end
+    end
+    if y < 0 then
+        move(5)
+        while y < 0 do
+            move(1)
+            y = y + 1
+        end
     end
 end
+
 while true do
-    turtle.dig()
-    turtle.forward()
-    CheckAround(2)
+    break
 end
+
+goTo(vector.new(-5, 5, 0))

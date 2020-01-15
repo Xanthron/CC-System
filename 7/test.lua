@@ -1,1 +1,1 @@
-print(load('return "jo"')())
+print(30 * 30 * 30)

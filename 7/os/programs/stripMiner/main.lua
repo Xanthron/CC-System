@@ -32,7 +32,7 @@ whitelist/Blacklist
 ]]
 local _x, _y, _w, _h = 1, 1, term.getSize()
 
-local success, set = fs.doFile("os/programs/stripMine/settings")
+local success, set = fs.doFile("os/programs/stripMiner/settings")
 if not success then
     set = {}
     set.length = 0
@@ -65,13 +65,37 @@ local label_title = ui.label.new(manager, "Strip Miner", theme.label1, _x, _y, _
 local button_exit = ui.button.new(manager, "<", nil, theme.button2, _x + _w - 3, _y, 3, 1)
 
 local label_length = ui.label.new(manager, "Length: ", theme.label2, _x, _y + 1, 8, 1)
-local iField_length = ui.inputField.new(manager, "", tostring(set.length), false, nil, theme.iField1, _x + 8, _y + 1, _w - 8, 1)
+local iField_length =
+    ui.inputField.new(manager, "", tostring(set.length), false, nil, theme.iField1, _x + 8, _y + 1, _w - 8, 1)
 
-local toggle_savePath = ui.toggleButton.new(manager, "Save Path", set.savePath, nil, theme.toggle1, _x, _y + 3, math.floor(_w / 2), 1)
-local toggle_enderChest = ui.toggleButton.new(manager, "Ender Chest", set.enderChest, nil, theme.toggle1, _x + math.floor(_w / 2), _y + 3, math.floor(_w / 2), 1)
+local toggle_savePath =
+    ui.toggleButton.new(manager, "Save Path", set.savePath, nil, theme.toggle1, _x, _y + 3, math.floor(_w / 2), 1)
+local toggle_enderChest =
+    ui.toggleButton.new(
+    manager,
+    "Ender Chest",
+    set.enderChest,
+    nil,
+    theme.toggle1,
+    _x + math.floor(_w / 2),
+    _y + 3,
+    math.floor(_w / 2),
+    1
+)
 
 local button_whiteList = ui.button.new(manager, set.whiteList, nil, theme.button1, _x, _y + 5, math.floor(_w / 2), 1)
-local toggle_destroy = ui.toggleButton.new(manager, "Destroy Reject", set.destroy, nil, theme.toggle1, _x + math.floor(_w / 2), _y + 5, math.floor(_w / 2), 1)
+local toggle_destroy =
+    ui.toggleButton.new(
+    manager,
+    "Destroy Reject",
+    set.destroy,
+    nil,
+    theme.toggle1,
+    _x + math.floor(_w / 2),
+    _y + 5,
+    math.floor(_w / 2),
+    1
+)
 
 local button_path = ui.button.new(manager, "Path", nil, theme.button1, _x, _y + 6, 6, 1)
 local label_path = ui.label.new(manager, set.path or "No Selection", theme.label2, _x + 7, _y + 6, _w - 7, 1)
@@ -161,7 +185,10 @@ end
 function button_path:_onClick(event)
     manager:callFunction(
         function()
-            local file = assert(loadfile("os/sys/explorer/main.lua"))({select = event.name ~= "mouse_up", mode = "select_one", edit = false, type = "list"})
+            local file =
+                assert(loadfile("os/sys/explorer/main.lua"))(
+                {select = event.name ~= "mouse_up", mode = "select_one", edit = false, type = "list"}
+            )
             if file then
                 set.path = file
                 label_path.text = set.path
@@ -219,7 +246,7 @@ for i = 1, 16 do
 end
 
 function button_saveSettings:_onClick(event)
-    table.save(set, "os/programs/stripMine/settings")
+    table.save(set, "os/programs/stripMiner/settings")
 end
 
 manager:draw()
