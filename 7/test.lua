@@ -1,4 +1,9 @@
-local a = 5
-local b = 10
-a, b = 3, a
-print(a, b)
+local test = {}
+local test_m = {
+    __mode = ""
+}
+
+test.list = {name = "test1"}
+local list = test.list
+list.name = "test2"
+print(test.list.name)
