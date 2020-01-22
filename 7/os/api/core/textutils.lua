@@ -1,6 +1,6 @@
-function serializeCompressed()
+function textutils.serializeCompressed()
 end
-function getNeatName(path)
+function textutils.getNeatName(path)
     local name = fs.getName(path)
     name =
         name:gsub(

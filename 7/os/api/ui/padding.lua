@@ -11,13 +11,14 @@ _padding_metatable = {
     end,
     __metatable = false
 }
+ui.padding = {}
 ---Create a new padding
 ---@param left integer
 ---@param top integer
 ---@param right integer
 ---@param bottom integer
 ---@return padding
-function new(left, top, right, bottom)
+function ui.padding.new(left, top, right, bottom)
     ---@class padding
     local this = {left = left or 0, top = top or 0, right = right or 0, bottom = bottom or 0}
     ---Get unpacked padding

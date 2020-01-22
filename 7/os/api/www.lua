@@ -1,10 +1,11 @@
-function _getFileName(url)
+www = {}
+function www._getFileName(url)
     url = url:gsub("[#?].*", ""):gsub("/+$", "")
     return url:match("/([^/]+)$")
 end
 
 ---@param url string
-function get(url)
+function www.get(url)
     local ok, err = http.checkURL(url)
 
     if not ok then
@@ -21,7 +22,7 @@ function get(url)
     return true, content
 end
 
-function _run(content, name, ...)
+function www._run(content, name, ...)
     local func, err = load(content, name, "t", _ENV)
     if not func then
         return false, err
@@ -34,16 +35,16 @@ function _run(content, name, ...)
     return true
 end
 
-function run(url, ...)
+function www.run(url, ...)
     local success, content = get(url)
     if success then
-        return _run(content, _getFileName(url), ...)
+        return www._run(content, www._getFileName(url), ...)
     else
         return false, content
     end
 end
 
-function _save(content, path, override)
+function www._save(content, path, override)
     local name = fs.getName(path)
     local path = path:match("^.*/?")
     if fs.exists(path) and not override then
@@ -56,15 +57,15 @@ function _save(content, path, override)
     return true
 end
 
-function save(url, path, override)
-    local success, content = get(url)
+function www.save(url, path, override)
+    local success, content = www.get(url)
     if not success then
         return false, content
     end
-    return _save(content, path, override)
+    return www._save(content, path, override)
 end
 
-function pasteBinGet(url)
+function www.pasteBinGet(url)
     local patterns = {
         "^([%a%d]+)$",
         "^https?://pastebin.com/([%a%d]+)$",
@@ -85,7 +86,8 @@ function pasteBinGet(url)
         return false, "No code found."
     end
 
-    local response, err = http.get(("https://pastebin.com/raw/%s?cb=%x"):format(textutils.urlEncode(code), math.random(0, 2 ^ 30)))
+    local response, err =
+        http.get(("https://pastebin.com/raw/%s?cb=%x"):format(textutils.urlEncode(code), math.random(0, 2 ^ 30)))
     if not response then
         return false, err or "Failed."
     end
@@ -100,28 +102,38 @@ function pasteBinGet(url)
     return true, content
 end
 
-function pasteBinRun(url)
-    local success, content = pasteBinGet(url)
+function www.pasteBinRun(url)
+    local success, content = www.pasteBinGet(url)
     if success then
-        return _run(content, _getFileName(url))
+        return www._run(content, wwww._getFileName(url))
     else
         return false, content
     end
 end
 
-function pasteBinSave(url, path, override)
-    local success, content = pasteBinGet(url)
+function www.pasteBinSave(url, path, override)
+    local success, content = www.pasteBinGet(url)
     if success then
-        return _save(content, path, override)
+        return www._save(content, path, override)
     else
         return false, content
     end
 end
 
 ---@param text string
-function pasteBinPut(text)
+function www.pasteBinPut(text)
     local key = "0ec2eb25b6166c0c27a394ae118ad829"
-    local response = http.post("https://pastebin.com/api/api_post.php", "api_option=paste&" .. "api_dev_key=" .. key .. "&" .. "api_paste_format=lua&" .. "api_paste_name=" .. textutils.urlEncode("file") .. "&" .. "api_paste_code=" .. textutils.urlEncode(text))
+    local response =
+        http.post(
+        "https://pastebin.com/api/api_post.php",
+        "api_option=paste&" ..
+            "api_dev_key=" ..
+                key ..
+                    "&" ..
+                        "api_paste_format=lua&" ..
+                            "api_paste_name=" ..
+                                textutils.urlEncode("file") .. "&" .. "api_paste_code=" .. textutils.urlEncode(text)
+    )
     if response then
         local responseText = response.readAll()
         response.close()

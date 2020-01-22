@@ -1,4 +1,4 @@
-local function loadAPI(input, dir, rootPath)
+local function _loadAPI(input, dir, rootPath)
     rootPath = rootPath or dir
     local apiFiles = fs.list(dir)
     local fs, os = fs, os
@@ -39,8 +39,21 @@ local function loadAPI(input, dir, rootPath)
         end
     end
 end
+local function loadAPIs(dir)
+    local apiFiles = fs.list(dir)
+    for i = 1, #apiFiles do
+        local path = dir .. "/" .. apiFiles[i]
 
-loadAPI(_G, "os/api")
+        if fs.isDir(path) == false then
+            dofile(path)
+        else
+            loadAPIs(path)
+        end
+    end
+end
+
+--loadAPI(_G, "os/api")
+loadAPIs("os/api")
 
 local success
 success, _G.theme = ui.theme.load("main.lua")

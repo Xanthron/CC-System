@@ -1,18 +1,18 @@
-function copy(table)
-    if type(table) ~= "table" then
-        error("bad argument: table expected, got " .. type(table), 2)
+function table.copy(list)
+    if type(list) ~= "table" then
+        error("bad argument: table expected, got " .. type(list), 2)
     end
     local new = {}
-    for key, value in pairs(table) do
+    for key, value in pairs(list) do
         if type(value) == "table" then
-            new[key] = copy(value)
+            new[key] = table.copy(value)
         else
             new[key] = value
         end
     end
     return new
 end
-function save(list, path)
+function table.save(list, path)
     if type(table) ~= "table" then
         error("bad argument: table expected, got " .. type(table), 2)
     end
@@ -21,7 +21,7 @@ function save(list, path)
     file:write("return" .. save)
     file:close()
 end
-function checkType(set, name, kind, needSet, default)
+function table.checkType(set, name, kind, needSet, default)
     if not (set[name] or set[name] == false) then
         set[name] = default
     end
@@ -42,7 +42,7 @@ function swap(list, i, j)
     list[j] = temp
 end
 
-function order(list, func)
+function table.order(list, func)
     local values = {}
     local n = #list
 
@@ -63,7 +63,7 @@ function order(list, func)
     until n <= 1
 end
 
-function orderComplex(list, func)
+function table.orderComplex(list, func)
     local values = {}
     local n = #list
 
@@ -92,23 +92,8 @@ function orderComplex(list, func)
     until n <= 1
 end
 
-function clear(list)
+function table.clear(list)
     for k in pairs(list) do
         list[k] = nil
     end
-end
-
-local a1 = {0, 0}
-local b1 = {9, 4}
-local list = {{1, 2}, {2, 1}, {-1, 9}, {-1, 9}, {2, 1}, {1, 2}}
-orderComplex(
-    list,
-    function(v)
-        local a = (v[1] - a1[1]) ^ 2 + (v[2] - a1[2]) ^ 2
-        local b = (v[1] - b1[1]) ^ 2 + (v[2] - b1[2]) ^ 2
-        return a, -b
-    end
-)
-for i = 1, #list do
-    print(list[i][1], list[i][2])
 end

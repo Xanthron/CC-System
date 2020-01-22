@@ -1,8 +1,9 @@
+ui.repeatItem = {}
 ---@param startRepeatSpeed number
 ---@param endRepeatSpeed number
 ---@param repeatSpeedIncrement number
 ---@return repeatItem
-function new(startRepeatSpeed, endRepeatSpeed, repeatSpeedIncrement)
+function ui.repeatItem.new(startRepeatSpeed, endRepeatSpeed, repeatSpeedIncrement)
     ---Class to handle input that happens every frames but should get executed at fix times
     ---@class repeatItem
     local this = {

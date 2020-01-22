@@ -1,4 +1,5 @@
-function new(class)
+class = {}
+function class.new(class)
     ---@class class
     local this = {}
 

@@ -1,5 +1,6 @@
+ui.style = {}
 ---@return style
-function new(path)
+function ui.style.new(path)
     ---@class style
     local this = {}
     ---@class style.label

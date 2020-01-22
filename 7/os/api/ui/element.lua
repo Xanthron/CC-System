@@ -1,3 +1,4 @@
+ui.element = {}
 ---Create a new element
 ---@param parent element
 ---@param x integer
@@ -6,7 +7,7 @@
 ---@param h integer
 ---@param T string
 ---@return element
-function new(parent, name, x, y, w, h)
+function ui.element.new(parent, name, x, y, w, h)
     ---Base of every ui element
     ---@class element:class
     local this = class.new("element")

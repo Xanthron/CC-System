@@ -1,3 +1,4 @@
+ui.scrollView = {}
 ---@param parent element
 ---@param label string|nil
 ---@param mode "1 = vertical, horizontal"|"2 = non"|"3 = vertical"|"4 = horizontal"
@@ -6,7 +7,7 @@
 ---@param y integer
 ---@param w integer
 ---@param h integer
-function new(parent, label, mode, style, x, y, w, h)
+function ui.scrollView.new(parent, label, mode, style, x, y, w, h)
     ---@class scrollView:element
     local this = ui.element.new(parent, "scrollView", x, y, w, h)
 
@@ -16,15 +17,43 @@ function new(parent, label, mode, style, x, y, w, h)
     this.style = style
     ---@type padding
     this.stylePadding = ui.padding.new(#style.nTheme.b[4], #style.nTheme.b[2], #style.nTheme.b[5], #style.nTheme.b[7])
-    this._elements[1] = ui.element.new(this, "container", this.stylePadding:getPaddedRect(this.buffer.rect:getUnpacked()))
-    this._elements[1]._elements[1] = ui.element.new(this._elements[1], "container", this.stylePadding:getPaddedRect(this.buffer.rect:getUnpacked()))
+    this._elements[1] =
+        ui.element.new(this, "container", this.stylePadding:getPaddedRect(this.buffer.rect:getUnpacked()))
+    this._elements[1]._elements[1] =
+        ui.element.new(this._elements[1], "container", this.stylePadding:getPaddedRect(this.buffer.rect:getUnpacked()))
     if mode == 1 or mode == 3 then
         local slideWidth = #style.sliderV.nTheme.handleL
-        this._elements[2] = ui.slider.new(this, nil, 1, 0, this._elements[1]:getHeight(), this._elements[1]._elements[1]:getHeight(), style.sliderV, x + w - math.max(math.ceil((this.stylePadding.right + slideWidth) / 2), slideWidth), y + this.stylePadding.top, slideWidth, h - this.stylePadding.top - this.stylePadding.bottom)
+        this._elements[2] =
+            ui.slider.new(
+            this,
+            nil,
+            1,
+            0,
+            this._elements[1]:getHeight(),
+            this._elements[1]._elements[1]:getHeight(),
+            style.sliderV,
+            x + w - math.max(math.ceil((this.stylePadding.right + slideWidth) / 2), slideWidth),
+            y + this.stylePadding.top,
+            slideWidth,
+            h - this.stylePadding.top - this.stylePadding.bottom
+        )
     end
     if mode == 1 or mode == 4 then
         local slideHeight = #style.sliderV.nTheme.handleL
-        this._elements[3] = ui.slider.new(this, nil, 2, 0, this._elements[1]:getWidth(), this._elements[1]._elements[1]:getWidth(), style.sliderH, x + this.stylePadding.left, y + h - math.max(math.ceil((this.stylePadding.bottom + slideHeight) / 2), slideHeight), w - this.stylePadding.left - this.stylePadding.right, slideHeight)
+        this._elements[3] =
+            ui.slider.new(
+            this,
+            nil,
+            2,
+            0,
+            this._elements[1]:getWidth(),
+            this._elements[1]._elements[1]:getWidth(),
+            style.sliderH,
+            x + this.stylePadding.left,
+            y + h - math.max(math.ceil((this.stylePadding.bottom + slideHeight) / 2), slideHeight),
+            w - this.stylePadding.left - this.stylePadding.right,
+            slideHeight
+        )
     end
     ---@type selectionGroup
     this.selectionGroup = ui.selectionGroup.new()
@@ -55,7 +84,12 @@ function new(parent, label, mode, style, x, y, w, h)
     ---Reset controlling elements layout
     ---@return nil
     function this:resetLayout()
-        self.stylePadding:set(#self.style.nTheme.b[4], #self.style.nTheme.b[2], #self.style.nTheme.b[5], #self.style.nTheme.b[7])
+        self.stylePadding:set(
+            #self.style.nTheme.b[4],
+            #self.style.nTheme.b[2],
+            #self.style.nTheme.b[5],
+            #self.style.nTheme.b[7]
+        )
         local x, y, w, h = self:getGlobalRect()
         local sX, sY, sW, sH = self.stylePadding:getPaddedRect(self.buffer.rect:getUnpacked())
         self._elements[1]:setGlobalRect(sX, sY, sW, sH)
@@ -66,7 +100,12 @@ function new(parent, label, mode, style, x, y, w, h)
         if sliderVertical then
             sliderVertical.style = self.style.sliderV
             local slideWidth = #self.style.sliderV.nTheme.handleL
-            sliderVertical:setGlobalRect(x + w - math.max(math.ceil((self.stylePadding.right + slideWidth) / 2), slideWidth), sY, slideWidth, sH)
+            sliderVertical:setGlobalRect(
+                x + w - math.max(math.ceil((self.stylePadding.right + slideWidth) / 2), slideWidth),
+                sY,
+                slideWidth,
+                sH
+            )
             sliderVertical.startValue = cY
             sliderVertical.endValue = cH
             sliderVertical.size = sH
@@ -76,7 +115,12 @@ function new(parent, label, mode, style, x, y, w, h)
         if sliderHorizontal then
             sliderHorizontal.style = self.style.sliderH
             local slideHeight = #self.style.sliderH.nTheme.handleL
-            sliderHorizontal:setGlobalRect(x + self.stylePadding.left, y + h - math.max(math.ceil((self.stylePadding.bottom + slideHeight) / 2), slideHeight), sW, slideHeight)
+            sliderHorizontal:setGlobalRect(
+                x + self.stylePadding.left,
+                y + h - math.max(math.ceil((self.stylePadding.bottom + slideHeight) / 2), slideHeight),
+                sW,
+                slideHeight
+            )
             sliderHorizontal.startValue = cX
             sliderHorizontal.endValue = cW
             sliderHorizontal.size = sW
@@ -92,7 +136,15 @@ function new(parent, label, mode, style, x, y, w, h)
         local maxMoveX = 0
         if valueX then
             if valueX > 0 then
-                maxMoveX = math.max(0, math.min(valueX, container:getLocalPosX() + container:getWidth() - (self:getWidth() - self.stylePadding.right + 1)))
+                maxMoveX =
+                    math.max(
+                    0,
+                    math.min(
+                        valueX,
+                        container:getLocalPosX() + container:getWidth() -
+                            (self:getWidth() - self.stylePadding.right + 1)
+                    )
+                )
             elseif valueX < 0 then
                 maxMoveX = math.min(0, math.max(valueX, container:getLocalPosX() + self.stylePadding.left - 1))
             end
@@ -100,7 +152,15 @@ function new(parent, label, mode, style, x, y, w, h)
         local maxMoveY = 0
         if valueY then
             if valueY > 0 then
-                maxMoveY = math.max(0, math.min(valueY, container:getLocalPosY() + container:getHeight() - (self:getHeight() - self.stylePadding.bottom + 1)))
+                maxMoveY =
+                    math.max(
+                    0,
+                    math.min(
+                        valueY,
+                        container:getLocalPosY() + container:getHeight() -
+                            (self:getHeight() - self.stylePadding.bottom + 1)
+                    )
+                )
             elseif valueY < 0 then
                 maxMoveY = math.min(0, math.max(valueY, container:getLocalPosY() + self.stylePadding.top - 1))
             end
@@ -182,7 +242,18 @@ function new(parent, label, mode, style, x, y, w, h)
         ui.buffer.fill(self.buffer, theme.b[5][1], theme.spaceTextColor, theme.spaceBackgroundColor)
         ui.buffer.borderBox(self.buffer, theme.b, theme.bC, theme.bBG)
         if self.label then
-            ui.buffer.labelBox(self.buffer, labelTheme.suffix .. self.label .. labelTheme.suffix, labelTheme.tC, labelTheme.tBG, self.style.label.align, nil, self.stylePadding.left, 0, self.stylePadding.right, self.buffer.rect.h - self.stylePadding.top)
+            ui.buffer.labelBox(
+                self.buffer,
+                labelTheme.suffix .. self.label .. labelTheme.suffix,
+                labelTheme.tC,
+                labelTheme.tBG,
+                self.style.label.align,
+                nil,
+                self.stylePadding.left,
+                0,
+                self.stylePadding.right,
+                self.buffer.rect.h - self.stylePadding.top
+            )
         end
     end
     ---Listener function of the selectionGroup

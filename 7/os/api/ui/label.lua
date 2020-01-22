@@ -1,3 +1,4 @@
+ui.label = {}
 ---Create a new label
 ---@param parent element
 ---@param text string
@@ -7,7 +8,7 @@
 ---@param w integer
 ---@param h integer
 ---@return label
-function new(parent, text, style, x, y, w, h)
+function ui.label.new(parent, text, style, x, y, w, h)
     ---A simple label without function
     ---@class label:element
     local this = ui.element.new(parent, "label", x, y, w, h)

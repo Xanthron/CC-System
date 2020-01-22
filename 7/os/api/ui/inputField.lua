@@ -1,3 +1,4 @@
+ui.inputField = {}
 ---Create a new inputField
 ---@param parent element
 ---@param label string|nil
@@ -12,7 +13,7 @@
 ---@param w integer
 ---@param h integer
 ---@return inputField
-function new(parent, label, text, multiLine, onSubmit, style, x, y, w, h)
+function ui.inputField.new(parent, label, text, multiLine, onSubmit, style, x, y, w, h)
     ---Input field
     ---@class inputField:element
     local this = ui.element.new(parent, "inputField", x, y, w, h)
@@ -177,7 +178,11 @@ function new(parent, label, text, multiLine, onSubmit, style, x, y, w, h)
             local completeLength = completeText:len()
             local offsetT = length - (width - left - right) + 1
             offsetT = math.min(offsetT, self.cursorOffset - width + left + right + 1)
-            local offsetC = math.max(0, math.min(width - left - right - 3, completeLength, length + completeLength - width - left - right + 3))
+            local offsetC =
+                math.max(
+                0,
+                math.min(width - left - right - 3, completeLength, length + completeLength - width - left - right + 3)
+            )
             offsetT = offsetT + offsetC
             offsetT = math.max(0, offsetT)
             self._cursorX = self.buffer.rect.x + left + self.cursorOffset - offsetT - self:getGlobalPosX()
@@ -188,9 +193,35 @@ function new(parent, label, text, multiLine, onSubmit, style, x, y, w, h)
             else
                 local text = self.text:sub(offsetT + 1, math.min(offsetT + width - left - right - offsetC, length))
                 ui.buffer.labelBox(self.buffer, text, theme.tC, theme.tBG, 1, theme.b[5][1], left, top, right, bottom)
-                ui.buffer.labelBox(self.buffer, completeText, theme.complC, theme.complBG, 1, theme.b[5][1], left + self.cursorOffset - offsetT, top, right, bottom)
-                text = self.text:sub(offsetT + width - left - right - offsetC, math.min(offsetT + width - left - right, length))
-                ui.buffer.labelBox(self.buffer, text, theme.tC, theme.tBG, 1, theme.b[5][1], left + length + completeLength - offsetT, top, right, bottom)
+                ui.buffer.labelBox(
+                    self.buffer,
+                    completeText,
+                    theme.complC,
+                    theme.complBG,
+                    1,
+                    theme.b[5][1],
+                    left + self.cursorOffset - offsetT,
+                    top,
+                    right,
+                    bottom
+                )
+                text =
+                    self.text:sub(
+                    offsetT + width - left - right - offsetC,
+                    math.min(offsetT + width - left - right, length)
+                )
+                ui.buffer.labelBox(
+                    self.buffer,
+                    text,
+                    theme.tC,
+                    theme.tBG,
+                    1,
+                    theme.b[5][1],
+                    left + length + completeLength - offsetT,
+                    top,
+                    right,
+                    bottom
+                )
             end
         end
     end
@@ -212,7 +243,18 @@ function new(parent, label, text, multiLine, onSubmit, style, x, y, w, h)
         ui.buffer.borderBox(self.buffer, theme.b, theme.bC, theme.bBG)
         if self.label then
             local yPos = math.max(0, math.floor((#theme.b[2] - 1) / 2))
-            ui.buffer.labelBox(self.buffer, self.label, labelTheme.tC, labelTheme.tBG, self.style.label.align, nil, #theme.b[4], yPos, #theme.b[6], self.buffer.rect.h - yPos)
+            ui.buffer.labelBox(
+                self.buffer,
+                self.label,
+                labelTheme.tC,
+                labelTheme.tBG,
+                self.style.label.align,
+                nil,
+                #theme.b[4],
+                yPos,
+                #theme.b[6],
+                self.buffer.rect.h - yPos
+            )
         end
         self:recalculateText()
     end
@@ -252,7 +294,10 @@ function new(parent, label, text, multiLine, onSubmit, style, x, y, w, h)
             elseif event.name == "key" then
                 local key = keys.getName(event.param1)
                 if key == "backspace" then
-                    if self.cursorOffset > 0 and self.repeatItem:call() and (not self.onTextEdit or not (self:onTextEdit("delete", self.cursorOffset) == false)) then
+                    if
+                        self.cursorOffset > 0 and self.repeatItem:call() and
+                            (not self.onTextEdit or not (self:onTextEdit("delete", self.cursorOffset) == false))
+                     then
                         self.text = self.text:sub(1, self.cursorOffset - 1) .. self.text:sub(self.cursorOffset + 1)
                         self.cursorOffset = self.cursorOffset - 1
                         self:getAutoComplete()
@@ -294,7 +339,12 @@ function new(parent, label, text, multiLine, onSubmit, style, x, y, w, h)
                         local success = false
                         if #self.autoComplete > 0 then
                             local text
-                            success, text, self.cursorOffset = self:onAutoCompletion(self.text, self.cursorOffset, self.autoComplete[self.autoCompleteIndex])
+                            success, text, self.cursorOffset =
+                                self:onAutoCompletion(
+                                self.text,
+                                self.cursorOffset,
+                                self.autoComplete[self.autoCompleteIndex]
+                            )
                             if self.onTextEdit then
                                 text = self:onTextEdit("autocomplete", text)
                             end
@@ -371,19 +421,31 @@ function new(parent, label, text, multiLine, onSubmit, style, x, y, w, h)
                 return self
             end
         elseif event.name == "mouse_drag" then
-            if self.mode == 4 and event.param2 >= x and event.param2 < x + w and event.param3 >= y and event.param3 < y + h then
+            if
+                self.mode == 4 and event.param2 >= x and event.param2 < x + w and event.param3 >= y and
+                    event.param3 < y + h
+             then
                 self.mode = 3
                 self:recalculate()
                 self:repaint("this", x, y, w, h)
-            elseif self.mode == 3 and (event.param2 < x or event.param2 >= x + w or event.param3 < y or event.param3 >= y + h) then
+            elseif
+                self.mode == 3 and
+                    (event.param2 < x or event.param2 >= x + w or event.param3 < y or event.param3 >= y + h)
+             then
                 self.mode = 4
                 self:recalculate()
                 self:repaint("this", x, y, w, h)
             end
         elseif event.name == "mouse_up" then
-            if self.mode == 3 and event.param2 >= x and event.param2 < x + w and event.param3 >= y and event.param3 < y + h then
+            if
+                self.mode == 3 and event.param2 >= x and event.param2 < x + w and event.param3 >= y and
+                    event.param3 < y + h
+             then
                 return self
-            elseif self.mode == 4 and (event.param2 < x or event.param2 >= x + w or event.param3 < y or event.param3 >= y + h) then
+            elseif
+                self.mode == 4 and
+                    (event.param2 < x or event.param2 >= x + w or event.param3 < y or event.param3 >= y + h)
+             then
                 self.mode = 1
                 self:recalculate()
                 self:repaint("this", x, y, w, h)

@@ -10,13 +10,14 @@ _rect_metatable = {
     end,
     __metatable = false
 }
+ui.rect = {}
 ---Create a new rect
 ---@param x integer
 ---@param y integer
 ---@param w integer
 ---@param h integer
 ---@return rect
-function new(x, y, w, h)
+function ui.rect.new(x, y, w, h)
     ---Contains x, y, w, h and math operations
     ---@class rect
     local this = {x = x or 0, y = y or 0, w = w or 0, h = h or 0}
@@ -44,7 +45,7 @@ function new(x, y, w, h)
     ---@param h integer
     ---@return integer, integer, integer, integer
     function this:getOverlaps(x, y, w, h)
-        return overlaps(x, y, w, h, self:getUnpacked())
+        return ui.rect.overlaps(x, y, w, h, self:getUnpacked())
     end
     ---Checks if the given x and y is in this rect
     ---@param x integer
@@ -66,7 +67,7 @@ end
 ---@param w2 integer
 ---@param h2 integer
 ---@return integer, integer, integer, integer
-function overlaps(x1, y1, w1, h1, x2, y2, w2, h2)
+function ui.rect.overlaps(x1, y1, w1, h1, x2, y2, w2, h2)
     local newX = math.max(x1, x2)
     local newY = math.max(y1, y2)
     local newW = math.min(x1 + w1 - newX, x2 + w2 - newX)

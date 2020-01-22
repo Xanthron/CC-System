@@ -1,14 +1,16 @@
+--TODO Check if necessary
 local _parallelElement_metadata = {
     __call = function(self, ...)
         return self:init(...)
     end
 }
+ui.parallelElement = {}
 ---Create a new parallelElement
 ---@param caller parallelManager|nil
 ---@param func function
 ---@param data table
 ---@return parallelElement
-function new(caller, func, data)
+function ui.parallelElement.new(caller, func, data)
     ---@class parallelElement
     local this = {}
 

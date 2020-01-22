@@ -1,3 +1,4 @@
+ui.buffer = {}
 ---Create a new buffer
 ---@param x integer
 ---@param y integer
@@ -7,7 +8,7 @@
 ---@param tC string|optional
 ---@param tBG string|optional
 ---@return buffer
-function new(x, y, w, h, t, tC, tBG)
+function ui.buffer.new(x, y, w, h, t, tC, tBG)
     ---Buffers the screen, so it can be drawn
     ---@class buffer
     local this = {text = t or {}, textColor = tC or {}, textBackgroundColor = tBG or {}}
@@ -95,7 +96,7 @@ end
 ---@param right integer|optional
 ---@param bottom integer|optional
 ---@return nil
-function labelBox(buffer, t, tC, tBG, align, space, left, top, right, bottom)
+function ui.buffer.labelBox(buffer, t, tC, tBG, align, space, left, top, right, bottom)
     left, top, right, bottom = left or 0, top or 0, right or 0, bottom or 0
     local totalWidth, totalHeight = buffer.rect.w, buffer.rect.h
     local width, height = totalWidth - left - right, totalHeight - top - bottom
@@ -199,7 +200,7 @@ end
 ---@param top integer|optional
 ---@param right integer|optional
 ---@param bottom integer|optional
-function borderBox(buffer, b, bC, bBG, left, top, right, bottom)
+function ui.buffer.borderBox(buffer, b, bC, bBG, left, top, right, bottom)
     local totalWidth, totalHeight = buffer.rect.w, buffer.rect.h
     left, top, right, bottom = left or 0, top or 0, right or 0, bottom or 0
     local width, height = totalWidth - left - right, totalHeight - top - bottom
@@ -282,7 +283,7 @@ end
 ---@param right integer|optional
 ---@param bottom integer|optional
 ---@return nil
-function borderLabelBox(buffer, t, tC, tBG, b, bC, bBG, align, left, top, right, bottom)
+function ui.buffer.borderLabelBox(buffer, t, tC, tBG, b, bC, bBG, align, left, top, right, bottom)
     local totalWidth, totalHeight = buffer.rect.w, buffer.rect.h
     left, top, right, bottom = left or 0, top or 0, right or 0, bottom or 0
     local width, height = totalWidth - left - right, totalHeight - top - bottom
@@ -290,8 +291,8 @@ function borderLabelBox(buffer, t, tC, tBG, b, bC, bBG, align, left, top, right,
     local rightP = #b[6]
     local topP = #b[2]
     local bottomP = #b[8]
-    labelBox(buffer, t, tC, tBG, align, " ", left + leftP, top + topP, right + rightP, bottom + bottomP)
-    borderBox(buffer, b, bC, bBG, left, top, right, bottom)
+    ui.buffer.labelBox(buffer, t, tC, tBG, align, " ", left + leftP, top + topP, right + rightP, bottom + bottomP)
+    ui.buffer.borderBox(buffer, b, bC, bBG, left, top, right, bottom)
 end
 
 ---Fills the buffer with one char a the text color and a background color
@@ -304,7 +305,7 @@ end
 ---@param right integer|optional
 ---@param bottom integer|optional
 ---@return nil
-function fill(buffer, t, tC, tBG, left, top, right, bottom)
+function ui.buffer.fill(buffer, t, tC, tBG, left, top, right, bottom)
     left, top, right, bottom = left or 0, top or 0, right or 0, bottom or 0
     for j = 1 + top, buffer.rect.h - top - bottom do
         for i = 1 + right, buffer.rect.w - left - right do
@@ -330,7 +331,7 @@ end
 ---@param right integer|optional
 ---@param bottom integer|optional
 ---@return nil
-function text(buffer, t, tC, tBG, align, scaleW, scaleH, richText, left, top, right, bottom)
+function ui.buffer.text(buffer, t, tC, tBG, align, scaleW, scaleH, richText, left, top, right, bottom)
     left, top, right, bottom = left or 0, top or 0, right or 0, bottom or 0
     local totalWidth, totalHeight = buffer.rect.w, buffer.rect.h
     local width, height = totalWidth - left - right, totalHeight - top - bottom

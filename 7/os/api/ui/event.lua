@@ -1,6 +1,7 @@
+ui.event = {}
 ---Create a new event container
 ---@return event
-function new()
+function ui.event.new()
     ---Contains the event name and parameter. The max amount of parameter is 5
     ---@class event
     local this = {param1 = nil, param2 = nil, param3 = nil, param4 = nil, param5 = nil}

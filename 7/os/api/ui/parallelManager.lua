@@ -1,6 +1,7 @@
+ui.parallelManager = {}
 ---Create a new parallelManager
 ---@return parallelManager
-function new()
+function ui.parallelManager.new()
     ---Handles the parallel execution of functions
     ---@class parallelManager
     local this = {}

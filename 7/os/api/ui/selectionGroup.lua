@@ -1,4 +1,5 @@
-function new(previous, next, listener)
+ui.selectionGroup = {}
+function ui.selectionGroup.new(previous, next, listener)
     ---@class selectionGroup:class
     local this = class.new("selectionGroup")
 

@@ -1,3 +1,4 @@
+ui.toggleButton = {}
 ---@param parent element
 ---@param text string
 ---@param checked boolean
@@ -9,7 +10,7 @@
 ---@param w integer
 ---@param h integer
 ---@return toggle
-function new(parent, text, checked, func, style, x, y, w, h)
+function ui.toggleButton.new(parent, text, checked, func, style, x, y, w, h)
     ---@class toggle:element
     local this = ui.element.new(parent, "toggle", x, y, w, h)
 
@@ -60,13 +61,19 @@ function new(parent, text, checked, func, style, x, y, w, h)
                 return self
             end
         elseif event.name == "mouse_drag" then
-            if self.mode == 3 and event.param2 >= x and event.param2 < x + w and event.param3 >= y and event.param3 < y + h then
+            if
+                self.mode == 3 and event.param2 >= x and event.param2 < x + w and event.param3 >= y and
+                    event.param3 < y + h
+             then
                 self.mode = 4
                 if self._inAnimation == false then
                     self:recalculate()
                     self:repaint("this", x, y, w, h)
                 end
-            elseif self.mode == 4 and (event.param2 < x or event.param2 >= x + w or event.param3 < y or event.param3 >= y + h) then
+            elseif
+                self.mode == 4 and
+                    (event.param2 < x or event.param2 >= x + w or event.param3 < y or event.param3 >= y + h)
+             then
                 self.mode = 3
                 if self._inAnimation == false then
                     self:recalculate()
@@ -74,7 +81,10 @@ function new(parent, text, checked, func, style, x, y, w, h)
                 end
             end
         elseif event.name == "mouse_up" then
-            if self.mode == 4 and event.param2 >= x and event.param2 < x + w and event.param3 >= y and event.param3 < y + h then
+            if
+                self.mode == 4 and event.param2 >= x and event.param2 < x + w and event.param3 >= y and
+                    event.param3 < y + h
+             then
                 self._checked = self._checked == false
                 self.mode = 1
                 if self._inAnimation == false then
@@ -85,7 +95,10 @@ function new(parent, text, checked, func, style, x, y, w, h)
                     self:_onToggle(event, self._checked)
                 end
                 return self
-            elseif self.mode == 3 and (event.param2 < x or event.param2 >= x + w or event.param3 < y or event.param3 >= y + h) then
+            elseif
+                self.mode == 3 and
+                    (event.param2 < x or event.param2 >= x + w or event.param3 < y or event.param3 >= y + h)
+             then
                 self.mode = 1
                 if self._inAnimation == false then
                     self:recalculate()

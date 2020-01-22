@@ -1,4 +1,4 @@
-function doFile(path)
+function fs.doFile(path)
     if fs.exists(path) then
         return true, dofile(path)
     else
@@ -6,7 +6,7 @@ function doFile(path)
     end
 end
 
-function listAll(path, paths)
+function fs.listAll(path, paths)
     local paths = paths or {}
     local list = fs.list(path)
     for _, p in ipairs(list) do
@@ -14,7 +14,7 @@ function listAll(path, paths)
             p = path .. "/" .. p
         end
         if fs.isDir(p) then
-            listAll(p, paths)
+            fs.listAll(p, paths)
         else
             table.insert(paths, p)
         end
@@ -22,7 +22,7 @@ function listAll(path, paths)
     return paths
 end
 
-function addExtension(path, ext)
+function fs.addExtension(path, ext)
     if not path:sub(path:len() - ext:len()) == ext then
         return path .. "." .. ext
     else

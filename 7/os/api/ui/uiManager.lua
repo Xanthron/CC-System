@@ -1,10 +1,11 @@
+ui.uiManager = {}
 ---Create a new uiManager
 ---@param x integer
 ---@param y integer
 ---@param w integer
 ---@param h integer
 ---@return uiManager
-function new(x, y, w, h)
+function ui.uiManager.new(x, y, w, h)
     ---Base Manager to handel drawing end events
     ---@class uiManager:element
     local this = ui.element.new(nil, "uiManager", x, y, w, h)
@@ -47,7 +48,10 @@ function new(x, y, w, h)
             this._event:pull()
             term.setCursorBlink(false)
             local eventName = this._event.name
-            if eventName == "mouse_click" or eventName == "mouse_up" or eventName == "mouse_drag" or eventName == "monitor_touch" then
+            if
+                eventName == "mouse_click" or eventName == "mouse_up" or eventName == "mouse_drag" or
+                    eventName == "monitor_touch"
+             then
                 local element = this:doPointerEvent(this._event, this:getSimpleMaskRect())
                 if #this.selectionManager.groups > 0 then
                     this.selectionManager:mouseEvent(this._event, element)
