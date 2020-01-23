@@ -37,17 +37,39 @@ local function addToUndone(v)
     table.insert(done, clone)
     table.insert(undone, clone)
 end
+local function removeVector(v)
+    for i = 1, #undone do
+        if undone[i] == v then
+            table.remove(undone, i)
+            break
+        end
+    end
+end
 local function clearVectorLists()
     table.clear(undone)
-    table.clear(done)
+    local i = 1
+    while i <= #done do
+        local v = done[i]
+        if
+            ((v.y <= 1 and v.y >= -1 and v.z == 0) and (v.z <= 1 or v.z >= -1 and v.y == 0) and
+                (v - base):sqLength() < 10)
+         then
+            i = i + 1
+        else
+            table.remove(done, i)
+        end
+    end
+end
+local function getDir(dir)
+    dir:set(dir.x * facing.x + dir.y * facing.y, dir.x * facing.y + dir.y * facing.x)
+    return dir
 end
 local function orderVectorList()
     table.orderComplex(
         undone,
         function(v)
             local turns = 0
-            local dir = v - pos
-            dir:set(dir.x * facing.x + dir.y * facing.y, dir.x * -facing.y + dir.y * facing.x)
+            local dir = getDir(v - pos)
             if dir.x < 0 then
                 turns = 2
             elseif dir.y ~= 0 then
@@ -86,12 +108,11 @@ local function inspect(dir)
         success, data = turtle.inspectDown()
     end
     if success then
-        return true
-    -- for _, v in ipairs(list) do
-    --     if v == data.name then
-    --         return true
-    --     end
-    -- end
+        for _, v in ipairs(list) do
+            if v == data.name then
+                return true
+            end
+        end
     end
     return false
 end
@@ -107,17 +128,18 @@ local function addAround(forward)
     addToUndone(getConnected(pos, 5))
     -- end
 end
-local function getNearest(relative, destination)
-    local newV, minD
+local function getNearest(r1, r2, d)
+    local vs = {}
     for i = 1, 6 do
-        local tempV = getConnected(destination, i)
-        local newD = (tempV.x - relative.x) ^ 2 + (tempV.y - relative.y) ^ 2 + (tempV.z - relative.z) ^ 2
-        if not minD or minD > newD then
-            newV = tempV
-            minD = newD
-        end
+        vs[i] = getConnected(d, i)
     end
-    return newV
+    table.orderComplex(
+        vs,
+        function(v)
+            return (r1 - d):sqLength(), (r2 - d):sqLength()
+        end
+    )
+    return vs[1]
 end
 
 local function move(dir)
@@ -210,60 +232,96 @@ local function go(v)
 end
 
 local function iteration()
-    print("start")
-    table.insert(done, pos:copy())
-    move(1)
-    table.insert(done, pos:copy())
-    base:set(pos.x, pos.y, pos.z)
-    addAround(false)
     while #undone > 0 do
         orderVectorList()
         local current = undone[1]
         table.remove(undone, 1)
-        local nearest = getNearest(pos, current)
         term.write(pos)
         term.write(" ")
         term.write(current)
         term.write(" ")
-        term.write(nearest)
+        term.write(current)
         term.write(" ")
-        if not (nearest == pos) then
-            term.write("-> " .. tostring(nearest - pos))
-            go(nearest - pos)
+        if not (current == pos) then
+            term.write("-> " .. tostring(current - pos))
+            go(current - pos)
         end
-        print()
-        local dir = current - pos
-        dir:set(dir.x * facing.x + dir.y * facing.y, dir.x * -facing.y + dir.y * facing.x)
-        if dir.z > 0 then
-            if inspect(2) then
-                move(2)
-                addAround(true)
+
+        local near = {}
+        for i = 1, 6 do
+            local add = true
+            local v = getConnected(pos, i)
+            for j = 1, #done do
+                if done[j] == v then
+                    add = false
+                    break
+                end
             end
-        elseif dir.z < 0 then
-            if inspect(3) then
-                move(3)
-                addAround(true)
+            if add then
+                table.insert(near, v)
             end
-        else
-            if dir.x < 0 then
-                move(4)
-                move(4)
-            elseif dir.y > 0 then
-                move(5)
-            elseif dir.y < 0 then
-                move(4)
+        end
+        while #near > 0 do
+            table.order(
+                near,
+                function(v)
+                    local dir = getDir(v - pos)
+                    if v.x < 0 then
+                        return 2
+                    elseif v.y ~= 0 then
+                        return 1
+                    else
+                        return 0
+                    end
+                end
+            )
+            local v = near[1]
+            local dir = getDir(v - pos)
+            if dir.z > 0 then
+                if inspect(2) then
+                    addToUndone(v)
+                end
+            elseif dir.z < 0 then
+                if inspect(3) then
+                    addToUndone(v)
+                end
+            else
+                if dir.x < 0 then
+                    print("turn")
+                    move(4)
+                    move(4)
+                elseif dir.y > 0 then
+                    move(4)
+                elseif dir.y < 0 then
+                    move(5)
+                end
+                if inspect(1) then
+                    addToUndone(v)
+                end
             end
-            if inspect(1) then
-                move(1)
-                addAround(true)
-            end
+            table.remove(near, 1)
         end
     end
+
+    clearVectorLists()
+
+    local v = getConnected(base, 1)
+    while #undone == 0 do
+        addToUndone(v)
+        v:set(v.x + 1)
+    end
+    base:set(v.x - 1, v.y, v.z)
 end
 
-for i = 1, 1 do
+table.insert(done, getConnected(pos, -1))
+table.insert(done, pos:copy())
+addToUndone(getConnected(pos, 1))
+base:set(pos.x + 1, pos.y, pos.z)
+while base.x < 20 do
     iteration()
 end
+
 go(start - pos)
-move(4)
-move(4)
+while facing.x ~= 1 do
+    move(4)
+end
