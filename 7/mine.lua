@@ -1,1 +1,0 @@
-/home/daniele/Projekte/Git Hub/CC-System/7/os/programs/stripMiner/mine.lua

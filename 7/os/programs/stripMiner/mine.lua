@@ -45,7 +45,16 @@ local function orderVectorList()
     table.orderComplex(
         undone,
         function(v)
-            return ((v.x - base.x) ^ 2 + (v.y - base.y) ^ 2 + (v.z - base.z) ^ 2)
+            local turns = 0
+            local dir = v - pos
+            dir:set(dir.x * facing.x + dir.y * facing.y, dir.x * -facing.y + dir.y * facing.x)
+            if dir.x < 0 then
+                turns = 2
+            elseif dir.y ~= 0 then
+                turns = 1
+            end
+
+            return ((v.x - pos.x) ^ 2 + (v.y - pos.y) ^ 2 + (v.z - pos.z) ^ 2), turns
             --return (v.x - pos.x) ^ 2 + (v.y - pos.y) ^ 2 + (v.z - pos.z) ^ 2, ((v.x - base.x) ^ 2 + (v.y - base.y) ^ 2 + (v.z - base.z) ^ 2)
         end
     )
@@ -94,6 +103,8 @@ local function addAround(forward)
     -- for i = start, 5 do
     addToUndone(getConnected(pos, 2))
     addToUndone(getConnected(pos, 3))
+    addToUndone(getConnected(pos, 4))
+    addToUndone(getConnected(pos, 5))
     -- end
 end
 local function getNearest(relative, destination)
@@ -206,9 +217,9 @@ local function iteration()
     base:set(pos.x, pos.y, pos.z)
     addAround(false)
     while #undone > 0 do
+        orderVectorList()
         local current = undone[1]
         table.remove(undone, 1)
-        orderVectorList()
         local nearest = getNearest(pos, current)
         term.write(pos)
         term.write(" ")

@@ -1,0 +1,1 @@
+dofile("os/programs/stripMiner/mine.lua")
