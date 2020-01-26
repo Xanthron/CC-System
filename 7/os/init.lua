@@ -90,7 +90,15 @@ local function updateSView(manager, sView)
         local function start(self, event)
             manager:callFunction(
                 function()
-                    local success, select = assert(loadfile("os/sys/execute.lua"))({file = file.path, select = event.name ~= "mouse_up", edit = file.data.enter, args = {load(file.data.argument or "")()}})
+                    local success, select =
+                        assert(loadfile("os/sys/execute.lua"))(
+                        {
+                            file = file.path,
+                            select = event.name ~= "mouse_up",
+                            edit = file.data.enter,
+                            args = {load(file.data.argument or "")()}
+                        }
+                    )
                     manager:draw()
                 end
             )
@@ -145,18 +153,28 @@ local button_exit = ui.button.new(manager, "x", nil, theme.button2, _w - 2, 1, 3
 local sView_list = ui.scrollView.new(manager, "", 3, theme.sView1, 1, 2, _w, _h - 1)
 
 function button_browser:_onClick(event)
-    manager:callFunction(
-        function()
-            local success, select = assert(loadfile("os/sys/execute.lua"))({file = "os/sys/browser/main.lua", select = event ~= "mouse_up", args = {{select = event ~= "mouse_up"}}})
-            manager:draw()
-        end
+    -- manager:callFunction(
+    --     function()
+    local success, select =
+        assert(loadfile("os/sys/execute.lua"))(
+        {file = "os/sys/browser/main.lua", select = event ~= "mouse_up", args = {{select = event ~= "mouse_up"}}}
     )
+    manager:draw()
+    --     end
+    -- )
 end
 
 function button_explorer:_onClick(event)
     manager:callFunction(
         function()
-            local success, select = assert(loadfile("os/sys/execute.lua"))({file = "os/sys/explorer/main.lua", select = event ~= "mouse_up", args = {{select = event ~= "mouse_up"}}})
+            local success, select =
+                assert(loadfile("os/sys/execute.lua"))(
+                {
+                    file = "os/sys/explorer/main.lua",
+                    select = event ~= "mouse_up",
+                    args = {{select = event ~= "mouse_up"}}
+                }
+            )
             manager:draw()
         end
     )

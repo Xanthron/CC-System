@@ -89,7 +89,7 @@ function ui.uiManager.new(x, y, w, h)
                 this._callFunction = nil
             end
         end
-        this.exit = false
+        this.exit = true
     end
 
     this.parallelManager:addFunction(this._execute)

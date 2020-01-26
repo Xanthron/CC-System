@@ -24,11 +24,14 @@ local browserButton =
                 if event.name == "mouse_up" then
                     select = false
                 end
-                local success, select = assert(loadfile("os/sys/execute.lua"))({file = "os/sys/browser/manager.lua", select = event ~= "mouse_up", args = {{select = select}}})
+                local success, select =
+                    assert(loadfile("os/sys/execute.lua"))(
+                    {file = "os/sys/browser/manager.lua", select = event ~= "mouse_up", args = {{select = select}}}
+                )
                 if select then
-                    manager.selectionManager.select(self, "code", 3)
+                    manager.selectionManager:select(self, "code", 3)
                 else
-                    manager.selectionManager.deselect("code")
+                    manager.selectionManager:deselect("code")
                 end
                 manager:draw()
             end
@@ -51,11 +54,14 @@ local explorerButton =
                 if event.name == "mouse_up" then
                     select = false
                 end
-                local success, select = assert(loadfile("os/sys/execute.lua"))({file = "os/sys/explorer/main.lua", select = event ~= "mouse_up", args = {{select = select}}})
+                local success, select =
+                    assert(loadfile("os/sys/execute.lua"))(
+                    {file = "os/sys/explorer/main.lua", select = event ~= "mouse_up", args = {{select = select}}}
+                )
                 if select then
-                    manager.selectionManager.select(self, "code", 3)
+                    manager.selectionManager:select(self, "code", 3)
                 else
-                    manager.selectionManager.deselect("code")
+                    manager.selectionManager:deselect("code")
                 end
                 manager:draw()
             end
@@ -142,7 +148,14 @@ local function updateListView()
             startFunction = function(self, event)
                 manager:callFunction(
                     function()
-                        local success, select = assert(loadfile("os/sys/execute.lua"))({file = "os/programs/" .. v, select = event.name ~= "mouse_up", args = {select = event.name ~= "mouse_up"}})
+                        local success, select =
+                            assert(loadfile("os/sys/execute.lua"))(
+                            {
+                                file = "os/programs/" .. v,
+                                select = event.name ~= "mouse_up",
+                                args = {select = event.name ~= "mouse_up"}
+                            }
+                        )
                         --TODO selection:
                         -- if select then
                         --     manager.selectionManager.select(self, "code", 3)
@@ -196,7 +209,13 @@ local function updateListView()
     end
     for i = 1, #elements, 3 do
         listView.selectionGroup:addElement(elements[i], nil, elements[i - 3], elements[i + 1], elements[i + 3])
-        listView.selectionGroup:addElement(elements[i + 1], elements[i], elements[i - 4], elements[i + 2], elements[i + 4])
+        listView.selectionGroup:addElement(
+            elements[i + 1],
+            elements[i],
+            elements[i - 4],
+            elements[i + 2],
+            elements[i + 4]
+        )
         listView.selectionGroup:addElement(elements[i + 2], elements[i + 1], elements[i - 5], nil, elements[i + 5])
     end
     listView.selectionGroup.current = listView:getContainer()._elements[1]

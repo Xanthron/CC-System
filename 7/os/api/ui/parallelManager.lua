@@ -35,7 +35,7 @@ function ui.parallelManager.new()
             end
             table.insert(self._parallelElements, ui.parallelElement.new(self, func, data))
         end
-        self._stop = true
+        self:stop()
     end
     ---Remove a function or parallelElement with data
     ---@param func function|parallelElement
@@ -45,7 +45,7 @@ function ui.parallelManager.new()
             for i = 1, #self._parallelElements do
                 if self._parallelElements[i] == func then
                     table.remove(self._parallelElements, i)
-                    self._stop = true
+                    self:stop()
                     return true
                 end
             end
@@ -53,7 +53,7 @@ function ui.parallelManager.new()
             for i = 1, #self._parallelElements do
                 if self._parallelElements[i]._func == func then
                     table.remove(self._parallelElements, i)
-                    self._stop = true
+                    self:stop()
                     return true
                 end
             end

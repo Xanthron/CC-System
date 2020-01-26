@@ -1,9 +1,3 @@
---TODO Check if necessary
-local _parallelElement_metadata = {
-    __call = function(self, ...)
-        return self:init(...)
-    end
-}
 ui.parallelElement = {}
 ---Create a new parallelElement
 ---@param caller parallelManager|nil
@@ -27,6 +21,5 @@ function ui.parallelElement.new(caller, func, data)
             this.caller:removeFunction(this)
         end
     end
-    setmetatable(this, _padding_metatable)
     return this
 end

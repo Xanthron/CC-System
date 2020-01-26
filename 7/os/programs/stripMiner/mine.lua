@@ -18,6 +18,30 @@ local undone = {}
 ---@type vector[]
 local done = {}
 
+local slots = {}
+for i = 1, 16 do
+    if i < 5 then
+        slots[i] = i
+    else
+        slots[i] = 0
+    end
+end
+local slotsData = {}
+slotsData[1] = "minecraft:chest"
+slotsData[2] = 80
+slotsData[3] = "minecraft:torch"
+slotsData[4] = "minecraft:cobblestone"
+
+local function checkFuel(v1, v2)
+    if turtle.getFuelLimit() == 0 then
+        return true
+    end
+    local v = v1 - v2
+    local distance = math.abs(v.x) + math.abs(v.y) + math.abs(v.z)
+    if distance > turtle.getFuelLevel() then
+    end
+end
+
 local function setCurrentPos(x, y, z)
     pos:set(x, y, z)
     for i = 1, #undone do
