@@ -33,12 +33,14 @@ slotsData[3] = "minecraft:torch"
 slotsData[4] = "minecraft:cobblestone"
 
 local function checkFuel(v1, v2)
-    if turtle.getFuelLimit() == 0 then
+    local fuelLimit = turtle.getFuelLimit()
+    if fuelLimit == 0 then
         return true
     end
     local v = v1 - v2
     local distance = math.abs(v.x) + math.abs(v.y) + math.abs(v.z)
-    if distance > turtle.getFuelLevel() then
+    local fuelLevel = turtle.getFuelLevel()
+    if distance > fuelLevel then
     end
 end
 
@@ -74,10 +76,7 @@ local function clearVectorLists()
     local i = 1
     while i <= #done do
         local v = done[i]
-        if
-            ((v.y <= 1 and v.y >= -1 and v.z == 0) and (v.z <= 1 or v.z >= -1 and v.y == 0) and
-                (v - base):sqLength() < 10)
-         then
+        if ((v.y <= 1 and v.y >= -1 and v.z == 0) and (v.z <= 1 or v.z >= -1 and v.y == 0) and (v - base):sqLength() < 10) then
             i = i + 1
         else
             table.remove(done, i)
