@@ -1,5 +1,5 @@
 --[[
-Strip Miner                        [x]
+Strip Miner                      i [x]
 Length: [                            ]
 
 Search List: [  White List  ]
@@ -8,10 +8,10 @@ Delete List: [  White List  ]
 [Path]
 
 Slots:                    [ ][ ][ ][ ]
-C: Chest    T: Torch      [ ][ ][ ][ ]   
-F: Fuel     B: Build      [ ][ ][ ][ ]   
-E: Ender Chest            [ ][ ][ ][ ]
-                               [Start]
+1: Chest    2: Fuel       [ ][ ][ ][ ]   
+3: Build    4: Torch      [ ][ ][ ][ ]   
+5: Ender Chest            [ ][ ][ ][ ]
+Save Settings                  [Start]
 ]]
 --[[
 Modes:

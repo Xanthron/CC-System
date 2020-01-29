@@ -19,18 +19,41 @@ local undone = {}
 local done = {}
 
 local slots = {}
+slots.all = {}
 for i = 1, 16 do
     if i < 5 then
-        slots[i] = i
+        slots.all[i] = i
     else
-        slots[i] = 0
+        slots.all[i] = 0
     end
 end
-local slotsData = {}
-slotsData[1] = "minecraft:chest"
-slotsData[2] = 80
-slotsData[3] = "minecraft:torch"
-slotsData[4] = "minecraft:cobblestone"
+slots.data = {}
+slots.data[1] = "minecraft:chest"
+slots.data[2] = 80
+slots.data[3] = "minecraft:torch"
+slots.data[4] = "minecraft:cobblestone"
+slots.chest = {}
+slots.fuel = {}
+slots.build = {}
+slots.torch = {}
+slots.enderChest = nil
+slots.empty = {}
+for i = 1, #slots.all do
+    local id = slots[i]
+    if id == 1 then
+        table.insert(slots.chest, i)
+    elseif id == 2 then
+        table.insert(slots.fuel, i)
+    elseif id == 3 then
+        table.insert(slots.build, i)
+    elseif id == 4 then
+        table.insert(slots.torch, i)
+    elseif id == 5 then
+        slots.enderChest = i
+    else
+        table.insert(slots.empty, i)
+    end
+end
 
 local function checkFuel(v1, v2)
     local fuelLimit = turtle.getFuelLimit()
@@ -38,10 +61,32 @@ local function checkFuel(v1, v2)
         return true
     end
     local v = v1 - v2
-    local distance = math.abs(v.x) + math.abs(v.y) + math.abs(v.z)
-    local fuelLevel = turtle.getFuelLevel()
-    if distance > fuelLevel then
+    local distance, slot, fuelLevel, level =
+        math.abs(v.x) + math.abs(v.y) + math.abs(v.z),
+        turtle.getSelectedSlot(),
+        turtle.getFuelLevel(),
+        0
+
+    for i = 1, #slots.fuel do
+        if distance < fuelLevel then
+            turtle.select(slot)
+            return true
+        end
+        local slot = slots.fuel[i]
+        local stackSize, increase = turtle.getItemCount(), slots.data[slot]
+        local refuel = math.min(stackSize, math.floor((fuelLimit - fuelLevel) / increase))
+        if refuel > 0 then
+            turtle.select(slot)
+            turtle.refuel(refuel)
+        end
+        level = level + (stackSize - refuel) * increase
+        fuelLevel = turtle.getFuelLevel()
     end
+    turtle.select(slot)
+    if distance < fuelLevel + level then
+        return true
+    end
+    return false
 end
 
 local function setCurrentPos(x, y, z)
@@ -76,7 +121,10 @@ local function clearVectorLists()
     local i = 1
     while i <= #done do
         local v = done[i]
-        if ((v.y <= 1 and v.y >= -1 and v.z == 0) and (v.z <= 1 or v.z >= -1 and v.y == 0) and (v - base):sqLength() < 10) then
+        if
+            ((v.y <= 1 and v.y >= -1 and v.z == 0) and (v.z <= 1 or v.z >= -1 and v.y == 0) and
+                (v - base):sqLength() < 10)
+         then
             i = i + 1
         else
             table.remove(done, i)
