@@ -29,7 +29,7 @@ for i = 1, 16 do
 end
 slots.data = {}
 slots.data[1] = "minecraft:chest"
-slots.data[2] = 80
+slots.data[2] = {name = "minecraft:coal", increase = 80}
 slots.data[3] = "minecraft:torch"
 slots.data[4] = "minecraft:cobblestone"
 slots.chest = {}
@@ -39,7 +39,7 @@ slots.torch = {}
 slots.enderChest = nil
 slots.empty = {}
 for i = 1, #slots.all do
-    local id = slots[i]
+    local id = slots.all[i]
     if id == 1 then
         table.insert(slots.chest, i)
     elseif id == 2 then
@@ -61,11 +61,7 @@ local function checkFuel(v1, v2)
         return true
     end
     local v = v1 - v2
-    local distance, slot, fuelLevel, level =
-        math.abs(v.x) + math.abs(v.y) + math.abs(v.z),
-        turtle.getSelectedSlot(),
-        turtle.getFuelLevel(),
-        0
+    local distance, slot, fuelLevel, level = math.abs(v.x) + math.abs(v.y) + math.abs(v.z), turtle.getSelectedSlot(), turtle.getFuelLevel(), 0
 
     for i = 1, #slots.fuel do
         if distance < fuelLevel then
@@ -73,16 +69,19 @@ local function checkFuel(v1, v2)
             return true
         end
         local slot = slots.fuel[i]
-        local stackSize, increase = turtle.getItemCount(), slots.data[slot]
-        local refuel = math.min(stackSize, math.floor((fuelLimit - fuelLevel) / increase))
-        if refuel > 0 then
-            turtle.select(slot)
-            turtle.refuel(refuel)
+        local name, increase = slots.data[slot].name, slots.data[slot].increase
+        local detail = turtle.getItemDetail(slot)
+        if detail and name == detail.name then
+            local refuel = math.min(detail.count, math.floor((fuelLimit - fuelLevel) / increase))
+            if refuel > 0 then
+                turtle.select(slot)
+                turtle.refuel(refuel)
+            end
+            level = level + (detail.count - refuel) * increase
+            fuelLevel = turtle.getFuelLevel()
         end
-        level = level + (stackSize - refuel) * increase
-        fuelLevel = turtle.getFuelLevel()
     end
-    turtle.select(slot)
+    --turtle.select(slot)
     if distance < fuelLevel + level then
         return true
     end
@@ -121,10 +120,7 @@ local function clearVectorLists()
     local i = 1
     while i <= #done do
         local v = done[i]
-        if
-            ((v.y <= 1 and v.y >= -1 and v.z == 0) and (v.z <= 1 or v.z >= -1 and v.y == 0) and
-                (v - base):sqLength() < 10)
-         then
+        if ((v.y <= 1 and v.y >= -1 and v.z == 0) and (v.z <= 1 or v.z >= -1 and v.y == 0) and (v - base):sqLength() < 10) then
             i = i + 1
         else
             table.remove(done, i)
@@ -188,17 +184,6 @@ local function inspect(dir)
     return false
 end
 
-local function addAround(forward)
-    if forward then
-        addToUndone(getConnected(pos, 1))
-    end
-    -- for i = start, 5 do
-    addToUndone(getConnected(pos, 2))
-    addToUndone(getConnected(pos, 3))
-    addToUndone(getConnected(pos, 4))
-    addToUndone(getConnected(pos, 5))
-    -- end
-end
 local function getNearest(r1, r2, d)
     local vs = {}
     for i = 1, 6 do
@@ -214,6 +199,7 @@ local function getNearest(r1, r2, d)
 end
 
 local function move(dir)
+    local v
     if dir == 1 then
         while not turtle.forward() do
             turtle.dig()
@@ -311,11 +297,26 @@ local function iteration()
         term.write(" ")
         term.write(current)
         term.write(" ")
-        term.write(current)
-        term.write(" ")
+        print("")
         if not (current == pos) then
             term.write("-> " .. tostring(current - pos))
-            go(current - pos)
+            print("")
+            if checkFuel(start, current) then
+                print("go")
+                go(current - pos)
+            else
+                print("go to start")
+                --TODO zu erst auf den pfad und dann den weg zurück
+                go(-pos)
+                print("wait for fuel")
+                os.pullEvent("turtle_inventory")
+                while not checkFuel(start, current) do
+                    print("no fuel")
+                    os.pullEvent("turtle_inventory")
+                end
+                print("go to position")
+                go(current)
+            end
         end
 
         local near = {}
@@ -350,10 +351,12 @@ local function iteration()
             local dir = getDir(v - pos)
             if dir.z > 0 then
                 if inspect(2) then
+                    print("inspected up")
                     addToUndone(v)
                 end
             elseif dir.z < 0 then
                 if inspect(3) then
+                    print("inspected down")
                     addToUndone(v)
                 end
             else
@@ -367,6 +370,7 @@ local function iteration()
                     move(5)
                 end
                 if inspect(1) then
+                    print("inspected front")
                     addToUndone(v)
                 end
             end
@@ -378,20 +382,23 @@ local function iteration()
 
     local v = getConnected(base, 1)
     while #undone == 0 do
+        print("next iteration", v)
         addToUndone(v)
         v:set(v.x + 1)
     end
     base:set(v.x - 1, v.y, v.z)
 end
 
+print(#slots.fuel)
+
 table.insert(done, getConnected(pos, -1))
 table.insert(done, pos:copy())
-addToUndone(getConnected(pos, 1))
 base:set(pos.x + 1, pos.y, pos.z)
-while base.x < 20 do
+addToUndone(base)
+while base.x <= 80 do
     iteration()
 end
-
+print("end")
 go(start - pos)
 while facing.x ~= 1 do
     move(4)
