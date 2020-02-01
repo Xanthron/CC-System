@@ -61,7 +61,11 @@ local function checkFuel(v1, v2)
         return true
     end
     local v = v1 - v2
-    local distance, slot, fuelLevel, level = math.abs(v.x) + math.abs(v.y) + math.abs(v.z), turtle.getSelectedSlot(), turtle.getFuelLevel(), 0
+    local distance, slot, fuelLevel, level =
+        math.abs(v.x) + math.abs(v.y) + math.abs(v.z),
+        turtle.getSelectedSlot(),
+        turtle.getFuelLevel(),
+        0
 
     for i = 1, #slots.fuel do
         if distance < fuelLevel then
@@ -120,7 +124,10 @@ local function clearVectorLists()
     local i = 1
     while i <= #done do
         local v = done[i]
-        if ((v.y <= 1 and v.y >= -1 and v.z == 0) and (v.z <= 1 or v.z >= -1 and v.y == 0) and (v - base):sqLength() < 10) then
+        if
+            ((v.y <= 1 and v.y >= -1 and v.z == 0) and (v.z <= 1 or v.z >= -1 and v.y == 0) and
+                (v - base):sqLength() < 10)
+         then
             i = i + 1
         else
             table.remove(done, i)
@@ -198,96 +205,6 @@ local function getNearest(r1, r2, d)
     return vs[1]
 end
 
-local function move(dir)
-    local v
-    if dir == 1 then
-        while not turtle.forward() do
-            turtle.dig()
-        end
-        setCurrentPos(pos.x + 1 * facing.x, pos.y + 1 * facing.y)
-    elseif dir == 2 then
-        while not turtle.up() do
-            turtle.digUp()
-        end
-        setCurrentPos(nil, nil, pos.z + 1)
-    elseif dir == 3 then
-        while not turtle.down() do
-            turtle.digDown()
-        end
-        setCurrentPos(nil, nil, pos.z - 1)
-    elseif dir == 4 then
-        turtle.turnRight()
-        facing:set(-facing.y, facing.x)
-    elseif dir == 5 then
-        turtle.turnLeft()
-        facing:set(facing.y, -facing.x)
-    elseif dir == 6 then
-        turtle.back()
-        setCurrentPos(pos.x - 1 * facing.x, pos.y - 1 * facing.y)
-    end
-end
-local function go(v)
-    if v.x > 0 then
-        if facing.x < 0 then
-            move(4)
-            move(4)
-        elseif facing.y > 0 then
-            move(5)
-        elseif facing.y < 0 then
-            move(4)
-        end
-        for i = 1, v.x do
-            move(1)
-        end
-    elseif v.x < 0 then
-        if facing.x > 0 then
-            move(4)
-            move(4)
-        elseif facing.y > 0 then
-            move(4)
-        elseif facing.y < 0 then
-            move(5)
-        end
-        for i = 1, -v.x do
-            move(1)
-        end
-    end
-    if v.z > 0 then
-        for i = 1, v.z do
-            move(2)
-        end
-    elseif v.z < 0 then
-        for i = 1, -v.z do
-            move(3)
-        end
-    end
-    if v.y > 0 then
-        if facing.y < 0 then
-            move(4)
-            move(4)
-        elseif facing.x > 0 then
-            move(4)
-        elseif facing.x < 0 then
-            move(5)
-        end
-        for i = 1, v.y do
-            move(1)
-        end
-    elseif v.y < 0 then
-        if facing.y > 0 then
-            move(4)
-            move(4)
-        elseif facing.x > 0 then
-            move(5)
-        elseif facing.x < 0 then
-            move(4)
-        end
-        for i = 1, -v.y do
-            move(1)
-        end
-    end
-end
-
 local function iteration()
     while #undone > 0 do
         orderVectorList()
@@ -303,11 +220,11 @@ local function iteration()
             print("")
             if checkFuel(start, current) then
                 print("go")
-                go(current - pos)
+                turtle.move.go(current - pos, facing, pos, update)
             else
                 print("go to start")
                 --TODO zu erst auf den pfad und dann den weg zurück
-                go(-pos)
+                turtle.move.go(-pos, facing, pos, update)
                 print("wait for fuel")
                 os.pullEvent("turtle_inventory")
                 while not checkFuel(start, current) do
@@ -315,7 +232,7 @@ local function iteration()
                     os.pullEvent("turtle_inventory")
                 end
                 print("go to position")
-                go(current)
+                turtle.move.go(current, facing, pos, update)
             end
         end
 
@@ -362,12 +279,12 @@ local function iteration()
             else
                 if dir.x < 0 then
                     print("turn")
-                    move(4)
-                    move(4)
+                    turtle.move.turnRight(facing, update)
+                    turtle.move.turnRight(facing, update)
                 elseif dir.y > 0 then
-                    move(4)
+                    turtle.move.turnRight(facing, update)
                 elseif dir.y < 0 then
-                    move(5)
+                    turtle.move.turnLeft(facing, update)
                 end
                 if inspect(1) then
                     print("inspected front")
@@ -395,11 +312,11 @@ table.insert(done, getConnected(pos, -1))
 table.insert(done, pos:copy())
 base:set(pos.x + 1, pos.y, pos.z)
 addToUndone(base)
-while base.x <= 80 do
+while base.x <= 1 do
     iteration()
 end
 print("end")
-go(start - pos)
+turtle.move.go(start - pos, facing, pos, update)
 while facing.x ~= 1 do
-    move(4)
+    turtle.move.turnRight(facing, update)
 end
