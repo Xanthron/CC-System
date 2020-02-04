@@ -32,9 +32,9 @@ whitelist/Blacklist
 ]]
 local _x, _y, _w, _h = 1, 1, term.getSize()
 
-local success, set = fs.doFile("os/programs/stripMiner/settings")
+local success, set = fs.doFile("os/programs/stripMiner/data/settings.set")
 set = set or {}
-set.length = set.length or "0"
+set.length = set.length or 0
 set.searchWhiteList = set.searchWhiteList or "White List"
 if set.pathSearchList and not fs.exists(set.pathSearchList) then
     set.pathSearchList = nil
@@ -69,41 +69,27 @@ local label_title = ui.label.new(manager, "Strip Miner", theme.label1, _x, _y, _
 local button_exit = ui.button.new(manager, "<", nil, theme.button2, _x + _w - 3, _y, 3, 1)
 
 local label_length = ui.label.new(manager, "Length: ", theme.label2, _x, _y + 1, 8, 1)
-local iField_length =
-    ui.inputField.new(manager, "", tostring(set.length), false, nil, theme.iField1, _x + 8, _y + 1, _w - 8, 1)
+local iField_length = ui.inputField.new(manager, "", tostring(set.length), false, nil, theme.iField1, _x + 8, _y + 1, _w - 8, 1)
 
 local label_searchList = ui.label.new(manager, "Search List", theme.label2, _x, _y + 3, 12, 1)
-local button_searchList =
-    ui.button.new(manager, set.searchWhiteList, nil, theme.button1, 13, _y + 3, math.floor(_w / 2), 1)
+local button_searchList = ui.button.new(manager, set.searchWhiteList, nil, theme.button1, 13, _y + 3, math.floor(_w / 2), 1)
 
 local button_pathSearchList = ui.button.new(manager, "Path", nil, theme.button1, _x, _y + 4, 6, 1)
-local label_pathSearchList =
-    ui.label.new(manager, set.pathSearchList or "No Selection", theme.label2, _x + 7, _y + 4, _w - 7, 1)
+local label_pathSearchList = ui.label.new(manager, set.pathSearchList or "No Selection", theme.label2, _x + 7, _y + 4, _w - 7, 1)
 if not set.pathSearchList then
     label_pathSearchList:changeMode(2, true)
 end
 
 local label_trashList = ui.label.new(manager, "Trash List", theme.label2, _x, _y + 5, 12, 1)
-local button_trashList =
-    ui.button.new(manager, set.trashWhiteList, nil, theme.button1, 13, _y + 5, math.floor(_w / 2), 1)
+local button_trashList = ui.button.new(manager, set.trashWhiteList, nil, theme.button1, 13, _y + 5, math.floor(_w / 2), 1)
 
 local button_pathTrashList = ui.button.new(manager, "Path", nil, theme.button1, _x, _y + 6, 6, 1)
-local label_pathTrashList =
-    ui.label.new(manager, set.pathTrashList or "No Selection", theme.label2, _x + 7, _y + 6, _w - 7, 1)
+local label_pathTrashList = ui.label.new(manager, set.pathTrashList or "No Selection", theme.label2, _x + 7, _y + 6, _w - 7, 1)
 if not set.pathTrashList then
     label_pathTrashList:changeMode(2, true)
 end
 
-local label_slot =
-    ui.label.new(
-    manager,
-    "Slots:\n1: Chest    2: Fuel\n3: Build     4: Torch\n5: Ender Chest",
-    theme.label2,
-    _x,
-    _y + 8,
-    26,
-    4
-)
+local label_slot = ui.label.new(manager, "Slots:\n1: Chest    2: Fuel\n3: Build     4: Torch\n5: Ender Chest", theme.label2, _x, _y + 8, 26, 4)
 local list_slots = {}
 for i = 1, 16 do
     local x = _x + 26 + ((i - 1) % 4) * 3
@@ -170,10 +156,7 @@ local function updateStart()
         end
     end
 
-    if
-        ((t[1] > 0 and t[5] == 0) or (t[5] == 1 and t[1] == 0)) and (t[2] > 0 == turtle.getFuelLimit() > 0) and
-            set.pathSearchList
-     then
+    if ((t[1] > 0 and t[5] == 0) or (t[5] == 1 and t[1] == 0)) and (t[3] > 0 or t[4] == 0) and ((t[2] > 0) == (turtle.getFuelLimit() > 0)) and set.pathSearchList then
         possible = true
     end
 
@@ -216,10 +199,7 @@ end
 function button_pathSearchList:_onClick(event)
     manager:callFunction(
         function()
-            local file =
-                assert(loadfile("os/sys/explorer/main.lua"))(
-                {select = event.name ~= "mouse_up", mode = "select_one", edit = false, type = "list"}
-            )
+            local file = assert(loadfile("os/sys/explorer/main.lua"))({select = event.name ~= "mouse_up", mode = "select_one", edit = false, type = "list"})
             if file then
                 set.pathSearchList = file
                 label_pathSearchList.text = set.pathSearchList
@@ -247,10 +227,7 @@ end
 function button_pathTrashList:_onClick(event)
     manager:callFunction(
         function()
-            local file =
-                assert(loadfile("os/sys/explorer/main.lua"))(
-                {select = event.name ~= "mouse_up", mode = "select_one", edit = false, type = "list"}
-            )
+            local file = assert(loadfile("os/sys/explorer/main.lua"))({select = event.name ~= "mouse_up", mode = "select_one", edit = false, type = "list"})
             if file then
                 set.pathTrashList = file
                 label_pathTrashList.text = set.pathTrashList
@@ -294,7 +271,16 @@ for i = 1, 16 do
 end
 
 function button_saveSettings:_onClick(event)
-    table.save(set, "os/programs/stripMiner/settings")
+    table.save(set, "os/programs/stripMiner/data/settings.set")
+end
+
+function button_start:_onClick(event)
+    manager:callFunction(
+        function()
+            table.save(set, "os/programs/stripMiner/data/data.set")
+            dofile("os/programs/stripMiner/mine.lua")
+        end
+    )
 end
 
 manager.selectionManager:select(group_mainUp, "code", 1)

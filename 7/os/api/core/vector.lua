@@ -45,6 +45,9 @@ function _v_m.__add(v1, v2)
 end
 ---@return vector
 function _v_m.__sub(v1, v2)
+    if type(v2) ~= "table" then
+        error("lol", 4)
+    end
     return vector.new(v1.x - v2.x, v1.y - v2.y, v1.z - v2.z)
 end
 function _v_m.__mul(v1, v2)
@@ -92,3 +95,20 @@ vector.left = vector.new(0, -1, 0)
 vector.right = vector.new(0, 1, 0)
 vector.up = vector.new(0, 0, 1)
 vector.down = vector.new(0, 0, -1)
+
+---@param v1  vector
+---@param v2  vector
+---@param v3  vector
+function vector.contains(v1, v2, v3)
+    local vMin = vector.new(math.min(v1.x, v2.x), math.min(v1.y, v2.y), math.min(v1.z, v2.z))
+    local vMax = vector.new(math.max(v1.x, v2.x), math.max(v1.y, v2.y), math.max(v1.z, v2.z))
+    if v3.x >= vMin.x and v3.x <= vMax.x and v3.y >= vMin.y and v3.y <= vMax.y and v3.z >= vMin.z and v3.z <= vMax.z then
+        return true
+    else
+        return false
+    end
+end
+
+function vector.convert(list)
+    setmetatable(list, _v_m)
+end

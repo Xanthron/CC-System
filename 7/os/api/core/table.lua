@@ -16,7 +16,7 @@ function table.save(list, path)
     if type(table) ~= "table" then
         error("bad argument: table expected, got " .. type(table), 2)
     end
-    local save = textutils.serialize(list)
+    local save = table.toString(list)
     file = io.open(path, "w")
     file:write("return" .. save)
     file:close()
@@ -36,7 +36,7 @@ function table.checkType(set, name, kind, needSet, default)
     end
 end
 
-function swap(list, i, j)
+function table.swap(list, i, j)
     local temp = list[i]
     list[i] = list[j]
     list[j] = temp
@@ -54,8 +54,8 @@ function table.order(list, func)
         local newn = 1
         for i = 2, n do
             if values[i - 1] > values[i] then
-                swap(values, i - 1, i)
-                swap(list, i - 1, i)
+                table.swap(values, i - 1, i)
+                table.swap(list, i - 1, i)
                 newn = i
             end
         end
@@ -73,18 +73,15 @@ function table.orderComplex(list, func)
     repeat
         local newn = 1
         for i = 2, n do
-            if values[i - 1][1] > values[i][1] then
-                swap(values, i - 1, i)
-                swap(list, i - 1, i)
-                newn = i
-            elseif values[i - 1][1] == values[i][1] then
-                for j = 2, #values[i - 1] do
-                    if not values[i] or values[i - 1][j] > values[i][j] then
-                        swap(values, i - 1, i)
-                        swap(list, i - 1, i)
-                        newn = i
-                        break
-                    end
+            for j = 1, #values[i - 1] do
+                local var1, var2 = values[i - 1][j], values[i][j]
+                if var1 > var2 then
+                    table.swap(values, i - 1, i)
+                    table.swap(list, i - 1, i)
+                    newn = i
+                    break
+                elseif var1 < var2 then
+                    break
                 end
             end
         end
@@ -96,4 +93,39 @@ function table.clear(list)
     for k in pairs(list) do
         list[k] = nil
     end
+end
+
+local function _tableToString(list, contains)
+    for i = 1, #contains do
+        if contains[i] == list then
+            error("Error", #contains + 2)
+        --TODO error message
+        end
+    end
+    table.insert(contains, v)
+
+    local items = {}
+    for k, v in pairs(list) do
+        local t, value = type(v), nil
+        if t == "table" then
+            value = _tableToString(v, contains)
+        elseif t == "string" then
+            value = '"' .. v:gsub('"', '\\"') .. '"'
+        elseif t == nil then
+            value = t
+        else
+            value = tostring(v)
+        end
+        if type(k) == "number" then
+            k = ("[%s]"):format(k)
+        end
+        table.insert(items, ("%s=%s"):format(k, value))
+    end
+    table.remove(contains, #contains)
+
+    return ("{%s}"):format(table.concat(items, ","))
+end
+
+function table.toString(list)
+    return _tableToString(list, {})
 end

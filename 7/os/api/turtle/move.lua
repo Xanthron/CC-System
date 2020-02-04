@@ -1,143 +1,111 @@
 if turtle then
     turtle.move = {}
 
-    ---@param facing vector
-    ---@param position vector
     ---@param update function
-    function turtle.move.forward(facing, position, update)
+    function turtle.move.forward(update)
         while not turtle.forward() do
             turtle.dig()
         end
-        if position then
-            position:set(position.x + 1 * facing.x, position.y + 1 * facing.y)
-            if update then
-                update()
-            end
+        if update then
+            update(nil, vector.forward)
         end
     end
 
-    ---@param position vector
     ---@param update function
-    function turtle.move.up(position, update)
+    function turtle.move.up(update)
         while not turtle.up() do
             turtle.digUp()
         end
-        if position then
-            position:set(nil, nil, position.z + 1)
-            if update then
-                update()
-            end
+        if update then
+            update(nil, vector.up)
         end
     end
 
-    ---@param position vector
     ---@param update function
-    function turtle.move.down(position, update)
+    function turtle.move.down(update)
         while not turtle.down() do
             turtle.digDown()
         end
-        if position then
-            position:set(nil, nil, position.z - 1)
-            if update then
-                update()
-            end
+        if update then
+            update(nil, vector.down)
         end
     end
 
-    ---@param facing vector
     ---@param update function
-    function turtle.move.turnLeft(facing, update)
+    function turtle.move.turnLeft(update)
         turtle.turnLeft()
-        if facing then
-            facing:set(facing.y, -facing.x)
-            if update then
-                update()
-            end
+        if update then
+            update(vector.new(1, -1, 0), nil)
         end
     end
 
-    ---@param facing vector
     ---@param update function
-    function turtle.move.turnRight(facing, update)
+    function turtle.move.turnRight(update)
         turtle.turnRight()
-        if facing then
-            facing:set(-facing.y, facing.x)
-            if update then
-                update()
-            end
+        if update then
+            update(vector.new(-1, 1, 0), nil)
         end
     end
 
-    ---@param facing vector
-    ---@param position vector
     ---@param update function
-    function turtle.move.back(facing, position, update)
+    function turtle.move.back(update)
         while not turtle.back() do
-            turtle.turnLeft(facing, update)
-            turtle.turnLeft(facing, update)
+            turtle.turnLeft(update)
+            turtle.turnLeft(update)
             turtle.dig()
-            turtle.turnLeft(facing, update)
-            turtle.turnLeft(facing, update)
+            turtle.turnLeft(update)
+            turtle.turnLeft(update)
         end
-        if position then
-            position:set(position.x - 1 * facing.x, position.y - 1 * facing.y)
-            if update then
-                update(facing, position)
-            end
+        if update then
+            update(nil, vector.backward)
         end
     end
 
     ---@param v vector
-    ---@param facing vector
-    ---@param position vector
     ---@param update function
-    function turtle.move.go(v, facing, position, update)
-        local forward = v.x * facing.x + v.y * facing.y
-        local right = v.y * facing.x + v.x * -facing.y
-        local up = v.z
-
+    function turtle.move.go(v, update)
         local turns = 0
 
-        if up > 0 then
-            for i = 1, up do
-                turtle.move.up(position, update)
+        if v.z > 0 then
+            for i = 1, v.z do
+                turtle.move.up(update)
             end
-        elseif up < 0 then
-            for i = 1, -up do
-                turtle.move.down(position, update)
+        elseif v.z < 0 then
+            for i = 1, -v.z do
+                turtle.move.down(update)
             end
         end
 
-        if forward > 0 then
-            for i = 1, forward do
-                turtle.move.forward(facing, position, update)
+        if v.x > 0 then
+            for i = 1, v.x do
+                turtle.move.forward(update)
             end
         end
-        if right > 0 then
+        if v.y > 0 then
             turns = 1
-            turtle.move.turnRight(facing, update)
-            for i = 1, right do
-                turtle.move.forward(facing, position, update)
+            turtle.move.turnRight(update)
+            for i = 1, v.y do
+                turtle.move.forward(update)
             end
-        elseif right < 0 then
+        elseif v.y < 0 then
             turns = 2
-            turtle.move.turnLeft(facing, update)
-            for i = 1, -right do
-                turtle.move.forward(facing, position, update)
+            turtle.move.turnLeft(update)
+            for i = 1, -v.y do
+                turtle.move.forward(update)
             end
         end
 
-        if forward < 0 then
+        if v.x < 0 then
             if turns == 0 then
-                turtle.move.turnRight(facing, update)
-                turtle.move.turnRight(facing, update)
+                turtle.move.turnRight(update)
+                turtle.move.turnRight(update)
             elseif turns == 1 then
-                turtle.move.turnRight(facing, update)
+                turtle.move.turnRight(update)
             elseif turns == 2 then
-                turtle.move.turnLeft(facing, update)
+                turtle.move.turnLeft(update)
             end
-            for i = 1, -forward do
-                turtle.move.forward(facing, position, update)
+            for i = 1, -v.x do
+                turtle.move.forward(update)
             end
         end
     end
