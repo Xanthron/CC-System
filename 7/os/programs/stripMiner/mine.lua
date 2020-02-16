@@ -1,13 +1,149 @@
---TODO Daten einladen
---TODO Enderchest
---TODO Menu
---TODO trash
---TODO Statistik
---TODO Pause
+--[[
+Strip Miner                           
+Position:  x:       y:       z:       
 
-local function mine()
-    local start = vector.zero:copy()
-    local success, move = fs.doFile("os/programs/stripMiner/data/move.set")
+Fuel:            10 / 100 
+Facing:          Forward 
+Distance Moved:  120
+Total    Moved:  200
+Detected Blocks: 100
+
+Mode:            Mine
+
+
+                   [Pause][Stop][Exit]
+]]
+local inMove = false
+local start = vector.zero:copy()
+local way = vector.up:copy()
+local move, slots, mineList, trashList, data
+local _x, _y, _w, _h = 1, 1, term.getSize()
+
+local text_fuel, text_facing, text_distance, text_moved, text_detected = "Fuel:            ", "Facing:          ", "Distance Moved:  ", "Total    Moved:  ", "Detected Blocks: "
+
+local manager = ui.uiManager.new(_x, _y, _w, _h)
+for i = 1, _w * _h do
+    if i <= _w or i > _w * (_h - 1) then
+        manager.buffer.text[i] = " "
+        manager.buffer.textColor[i] = colors.green
+        manager.buffer.textBackgroundColor[i] = colors.green
+    else
+        manager.buffer.text[i] = " "
+        manager.buffer.textColor[i] = colors.white
+        manager.buffer.textBackgroundColor[i] = colors.white
+    end
+end
+local label_title = ui.label.new(manager, "Strip Miner", theme.label1, _x, _y, _w, 1)
+
+local label_pos = ui.label.new(manager, "Position: ", theme.label2, _x, _y + 1, 10, 1)
+local label_posX = ui.label.new(manager, "X: 0", theme.label2, _x + 10, _y + 1, 8, 1)
+local label_posY = ui.label.new(manager, "Y: 0", theme.label2, _x + 19, _y + 1, 8, 1)
+local label_posZ = ui.label.new(manager, "Z: 0", theme.label2, _x + 28, _y + 1, 8, 1)
+
+local label_fuel = ui.label.new(manager, text_fuel .. turtle.getFuelLevel() .. " / 0", theme.label2, _x, _y + 3, _w, 1)
+
+local label_facing = ui.label.new(manager, text_facing .. "Forward", theme.label2, _x, _y + 4, _w, 1)
+local label_distance = ui.label.new(manager, text_distance .. "0", theme.label2, _x, _y + 5, _w, 1)
+local label_moved = ui.label.new(manager, text_moved .. "0", theme.label2, _x, _y + 6, _w, 1)
+local label_detected = ui.label.new(manager, text_detected .. "0", theme.label2, _x, _y + 7, _w, 1)
+
+local label_mode = ui.label.new(manager, "Mine", theme.label2, _x, _y + 9, _w, 3)
+label_mode:setGlobalRect(nil, nil, _w, 3)
+label_mode.scaleH = false
+label_mode.scaleW = false
+
+local button_pause = ui.button.new(manager, "Pause", nil, theme.button1, _x, _h, 8, 1)
+if move and move.pause then
+    button_pause.text = "Resume"
+    button_pause:recalculate()
+    button_pause:repaint("this")
+end
+local button_stop = ui.button.new(manager, "Stop", nil, theme.button1, _x + _w - 12, _h, 6, 1)
+local button_exit = ui.button.new(manager, "Exit", nil, theme.button1, _x + _w - 6, _h, 6, 1)
+
+local group_mainMenu = manager.selectionManager:addNewGroup()
+group_mainMenu.current = button_pause
+group_mainMenu:addElement(button_pause, nil, nil, button_stop, nil)
+group_mainMenu:addElement(button_stop, button_pause, nil, button_exit, nil)
+group_mainMenu:addElement(button_exit, button_stop, nil, nil, nil)
+
+manager:draw()
+
+local function loadSlots()
+    slots = {}
+    slots.all = data.slots
+    slots.data = {}
+    slots.chest = {}
+    slots.fuel = {}
+    slots.build = {}
+    slots.torch = {}
+    slots.enderChest = nil
+    slots.empty = {}
+
+    local function waifForData(slot)
+        while turtle.getItemCount(slot) == 0 do
+            os.pullEvent("turtle_inventory")
+        end
+    end
+
+    for i = 1, #slots.all do
+        local id = slots.all[i]
+        if id == 1 then
+            label_mode.text = ("Collecting chest data.\nPlease insert chest in slot %s."):format(i)
+            label_mode:recalculate()
+            label_mode:repaint("this")
+            waifForData(i)
+            slots.data[i] = turtle.getItemDetail(i).name
+            table.insert(slots.chest, i)
+        elseif id == 2 then
+            label_mode.text = ("Collecting fuel data.\nPlease insert fuel in slot %s."):format(i)
+            label_mode:recalculate()
+            label_mode:repaint("this")
+            local right = false
+            while right == false do
+                while turtle.getItemCount(i) <= 1 do
+                    os.pullEvent("turtle_inventory")
+                end
+                turtle.select(i)
+                local level = turtle.getFuelLevel()
+                if turtle.refuel(1) then
+                    level = turtle.getFuelLevel() - turtle.getFuelLimit()
+                    slots.data[i] = {name = turtle.getItemDetail(i).name, increase = level}
+                    if turtle.getFuelLevel() == turtle.getFuelLimit() then
+                        slots.data[i].increase = 80
+                    end
+                    right = true
+                end
+            end
+            table.insert(slots.fuel, i)
+        elseif id == 3 then
+            label_mode.text = ("Collecting build data.\nPlease insert blocks in slot %s."):format(i)
+            label_mode:recalculate()
+            label_mode:repaint("this")
+            waifForData(i)
+            slots.data[i] = turtle.getItemDetail(i).name
+            table.insert(slots.build, i)
+        elseif id == 4 then
+            label_mode.text = ("Collecting torch data.\nPlease insert torches in slot %s."):format(i)
+            label_mode:recalculate()
+            label_mode:repaint("this")
+            waifForData(i)
+            slots.data[i] = turtle.getItemDetail(i).name
+            table.insert(slots.torch, i)
+        elseif id == 5 then
+            label_mode.text = ("Collecting ender chest data.\nPlease insert one ender chest in slot %s."):format(i)
+            label_mode:recalculate()
+            label_mode:repaint("this")
+            waifForData(i)
+            slots.enderChest = i
+        else
+            table.insert(slots.empty, i)
+        end
+    end
+end
+local function loadData()
+    local success
+    success, move = fs.doFile("os/programs/stripMiner/data/move.set")
     if not success then
         move = {}
         move.pos = start:copy()
@@ -29,44 +165,88 @@ local function mine()
             vector.convert(move.done[i])
         end
     end
+    if not move.distance then
+        move.distance = 0
+        move.moved = 0
+        move.detected = 0
+        move.pause = false
+    end
 
-    local success, data = fs.doFile("os/programs/stripMiner/data/data.set")
-    local mineList = dofile(data.pathSearchList)
+    success, data = fs.doFile("os/programs/stripMiner/data/data.set")
+    mineList = dofile(data.pathSearchList)
     if data.pathTrashList then
-        local trashList = dofile(data.pathTrashList)
+        trashList = dofile(data.pathTrashList)
     end
-    local slots = {}
-    slots.all = data.slots
-    slots.data = {}
-    slots.data[1] = "minecraft:chest"
-    slots.data[2] = {name = "minecraft:coal", increase = 80}
-    slots.data[3] = "minecraft:cobblestone"
-    slots.data[4] = "minecraft:torch"
-    slots.chest = {}
-    slots.fuel = {}
-    slots.build = {}
-    slots.torch = {}
-    slots.enderChest = nil
-    slots.empty = {}
-    for i = 1, #slots.all do
-        local id = slots.all[i]
-        if id == 1 then
-            table.insert(slots.chest, i)
-        elseif id == 2 then
-            table.insert(slots.fuel, i)
-        elseif id == 3 then
-            table.insert(slots.build, i)
-        elseif id == 4 then
-            table.insert(slots.torch, i)
-        elseif id == 5 then
-            slots.enderChest = i
-        else
-            table.insert(slots.empty, i)
-        end
+    if not data.slot then
+        loadSlots()
+        table.save(data, "os/programs/stripMiner/data/data.set")
+    else
+        slots = data.slots
     end
+end
+loadData()
 
+local function save()
+    table.save(move, "os/programs/stripMiner/data/move.set")
+end
+
+local function update(f, p, m)
+    if m then
+        inMove = true
+    end
+    if f then
+        move.facing:set(move.facing.y * f.x, move.facing.x * f.y)
+        local facing
+        if move.facing.x == 1 then
+            facing = "Forward"
+        elseif move.facing.x == -1 then
+            facing = "Backward"
+        elseif move.facing.y == 1 then
+            facing = "Right"
+        else
+            facing = "Left"
+        end
+        save()
+
+        label_facing.text = text_facing .. facing
+
+        label_facing:recalculate()
+
+        label_facing:repaint("this")
+    end
+    if p then
+        move.pos:set(move.pos.x + (p.x * move.facing.x + p.y * move.facing.y), move.pos.y + (p.x * move.facing.y + p.y * move.facing.x), move.pos.z + p.z)
+        move.moved = move.moved + math.abs(p.x) + math.abs(p.y) + math.abs(p.z)
+        move.distance = math.max(move.distance, move.pos.x)
+        save()
+
+        label_posX.text = "X: " .. move.pos.x
+        label_posY.text = "Y: " .. move.pos.y
+        label_posZ.text = "Z: " .. move.pos.z
+        label_moved.text = text_moved .. move.moved
+        label_distance.text = text_distance .. move.distance
+
+        label_posX:recalculate()
+        label_posY:recalculate()
+        label_posZ:recalculate()
+        label_moved:recalculate()
+        label_distance:recalculate()
+
+        label_posX:repaint("this")
+        label_posY:repaint("this")
+        label_posZ:repaint("this")
+        label_moved:repaint("this")
+        label_distance:repaint("this")
+
+        manager:draw()
+    end
+    inMove = m
+end
+
+local function mine()
+    --local chestPos = vector.down:copy()
     local placeTorch = false
-    local update, startMode
+    local startMode
 
     local function fillBuild(slot)
         local ret = false
@@ -74,7 +254,6 @@ local function mine()
         for i = 1, #slots.empty do
             local s = slots.empty[i]
             local data = turtle.getItemDetail(s)
-            print(name, data)
             if data and data.name == name then
                 turtle.select(s)
                 turtle.transferTo(slot)
@@ -86,14 +265,21 @@ local function mine()
         end
         return ret
     end
-    local function checkBuild()
+    local function checkBuild(count)
+        count = count or 0
         for i = 1, #slots.build do
             local slot = slots.build[i]
-            if turtle.getItemCount(slot) > 1 then
+            local slotCount = turtle.getItemCount(slot) - 1
+            if slotCount > count then
                 return true
             else
                 if fillBuild(slot) then
-                    return true
+                    slotCount = turtle.getItemCount(slot) - 1
+                    if slotCount > count then
+                        return true
+                    else
+                        count = count - slotCount
+                    end
                 end
             end
         end
@@ -109,7 +295,7 @@ local function mine()
                 end
             end
         else
-            error("no buildingblock")
+            startMode("build", move.pos)
         end
     end
 
@@ -123,9 +309,7 @@ local function mine()
         return false
     end
     local function selectTorch()
-        if not checkTorch() then
-            error("no buildingblock")
-        else
+        if checkTorch() then
             for i = 1, #slots.torch do
                 local slot = slots.torch[i]
                 if turtle.getItemCount(slot) > 0 then
@@ -133,6 +317,8 @@ local function mine()
                     return
                 end
             end
+        else
+            startMode("torch", move.pos)
         end
     end
 
@@ -146,9 +332,7 @@ local function mine()
         return false
     end
     local function selectChest()
-        if not checkTorch() then
-            error("no buildingblock")
-        else
+        if checkChest() then
             for i = 1, #slots.chest do
                 local slot = slots.chest[i]
                 if turtle.getItemCount(slot) > 0 then
@@ -156,27 +340,35 @@ local function mine()
                     return
                 end
             end
+        else
+            startMode("chest", move.pos)
         end
     end
 
-    local function checkFuelLevel(v1, v2)
+    local function getNeededFuelLevel(v1, v2)
+        local v = v1 - v2
+        return math.abs(v.x) + math.abs(v.y) + math.abs(v.z)
+    end
+    local function checkFuelLevel(distance)
         local fuelLimit = turtle.getFuelLimit()
         if fuelLimit == 0 then
             return true
         end
-        local v = v1 - v2
-        local distance, fuelLevel, level = math.abs(v.x) + math.abs(v.y) + math.abs(v.z), turtle.getFuelLevel(), 0
+        local fuelLevel, level = turtle.getFuelLevel(), 0
 
         for i = 1, #slots.fuel do
             if distance < fuelLevel then
                 turtle.select(1)
+                label_fuel.text = text_fuel .. fuelLevel .. " / " .. distance
+                label_fuel:recalculate()
+                label_fuel:repaint("this")
                 return true
             end
             local slot = slots.fuel[i]
             local name, increase = slots.data[slot].name, slots.data[slot].increase
             local detail = turtle.getItemDetail(slot)
             if detail and name == detail.name then
-                local refuel = math.min(detail.count, math.floor((fuelLimit - fuelLevel) / increase))
+                local refuel = math.min(detail.count - 1, math.ceil((distance - fuelLevel) / increase))
                 if refuel > 0 then
                     turtle.select(slot)
                     turtle.refuel(refuel)
@@ -186,6 +378,9 @@ local function mine()
             end
         end
         turtle.select(1)
+        label_fuel.text = text_fuel .. fuelLevel + level .. " / " .. distance
+        label_fuel:recalculate()
+        label_fuel:repaint("this")
         if distance < fuelLevel + level then
             return true
         end
@@ -204,12 +399,13 @@ local function mine()
     local function addToUndone(v)
         for i = 1, #move.done do
             if move.done[i] == v then
-                return
+                return false
             end
         end
         local clone = v:copy()
         table.insert(move.done, clone)
         table.insert(move.undone, clone)
+        return true
     end
     local function removeVector(v)
         for i = 1, #move.undone do
@@ -332,13 +528,12 @@ local function mine()
     end
     ---@param v vector
     local function goToDestination(v)
-        if not move.mode.name and not checkFuelLevel(start, move.pos) then
+        if not move.mode.name and not checkFuelLevel(getNeededFuelLevel(start, move.pos)) then
             startMode("fuel", move.pos)
         end
 
         local go = v - move.pos
-        print("GO:", go)
-        local chest = vector.new(move.base.x - 1, 0, move.base.z)
+        local chest = vector.new(move.base.x, 0, 0)
         if v ~= chest and ((go.x < 0 and move.pos.x > chest.x) or (go.x > 0 and move.pos.x < chest.x)) and (move.pos.y == 0 and go.z ~= 0 and math.min(v.z, move.pos.z) <= chest.z and math.min(v.z, move.pos.z) >= chest.z) then
             if move.facing.y == 0 then
                 turtle.move.turnRight(update)
@@ -354,33 +549,37 @@ local function mine()
         local free = false
         for i = 1, #slots.empty do
             if turtle.getItemCount(slots.empty[i]) == 0 then
-                return true
+                free = true
+                break
             end
         end
 
-        return false
-    end
+        if not free and trashList then
+            local space = 0
+            for i = 1, #slots.empty do
+                local slot = slots.empty[i]
+                local data = turtle.getItemDetail(slot)
+                if data then
+                    for j = 1, #trashList do
+                        if (data.name == trashList[i]) == (data.trashWhiteList == "White List") then --TODO Whitelist
+                            turtle.select(slot)
+                            turtle.drop()
+                            space = space + 1
+                            break
+                        end
+                    end
+                end
+                if space > 2 then
+                    free = true
+                    break
+                end
+            end
+        end
 
-    local function save()
-        table.save(move, "os/programs/stripMiner/data/move.set")
+        return free
     end
 
     local gotoChest = false
-    update = function(f, p)
-        if f then
-            move.facing:set(move.facing.y * f.x, move.facing.x * f.y)
-            save()
-        end
-        if p then
-            move.pos:set(move.pos.x + (p.x * move.facing.x + p.y * move.facing.y), move.pos.y + (p.x * move.facing.y + p.y * move.facing.x), move.pos.z + p.z)
-            save()
-
-            if move.mode.name then
-                startMode("clear", move.pos)
-            end
-        end
-        --sleep(5)
-    end
 
     startMode = function(mode, position)
         move.mode.name = mode
@@ -388,51 +587,79 @@ local function mine()
         save()
 
         if mode == "fuel" then
-            goToDestination(vector.new(move.pos.x, 0, 0))
-            goToDestination(start)
-            print("wait for fuel")
-            os.pullEvent("turtle_inventory")
-            while not checkFuelLevel(start, move.base + vector.forward * 40) do
-                print("no fuel")
+            label_mode.text = "Fuel is to low!\nGo back to start and request fuel."
+            label_mode:recalculate()
+            label_mode:repaint("this")
+
+            goToDestination(vector.new(move.pos.x, 0, way.z))
+            goToDestination(way)
+
+            label_mode.text = "Fuel is to low!\nPlease insert enough fuel."
+            label_mode:recalculate()
+            label_mode:repaint("this")
+
+            repeat
                 os.pullEvent("turtle_inventory")
-            end
+            until checkFuelLevel(getNeededFuelLevel(start, move.base) + 40)
         elseif mode == "chest" then
-            goToDestination(vector.new(move.pos.x, 0, 0))
-            goToDestination(start)
-            print("wait for Chest")
-            os.pullEvent("turtle_inventory")
-            while not checkChest() do
-                print("no Chest")
+            label_mode.text = "Chest is required to empty inventory!\nGo back to start and request chest."
+            label_mode:recalculate()
+            label_mode:repaint("this")
+
+            goToDestination(vector.new(move.pos.x, 0, way.z))
+            goToDestination(way)
+
+            label_mode.text = "Chest is required to empty inventory!\nPlease insert enough chests."
+            label_mode:recalculate()
+            label_mode:repaint("this")
+
+            repeat
                 os.pullEvent("turtle_inventory")
-            end
+            until checkChest()
         elseif mode == "torch" then
-            goToDestination(vector.new(move.pos.x, 0, 0))
-            goToDestination(start)
-            print("wait for Torch")
-            os.pullEvent("turtle_inventory")
-            while not checkChest() do
-                print("no Torch")
+            label_mode.text = "Torches are required to light the way!\nGo back to start and request torches."
+            label_mode:recalculate()
+            label_mode:repaint("this")
+
+            goToDestination(vector.new(move.pos.x, 0, way.z))
+            goToDestination(way)
+
+            label_mode.text = "Torches are required to light the way!\nPlease insert enough torches."
+            label_mode:recalculate()
+            label_mode:repaint("this")
+
+            repeat
                 os.pullEvent("turtle_inventory")
-            end
+            until checkChest()
         elseif mode == "build" then
-            goToDestination(vector.new(move.pos.x, 0, 0))
-            goToDestination(start)
-            print("wait for Build")
-            os.pullEvent("turtle_inventory")
-            while not checkChest() do
-                print("no Build")
+            label_mode.text = "Blocks are required to build the way!\nGo back to start and request blocks."
+            label_mode:recalculate()
+            label_mode:repaint("this")
+
+            goToDestination(vector.new(move.pos.x, 0, way.z))
+            goToDestination(way)
+
+            label_mode.text = "Blocks are required to build the way!\nPlease insert enough blocks."
+            label_mode:recalculate()
+            label_mode:repaint("this")
+
+            repeat
                 os.pullEvent("turtle_inventory")
-            end
+            until checkChest(6)
         elseif mode == "wall" then
+            label_mode.text = "A safe path is being built."
+            label_mode:recalculate()
+            label_mode:repaint("this")
+
             if not (move.pos.x == move.base.x and move.pos.y == 0 and move.pos.z >= 0 and move.pos.z <= 1) then
                 goToDestination(vector.new(move.base.x, 0, move.pos.z))
                 goToDestination(vector.new(move.base.x, 0, math.min(1, math.max(0, move.pos.z))))
             end
 
             if move.facing.x == -1 then
-                turtle.move.turnLeft(update)
+                turn(4)
             elseif move.facing.x == 1 then
-                turtle.move.turnRight(update)
+                turn(2)
             end
 
             selectBuild()
@@ -444,7 +671,6 @@ local function mine()
             if move.pos.z == 0 then
                 selectBuild()
                 turtle.placeDown()
-                --TODO check for fuel when moving and stone
                 goToDestination(move.pos + vector.up)
                 selectBuild()
                 turtle.placeUp()
@@ -462,15 +688,45 @@ local function mine()
             selectBuild()
             turtle.place()
         elseif mode == "light" then
+            label_mode.text = "Path is being illuminated."
+            label_mode:recalculate()
+            label_mode:repaint("this")
+
             placeTorch = false
-            goToDestination(move.pos + vector.down)
+            goToDestination(move.base + way)
 
             selectTorch()
-            if not turtle.placeUp() then
+            if not turtle.placeDown() then
                 placeTorch = true
             end
-        elseif mode == "clear" and not checkSpace() then
-            goToDestination(move.base + vector.up)
+        elseif mode == "clear" and slots.enderChest then
+            label_mode.text = "Inventory gets cleared."
+            label_mode:recalculate()
+            label_mode:repaint("this")
+
+            if inspect(2) then
+                if addToUndone(getConnected(position, 2)) then
+                    move.detected = move.detected + 1
+                end
+                label_detected.text = text_detected .. move.detected
+                label_detected:recalculate()
+                label_detected:repaint("this")
+            end
+            turtle.digUp()
+            turtle.select(slot.enderChest)
+            turtle.placeUp()
+            for i = 1, #slots.empty do
+                local slot = slots.empty[i]
+                turtle.select(slot)
+                turtle.droptUp()
+            end
+            turtle.select(slot.enderChest)
+            turtle.digUp()
+        elseif mode == "clear" then
+            label_mode.text = "Inventory gets cleared."
+            label_mode:recalculate()
+            label_mode:repaint("this")
+            goToDestination(move.base)
             turn(3)
 
             if turtle.inspect() then
@@ -486,19 +742,27 @@ local function mine()
                     turtle.drop()
                 end
             end
-            turtle.select(1)
         end
-        print("go to position")
+        turtle.select(1)
+        label_mode.text = "Move to resume position."
+        label_mode:recalculate()
+        label_mode:repaint("this")
         if move.pos ~= position then
-            goToDestination(vector.new(position.x, 0, 1))
+            goToDestination(vector.new(position.x, 0, way.z))
             goToDestination(position)
         end
+        label_mode.text = "Continue Mining."
+        label_mode:recalculate()
+        label_mode:repaint("this")
 
         move.mode.name = nil
         move.mode.data = nil
     end
 
     local function checkSurrounding()
+        label_mode.text = "Inspect surrounding blocks."
+        label_mode:recalculate()
+        label_mode:repaint("this")
         local near = {}
         for i = 1, 6 do
             local add = true
@@ -533,11 +797,15 @@ local function mine()
             local dir = getDir(v - move.pos)
             if dir.z > 0 then
                 if inspect(2) then
-                    addToUndone(v)
+                    if addToUndone(v) then
+                        move.detected = move.detected + 1
+                    end
                 end
             elseif dir.z < 0 then
                 if inspect(3) then
-                    addToUndone(v)
+                    if addToUndone(v) then
+                        move.detected = move.detected + 1
+                    end
                 end
             else
                 if dir.x < 0 then
@@ -549,9 +817,14 @@ local function mine()
                     turtle.move.turnLeft(update)
                 end
                 if inspect(1) then
-                    addToUndone(v)
+                    if addToUndone(v) then
+                        move.detected = move.detected + 1
+                    end
                 end
             end
+            label_detected.text = text_detected .. move.detected
+            label_detected:recalculate()
+            label_detected:repaint("this")
             table.remove(near, 1)
         end
     end
@@ -560,13 +833,13 @@ local function mine()
             orderVectorList()
             local current = move.undone[1]
             table.remove(move.undone, 1)
-            term.write(move.pos)
-            term.write(" ")
-            term.write(current)
-            term.write(" ")
-            print("")
             if not (current == move.pos) then
-                print("->", current - move.pos)
+                if not checkSpace() then
+                    startMode("clear", move.pos)
+                end
+                label_mode.text = "Mine blocks."
+                label_mode:recalculate()
+                label_mode:repaint("this")
                 goToDestination(current)
             end
 
@@ -592,8 +865,17 @@ local function mine()
         iteration()
     end
     while move.base.x <= data.length or data.length == 0 do
-        if #slots.build > 0 then --TODO build mode
+        if #slots.build > 0 then
             iteration()
+
+            if not move.mode.name and not checkFuelLevel(getNeededFuelLevel(start, move.pos) + 3) then
+                startMode("fuel", move.pos)
+            end
+
+            if not checkBuild(6) then
+                startMode("build", move.pos)
+            end
+
             startMode("wall", move.pos)
 
             if #slots.torch and (placeTorch or (move.base.x - 1) % 12 == 0) then
@@ -617,10 +899,59 @@ local function mine()
         end
     end
 
+    label_mode.text = "Finished Job!\nGo back to start."
+    label_mode:recalculate()
+    label_mode:repaint("this")
+    goToDestination(way)
     goToDestination(start)
     turn(1)
     fs.delete("os/programs/stripMiner/data/move.set")
     fs.delete("os/programs/stripMiner/data/data.set")
 end
-local co = coroutine.create(parallel.waitForAny)
-coroutine.resume(co, mine)
+
+local checkPause = true
+local function waitForPause()
+    while checkPause or inMove == true do
+        coroutine.yield()
+    end
+    move.pause = not move.pause
+    checkPause = true
+    save()
+    if move.pause == true then
+        button_pause.text = "Resume"
+        button_pause:recalculate()
+        button_pause:repaint("this")
+    else
+        button_pause.text = "Pause"
+        button_pause:recalculate()
+        button_pause:repaint("this")
+    end
+end
+
+function button_pause:_onClick(event)
+    checkPause = false
+end
+
+function button_stop:_onClick(event)
+    data.length = -1
+    button_pause:changeMode(2, true)
+    button_stop:changeMode(2, true)
+    button_exit:changeMode(2, true)
+end
+function button_exit:_onClick(event)
+    manager:exit()
+end
+
+while manager._exit == false do
+    if move.pause then
+        local exit = parallel.waitForAny(waitForPause, manager.execute)
+    else
+        local exit = parallel.waitForAny(mine, waitForPause, manager.execute)
+        if exit == 1 then
+            button_pause:changeMode(2, true)
+            button_stop:changeMode(2, true)
+            button_exit:changeMode(1, true)
+            manager.execute()
+        end
+    end
+end

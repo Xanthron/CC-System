@@ -18,6 +18,9 @@ function ui.label.new(parent, text, style, x, y, w, h)
     ---@type string
     this.text = text
 
+    this.scaleW = false
+    this.scaleH = true
+
     function this:recalculate()
         local theme = nil
         if self.mode == 2 then
@@ -25,7 +28,7 @@ function ui.label.new(parent, text, style, x, y, w, h)
         else
             theme = self.style.nTheme
         end
-        ui.buffer.text(self.buffer, self.text, theme.tC, theme.tBG, self.style.align, false, true, false)
+        ui.buffer.text(self.buffer, self.text, theme.tC, theme.tBG, self.style.align, this.scaleW, this.scaleH, false)
     end
     ---Recalculate the buffer of this element
     ---@return nil

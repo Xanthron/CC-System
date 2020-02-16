@@ -89,7 +89,7 @@ if not set.pathTrashList then
     label_pathTrashList:changeMode(2, true)
 end
 
-local label_slot = ui.label.new(manager, "Slots:\n1: Chest    2: Fuel\n3: Build     4: Torch\n5: Ender Chest", theme.label2, _x, _y + 8, 26, 4)
+local label_slot = ui.label.new(manager, "Slots:\n1: Chest    2: Fuel\n3: Build    4: Torch\n5: Ender Chest", theme.label2, _x, _y + 8, 26, 4)
 local list_slots = {}
 for i = 1, 16 do
     local x = _x + 26 + ((i - 1) % 4) * 3
@@ -277,8 +277,12 @@ end
 function button_start:_onClick(event)
     manager:callFunction(
         function()
+            term.clear()
+            fs.delete("os/programs/stripMiner/data/move.set")
+            fs.delete("os/programs/stripMiner/data/data.set")
             table.save(set, "os/programs/stripMiner/data/data.set")
             dofile("os/programs/stripMiner/mine.lua")
+            manager:draw()
         end
     )
 end

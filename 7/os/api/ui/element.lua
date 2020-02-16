@@ -31,7 +31,7 @@ function ui.element.new(parent, name, x, y, w, h)
     ---@type selectElement
     this.select = {}
 
-    ---Changes the visual appearance of an element by changing its mode
+    ---Changes the visual appearance of an element by changing its mode and redraws it
     ---@param self element
     ---@return nil
     function this:changeMode(mode, overwriteDeselection)

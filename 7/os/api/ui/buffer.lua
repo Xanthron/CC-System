@@ -337,8 +337,12 @@ function ui.buffer.text(buffer, t, tC, tBG, align, scaleW, scaleH, richText, lef
     local width, height = totalWidth - left - right, totalHeight - top - bottom
     local words = {}
     for line in t:gmatch(".[^\r\n]*") do
-        for word in line:gmatch("[^%s]+") do
-            table.insert(words, word)
+        for word in line:gmatch("[^%s]*") do
+            if word:len() > 0 then
+                table.insert(words, word)
+            else
+                table.insert(words, " ")
+            end
         end
         table.insert(words, "\n")
     end
@@ -371,7 +375,7 @@ function ui.buffer.text(buffer, t, tC, tBG, align, scaleW, scaleH, richText, lef
                     if lineCount == 0 then
                         lineCount = words[i]:len()
                     else
-                        lineCount = lineCount + words[i]:len() + 1
+                        lineCount = lineCount + words[i]:len()
                         if lineCount > width then
                             lineCount = 0
                             table.insert(words, i, "\n")
@@ -431,15 +435,9 @@ function ui.buffer.text(buffer, t, tC, tBG, align, scaleW, scaleH, richText, lef
                 local word = words[wordIndex]
                 wordIndex = wordIndex + 1
                 if word == "\n" then
+                    wordIndex = wordIndex + 1
                     break
                 else
-                    if lineCount > 0 then
-                        buffer.text[index] = " "
-                        buffer.textColor[index] = tC
-                        buffer.textBackgroundColor[index] = tBG
-                        index = index + 1
-                        lineCount = lineCount + 1
-                    end
                     for j = 1, word:len() do
                         buffer.text[index] = word:sub(j, j)
                         buffer.textColor[index] = tC

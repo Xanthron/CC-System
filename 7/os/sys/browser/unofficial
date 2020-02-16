@@ -1,1 +1,1 @@
-return{}
+return{[1]={type="t",name="Strip Miner",color=false,url="CRjb2y4q",path="run",description="Collect Resources as efficent as possible."}}

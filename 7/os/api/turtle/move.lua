@@ -3,52 +3,58 @@ if turtle then
 
     ---@param update function
     function turtle.move.forward(update)
+        update(nil, nil, true)
         while not turtle.forward() do
             turtle.dig()
         end
         if update then
-            update(nil, vector.forward)
+            update(nil, vector.forward, false)
         end
     end
 
     ---@param update function
     function turtle.move.up(update)
+        update(nil, nil, true)
         while not turtle.up() do
             turtle.digUp()
         end
         if update then
-            update(nil, vector.up)
+            update(nil, vector.up, false)
         end
     end
 
     ---@param update function
     function turtle.move.down(update)
+        update(nil, nil, true)
         while not turtle.down() do
             turtle.digDown()
         end
         if update then
-            update(nil, vector.down)
+            update(nil, vector.down, false)
         end
     end
 
     ---@param update function
     function turtle.move.turnLeft(update)
+        update(nil, nil, true)
         turtle.turnLeft()
         if update then
-            update(vector.new(1, -1, 0), nil)
+            update(vector.new(1, -1, 0), nil, false)
         end
     end
 
     ---@param update function
     function turtle.move.turnRight(update)
+        update(nil, nil, true)
         turtle.turnRight()
         if update then
-            update(vector.new(-1, 1, 0), nil)
+            update(vector.new(-1, 1, 0), nil, false)
         end
     end
 
     ---@param update function
     function turtle.move.back(update)
+        update(nil, nil, true)
         while not turtle.back() do
             turtle.turnLeft(update)
             turtle.turnLeft(update)
@@ -57,7 +63,7 @@ if turtle then
             turtle.turnLeft(update)
         end
         if update then
-            update(nil, vector.backward)
+            update(nil, vector.backward, false)
         end
     end
 
