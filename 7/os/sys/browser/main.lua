@@ -50,11 +50,11 @@ local function createSViewButton(manager, sView, official, data, elements, x, y,
         image.buffer.textColor[1] = colors.red
         image.buffer.textBackgroundColor[1] = colors.white
     end
-    local button_item = ui.button.new(container, name, nil, theme.button3, x + 2, y, w - 5, h)
-    local button_info = ui.button.new(container, "i", nil, theme.button4, x + w - 3, y, 3, h)
+    local button_item = ui.button.new(container, name, theme.button3, x + 2, y, w - 5, h)
+    local button_info = ui.button.new(container, "i", theme.button4, x + w - 3, y, 3, h)
 
     ---@type event
-    function button_item:_onClick(event)
+    function button_item:onClick(event)
         manager:callFunction(
             function()
                 local success, content, text
@@ -90,7 +90,7 @@ local function createSViewButton(manager, sView, official, data, elements, x, y,
     end
 
     ---@type event
-    function button_info:_onClick(event)
+    function button_info:onClick(event)
         local color = "no"
         if data.color then
             color = "yes"
@@ -113,7 +113,7 @@ local function createSViewButton(manager, sView, official, data, elements, x, y,
         if not official then
             button2 = "Remove"
         end
-        manager.parallelManager:removeFunction(self._pressAnimation)
+        manager.parallelManager:removeFunction(self.animation)
         manager:callFunction(
             function()
                 local number, select = assert(loadfile("os/sys/infoBox.lua"))({label = "Information", text = text, x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, button1 = "Ok", button2 = button2, select = event.name ~= "mouse_up"})
@@ -208,11 +208,11 @@ for i = 1, _w * _h do
     end
 end
 
-local button_update = ui.button.new(manager, "\21", nil, theme.button1, 1, 1, 3, 1)
-local button_upload = ui.button.new(manager, "\24", nil, theme.button1, 5, 1, 3, 1)
-local button_download = ui.button.new(manager, "\25", nil, theme.button1, 9, 1, 3, 1)
-local button_option = ui.button.new(manager, "\164", nil, theme.button1, _w - 5, 1, 3, 1)
-local button_exit = ui.button.new(manager, "x", nil, theme.button2, _w - 2, 1, 3, 1)
+local button_update = ui.button.new(manager, "\21", theme.button1, 1, 1, 3, 1)
+local button_upload = ui.button.new(manager, "\24", theme.button1, 5, 1, 3, 1)
+local button_download = ui.button.new(manager, "\25", theme.button1, 9, 1, 3, 1)
+local button_option = ui.button.new(manager, "\164", theme.button1, _w - 5, 1, 3, 1)
+local button_exit = ui.button.new(manager, "x", theme.button2, _w - 2, 1, 3, 1)
 local sView_list = ui.scrollView.new(manager, "", 3, theme.sView1, 1, 2, _w, _h - 1)
 
 local group_menu = manager.selectionManager:addNewGroup()
@@ -230,10 +230,10 @@ sView_list.selectionGroup.next = group_menu
 downloadScreen(updateFiles)
 updateSView(manager, sView_list)
 
-function button_exit:_onClick(event)
+function button_exit:onClick(event)
     manager:exit()
 end
-function button_update:_onClick(event)
+function button_update:onClick(event)
     manager:callFunction(
         function()
             downloadScreen(updateFiles)
@@ -242,7 +242,7 @@ function button_update:_onClick(event)
         end
     )
 end
-function button_download:_onClick(event)
+function button_download:onClick(event)
     manager:callFunction(
         function()
             assert(loadfile("os/sys/browser/loader.lua"))({mode = "download"})
@@ -252,7 +252,7 @@ function button_download:_onClick(event)
         end
     )
 end
-function button_upload:_onClick(event)
+function button_upload:onClick(event)
     manager:callFunction(
         function()
             assert(loadfile("os/sys/browser/loader.lua"))({mode = "upload"})

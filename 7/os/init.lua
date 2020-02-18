@@ -21,8 +21,8 @@ end
 local function createEntry(sView, file, func1, func2, x, y, w, h)
     local container = sView:getContainer()
 
-    local button_item = ui.button.new(container, file.name, nil, theme.button3, x, y, w - 6, h)
-    local button_info = ui.button.new(container, "i", nil, theme.button3, x + w - 6, y, 3, h)
+    local button_item = ui.button.new(container, file.name, theme.button3, x, y, w - 6, h)
+    local button_info = ui.button.new(container, "i", theme.button3, x + w - 6, y, 3, h)
     local element = ui.element.new(container, "image", x + w - 3, y, 3, h)
     ---@type boolean
     local startup, enter, argument = false, true, false
@@ -78,8 +78,8 @@ local function createEntry(sView, file, func1, func2, x, y, w, h)
         end
     end
 
-    button_item._onClick = func1
-    button_info._onClick = func2
+    button_item.onClick = func1
+    button_info.onClick = func2
 end
 ---@param manager uiManager
 ---@param sView scrollView
@@ -146,13 +146,13 @@ for i = 1, _w * _h do
         manager.buffer.textBackgroundColor[i] = colors.white
     end
 end
-local button_browser = ui.button.new(manager, "Browser", nil, theme.button1, 1, 1, 9, 1)
-local button_explorer = ui.button.new(manager, "Explorer", nil, theme.button1, 10, 1, 10, 1)
-local button_options = ui.button.new(manager, "\164", nil, theme.button1, _w - 5, 1, 3, 1)
-local button_exit = ui.button.new(manager, "x", nil, theme.button2, _w - 2, 1, 3, 1)
+local button_browser = ui.button.new(manager, "Browser", theme.button1, 1, 1, 9, 1)
+local button_explorer = ui.button.new(manager, "Explorer", theme.button1, 10, 1, 10, 1)
+local button_options = ui.button.new(manager, "\164", theme.button1, _w - 5, 1, 3, 1)
+local button_exit = ui.button.new(manager, "x", theme.button2, _w - 2, 1, 3, 1)
 local sView_list = ui.scrollView.new(manager, "", 3, theme.sView1, 1, 2, _w, _h - 1)
 
-function button_browser:_onClick(event)
+function button_browser:onClick(event)
     manager:callFunction(
         function()
             local success, select = assert(loadfile("os/sys/execute.lua"))({file = "os/sys/browser/main.lua", select = event ~= "mouse_up", args = {{select = event ~= "mouse_up"}}})
@@ -161,7 +161,7 @@ function button_browser:_onClick(event)
     )
 end
 
-function button_explorer:_onClick(event)
+function button_explorer:onClick(event)
     manager:callFunction(
         function()
             local success, select =
@@ -177,10 +177,10 @@ function button_explorer:_onClick(event)
     )
 end
 
-function button_options:_onClick(event)
+function button_options:onClick(event)
 end
 
-function button_exit:_onClick(event)
+function button_exit:onClick(event)
     manager:exit()
     term.setCursorPos(1, 1)
     term.setTextColor(colors.white)

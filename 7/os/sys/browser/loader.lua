@@ -43,7 +43,7 @@ else
 end
 
 local label_title = ui.label.new(manager, mode .. " File", theme.label1, 1, 1, _w - 3, 1)
-local button_exit = ui.button.new(manager, "<", nil, theme.button2, _w - 2, 1, 3, 1)
+local button_exit = ui.button.new(manager, "<", theme.button2, _w - 2, 1, 3, 1)
 local sView_item = ui.scrollView.new(manager, "", 3, theme.sView1, 1, 2, _w, _h - 2)
 local container_item = sView_item:getContainer()
 
@@ -54,7 +54,7 @@ if mode == "Upload" then
     element_code = ui.label.new(container_item, "", theme.label2, 7, y, _w - 8, 1)
     label_code = ui.label.new(container_item, "Code: ", theme.label2, 1, y, 6)
     y = y + 1
-    button_uploadPath = ui.button.new(container_item, "Path", nil, theme.button1, 1, y, 6, 1)
+    button_uploadPath = ui.button.new(container_item, "Path", theme.button1, 1, y, 6, 1)
     label_uploadPath = ui.label.new(container_item, "No Selection", theme.label2, 8, y, _w - 9, 1)
     if file then
         button_uploadPath.mode = 2
@@ -65,36 +65,36 @@ if mode == "Upload" then
     y = y + 2
 else
     label_code = ui.label.new(container_item, "Code: ", theme.label2, 1, y, 6)
-    element_code = ui.inputField.new(container_item, "", "", false, nil, theme.iField1, 7, y, _w - 8, 1)
+    element_code = ui.inputField.new(container_item, "", "", false, theme.iField1, 7, y, _w - 8, 1)
     y = y + 2
 end
 
-local toggle_run = ui.toggleButton.new(container_item, "Run", args.run or false, nil, theme.toggle1, 1, y, _w - 1, 1)
+local toggle_run = ui.toggleButton.new(container_item, "Run", args.run or false, theme.toggle1, 1, y, _w - 1, 1)
 y = y + 1
-local button_savePath = ui.button.new(container_item, "Path", nil, theme.button1, 1, y, 6, 1)
+local button_savePath = ui.button.new(container_item, "Path", theme.button1, 1, y, 6, 1)
 local label_savePath = ui.label.new(container_item, "No Selection", theme.label2, 8, y, _w - 9, 1)
 y = y + 2
-local toggle_toList = ui.toggleButton.new(container_item, "Add to list", true, nil, theme.toggle1, 1, y, _w - 1, 1)
+local toggle_toList = ui.toggleButton.new(container_item, "Add to list", true, theme.toggle1, 1, y, _w - 1, 1)
 y = y + 1
 local label_types = ui.label.new(container_item, "Types:", theme.label2, 3, y, _w - 3, 1)
 y = y + 1
-local toggle_desktop = ui.toggleButton.new(container_item, "Desktop", true, nil, theme.toggle1, 3, y, _w - 3, 1)
+local toggle_desktop = ui.toggleButton.new(container_item, "Desktop", true, theme.toggle1, 3, y, _w - 3, 1)
 y = y + 1
-local toggle_turtle = ui.toggleButton.new(container_item, "Turtle", true, nil, theme.toggle1, 3, y, _w - 3, 1)
+local toggle_turtle = ui.toggleButton.new(container_item, "Turtle", true, theme.toggle1, 3, y, _w - 3, 1)
 y = y + 1
-local toggle_pocket = ui.toggleButton.new(container_item, "Pocket", true, nil, theme.toggle1, 3, y, _w - 3, 1)
+local toggle_pocket = ui.toggleButton.new(container_item, "Pocket", true, theme.toggle1, 3, y, _w - 3, 1)
 y = y + 2
-local toggle_color = ui.toggleButton.new(container_item, "Need Color", false, nil, theme.toggle1, 2, y, _w - 2, 1)
+local toggle_color = ui.toggleButton.new(container_item, "Need Color", false, theme.toggle1, 2, y, _w - 2, 1)
 y = y + 2
 local label_name = ui.label.new(container_item, "Name:", theme.label2, 3, y, _w - 3, 1)
 y = y + 1
-local iField_name = ui.inputField.new(container_item, "", args.name or "", true, nil, theme.iField1, 3, y, _w - 4, 1)
+local iField_name = ui.inputField.new(container_item, "", args.name or "", true, theme.iField1, 3, y, _w - 4, 1)
 y = y + 2
 local label_description = ui.label.new(container_item, "Description:", theme.label2, 3, y, _w - 3, 1)
 y = y + 1
-local iField_description = ui.inputField.new(container_item, "", "", true, nil, theme.iField1, 3, y, _w - 4, 1)
+local iField_description = ui.inputField.new(container_item, "", "", true, theme.iField1, 3, y, _w - 4, 1)
 
-local button_load = ui.button.new(manager, mode, nil, theme.button1, _w - 9, _h, 10, 1)
+local button_load = ui.button.new(manager, mode, theme.button1, _w - 9, _h, 10, 1)
 button_load.mode = 2
 button_load:recalculate()
 
@@ -134,12 +134,12 @@ local function checkDownloadButton(codeText, nameText)
     button_load:repaint("this")
 end
 
-function button_exit:_onClick(event)
+function button_exit:onClick(event)
     manager:exit()
 end
 
 if mode == "Upload" then
-    function button_uploadPath:_onClick(event)
+    function button_uploadPath:onClick(event)
         manager:callFunction(
             function()
                 local wasSame = pathUpload == pathSave
@@ -200,7 +200,7 @@ else
     end
 end
 
-function button_savePath:_onClick(event)
+function button_savePath:onClick(event)
     manager:callFunction(
         function()
             local path = ""
@@ -230,7 +230,7 @@ function button_savePath:_onClick(event)
     )
 end
 
-function toggle_toList:_onToggle(event, checked)
+function toggle_toList:onToggle(event, checked)
     if checked then
         label_types.mode = 1
         toggle_desktop.mode = 1
@@ -265,17 +265,17 @@ function toggle_toList:_onToggle(event, checked)
     manager:repaint("this")
 end
 
-function toggle_desktop:_onToggle(event, checked)
+function toggle_desktop:onToggle(event, checked)
     checkDownloadButton()
 end
-function toggle_turtle:_onToggle(event, checked)
+function toggle_turtle:onToggle(event, checked)
     checkDownloadButton()
 end
-function toggle_pocket:_onToggle(event, checked)
+function toggle_pocket:onToggle(event, checked)
     checkDownloadButton()
 end
 
-function toggle_run:_onToggle(event, checked)
+function toggle_run:onToggle(event, checked)
     if checked then
         label_savePath.mode = 2
         button_savePath.mode = 2
@@ -301,7 +301,7 @@ function iField_name:onTextEdit(event, ...)
     end
 end
 
-function button_load:_onClick(event)
+function button_load:onClick(event)
     manager:callFunction(
         function()
             local code = element_code.text

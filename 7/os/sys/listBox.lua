@@ -52,15 +52,15 @@ local function setListBox(manager, listBox, buttons, indexes, x, y, w, h)
     local container = listBox:getContainer()
     local elements = {}
     if #indexes > 0 then
-        local element = ui.button.new(container, " <<<", nil, args.listButtonStyle, args.x + listBoxLeft, args.y + listBoxTop, args.w - listBoxLeft - listBoxRight, 1)
-        element._onClick = function(event)
+        local element = ui.button.new(container, " <<<", args.listButtonStyle, args.x + listBoxLeft, args.y + listBoxTop, args.w - listBoxLeft - listBoxRight, 1)
+        function element:onClick(event)
             local select = true
             if event.name == "mouse_up" then
                 select = false
             end
             manager:callFunction(
                 function()
-                    manager.parallelManager:removeFunction(element._pressAnimation)
+                    manager.parallelManager:removeFunction(element.animation)
                     table.remove(indexes, #indexes)
                     local button = buttons
                     for i = 1, #indexes do
@@ -84,15 +84,15 @@ local function setListBox(manager, listBox, buttons, indexes, x, y, w, h)
         local button = currentButtons[i]
         local x, y, w, h = args.x + listBoxLeft, args.y + i - 1 + listBoxTop + math.min(#indexes, 1), args.w - listBoxLeft - listBoxRight, 1
         if type(button) == "table" then
-            local element = ui.button.new(container, button.name .. " >", nil, args.listButtonStyle, x, y, w, h)
-            element._onClick = function(event)
+            local element = ui.button.new(container, button.name .. " >", args.listButtonStyle, x, y, w, h)
+            function element:onClick(event)
                 local select = true
                 if event.name == "mouse_up" then
                     select = false
                 end
                 manager:callFunction(
                     function()
-                        manager.parallelManager:removeFunction(element._pressAnimation)
+                        manager.parallelManager:removeFunction(element.animation)
                         table.insert(indexes, i)
                         local x, y, w, h = listBox:getGlobalRect()
                         x, w = getHorizontal(button, x, borderW, args.anchor)
@@ -118,8 +118,8 @@ local function setListBox(manager, listBox, buttons, indexes, x, y, w, h)
                 element.buffer.text[1] = " "
                 element.buffer.text[w] = " "
             elseif button ~= "" then
-                local element = ui.button.new(container, button, nil, args.listButtonStyle, x, y, w, h)
-                element._onClick = function(event)
+                local element = ui.button.new(container, button, args.listButtonStyle, x, y, w, h)
+                function element:onClick(event)
                     table.insert(indexes, i)
                     select = (event.name ~= "mouse_up")
                     manager:exit()

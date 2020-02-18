@@ -32,9 +32,9 @@ end
 local function createListItem(sView, name, func, x, y, w, h)
     local container = sView:getContainer()
     local element = ui.label.new(container, name, theme.label2, x, y, w - 3, h)
-    local button = ui.button.new(container, "x", nil, theme.button2, x + w - 3, y, 3, h)
+    local button = ui.button.new(container, "x", theme.button2, x + w - 3, y, 3, h)
 
-    button._onClick = func
+    button.onClick = func
 
     return element, button
 end
@@ -49,7 +49,7 @@ local function updateList(manager, sView)
         local func = function(self, event)
             manager:callFunction(
                 function()
-                    manager.parallelManager:removeFunction(self._pressAnimation)
+                    manager.parallelManager:removeFunction(self.animation)
                     table.remove(items, i)
                     local id = math.min(#items, i)
                     updateList(manager, sView)
@@ -124,12 +124,12 @@ for i = 1, _w * _h do
 end
 
 local label_title = ui.label.new(manager, "Item List", theme.label1, 1, 1, _w - 3, 1)
-local button_exit = ui.button.new(manager, "<", nil, theme.button2, _w - 2, 1, 3, 1)
+local button_exit = ui.button.new(manager, "<", theme.button2, _w - 2, 1, 3, 1)
 local sView_list = ui.scrollView.new(manager, "", 3, theme.sView1, 1, 2, _w, _h - 2)
-local button_load = ui.button.new(manager, "Load", nil, theme.button1, 1, _h, 6, 1)
-local button_clear = ui.button.new(manager, "Clear", nil, theme.button1, 7, _h, 7, 1)
-local button_add = ui.button.new(manager, "Add", nil, theme.button1, 14, _h, 5, 1)
-local button_save = ui.button.new(manager, "Save", nil, theme.button1, _w - 5, _h, 6, 1)
+local button_load = ui.button.new(manager, "Load", theme.button1, 1, _h, 6, 1)
+local button_clear = ui.button.new(manager, "Clear", theme.button1, 7, _h, 7, 1)
+local button_add = ui.button.new(manager, "Add", theme.button1, 14, _h, 5, 1)
+local button_save = ui.button.new(manager, "Save", theme.button1, _w - 5, _h, 6, 1)
 
 local group_menu = manager.selectionManager:addNewGroup()
 local group_tool = manager.selectionManager:addNewGroup()
@@ -150,11 +150,11 @@ group_tool:addElement(button_add, button_clear, group_menu, button_save, nil)
 group_tool:addElement(button_save, button_add, group_menu, nil, nil)
 group_tool.current = button_add
 
-function button_exit:_onClick(event)
+function button_exit:onClick(event)
     manager:exit()
 end
 
-function button_load:_onClick(event)
+function button_load:onClick(event)
     manager:callFunction(
         function()
             local selection = assert(loadfile("os/sys/explorer/main.lua"))({mode = "select_one", path = "os/programs", type = "list", edit = false, select = event ~= "mouse_up"})
@@ -168,13 +168,13 @@ function button_load:_onClick(event)
     )
 end
 
-function button_clear:_onClick(event)
+function button_clear:onClick(event)
     items = {}
     updateList(manager, sView_list)
     manager:draw()
 end
 
-function button_add:_onClick(event)
+function button_add:onClick(event)
     manager:callFunction(
         function()
             for i = 1, 16 do
@@ -195,7 +195,7 @@ function button_add:_onClick(event)
     )
 end
 
-function button_save:_onClick(event)
+function button_save:onClick(event)
     manager:callFunction(
         function()
             local save = "os/programs/"

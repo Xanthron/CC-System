@@ -29,3 +29,16 @@ function fs.addExtension(path, ext)
         return path
     end
 end
+
+function fs.getExtension(path)
+    local ext = path:match("[^/]%.[^/]-$")
+    if ext then
+        return ext:sub(3)
+    else
+        return nil
+    end
+end
+
+function fs.getClearName(path)
+    return fs.getName(path):match(".[^%.]+")
+end

@@ -288,9 +288,9 @@ local function updateListView(manager, listView)
             local ext = ext["folder"]
             extensionIcon(container, ext, x - 4, y)
         end
-        local button = ui.button.new(container, dirs[i + 1], nil, theme.button3, x, y, w, 1)
+        local button = ui.button.new(container, dirs[i + 1], theme.button3, x, y, w, 1)
         button.path = dirs[i]
-        button._onClick = function(self, event)
+        button.onClick = function(self, event)
             if (event.name == "mouse_up" and event.param1 == 2) or (event.name == "key_up" and event.param1 == 29) then
                 manager:callFunction(
                     function()
@@ -327,16 +327,16 @@ local function updateListView(manager, listView)
                             local name, indexes, select = assert(loadfile("os/sys/listBox.lua"))({x = self:getGlobalPosX(), y = y, manager = manager, label = "File", select = select, buttons = options})
                             if name then
                                 if name == "Rename" then
-                                    manager.parallelManager:removeFunction(self._pressAnimation)
+                                    manager.parallelManager:removeFunction(self.animation)
                                     rename(manager, listView, self, dirs[i])
                                 elseif name == "Move" then
-                                    manager.parallelManager:removeFunction(self._pressAnimation)
-                                    if move(manager, listView, dirs[i], select) then
-                                        manager:draw()
-                                    end
+                                    manager.parallelManager:removeFunction(self.animation)
+                                    move(manager, listView, dirs[i], select)
                                 elseif name == "Duplicate" then
+                                    manager.parallelManager:removeFunction(self.animation)
+                                    duplicate(manager, listView, dirs[i], select)
                                 elseif name == "Delete" then
-                                    manager.parallelManager:removeFunction(self._pressAnimation)
+                                    manager.parallelManager:removeFunction(self.animation)
                                     delete(manager, listView, dirs[i], select)
                                 elseif name == "Select All" then
                                     for _, p in ipairs(fs.listAll(dirs[i])) do
@@ -365,7 +365,7 @@ local function updateListView(manager, listView)
                     end
                 )
             else
-                manager.parallelManager:removeFunction(self._pressAnimation)
+                manager.parallelManager:removeFunction(self.animation)
                 addPath(dirs[i])
                 updateListView(manager, listView)
                 updateButton(manager)
@@ -391,9 +391,9 @@ local function updateListView(manager, listView)
         if set.mode == "select_many" and isSelected(files[i]) then
             buttonTheme = theme.button4
         end
-        local button = ui.button.new(container, files[i + 1], nil, buttonTheme, x, y, w, 1)
+        local button = ui.button.new(container, files[i + 1], buttonTheme, x, y, w, 1)
         button.path = files[i]
-        button._onClick = function(self, event)
+        button.onClick = function(self, event)
             if (event.name == "mouse_up" and event.param1 == 2) or (event.name == "key_up" and event.param1 == 29) then
                 manager:callFunction(
                     function()
@@ -417,16 +417,16 @@ local function updateListView(manager, listView)
                             local name, indexes, select = assert(loadfile("os/sys/listBox.lua"))({x = self:getGlobalPosX(), y = y, manager = manager, label = "File", select = select, buttons = options})
                             if name then
                                 if name == "Rename" then
-                                    manager.parallelManager:removeFunction(self._pressAnimation)
+                                    manager.parallelManager:removeFunction(self.animation)
                                     rename(manager, listView, self, files[i])
                                 elseif name == "Move" then
-                                    manager.parallelManager:removeFunction(self._pressAnimation)
-                                    if move(manager, listView, files[i], select) then
-                                        manager:draw()
-                                    end
+                                    manager.parallelManager:removeFunction(self.animation)
+                                    move(manager, listView, files[i], select)
                                 elseif name == "Duplicate" then
+                                    manager.parallelManager:removeFunction(self.animation)
+                                    duplicate(manager, listView, files[i], select)
                                 elseif name == "Delete" then
-                                    manager.parallelManager:removeFunction(self._pressAnimation)
+                                    manager.parallelManager:removeFunction(self.animation)
                                     delete(manager, listView, files[i], select)
                                 end
                             end
@@ -512,7 +512,7 @@ local function updateListView(manager, listView)
     listView:resetLayout()
 end
 local function nameItem(manager, text, submit, x, y, w, h)
-    local field = ui.inputField.new(manager, "", text, false, nil, theme.iField1, x, y, w, h)
+    local field = ui.inputField.new(manager, "", text, false, theme.iField1, x, y, w, h)
     local selectionGroup = manager.selectionManager:addNewGroup(manager.selectionManager.current, manager.selectionManager.current)
     selectionGroup:addElement(field)
     --selectionGroup.current = field
@@ -586,20 +586,49 @@ move = function(manager, listView, path, select)
     local isDir = fs.isDir(path)
     local name = fs.getName(path)
     local path = path:sub(1, path:len() - name:len())
-    local save = assert(loadfile("os/sys/explorer/main.lua"))({select = true, mode = "move", files = false, path = path, move = name, edit = false})
+    local save = assert(loadfile("os/sys/explorer/main.lua"))({select = select, mode = "move", files = false, path = path, move = name, edit = false})
     if save then
         local newPath = fs.combine(save, name)
         local startPath = path .. name
         if
-            not pcall(
+            pcall(
                 function()
                     fs.move(path .. name, newPath)
                 end
             )
          then
+            manager:draw()
+            updateListView(manager, listView)
+        else
+            assert(loadfile("os/sys/infoBox.lua"))({x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, text = "Access denied.\nFile could not be moved.", label = "Move file failed", select = select, button1 = "Ok"})
         end
+    end
+end
+duplicate = function(manager, listView, path, select)
+    local dir = fs.getDir(path)
+    local name = fs.getClearName(path)
+    local ext = fs.getExtension(path)
+    local i = 1
+    local newPath
+    repeat
+        if ext then
+            newPath = fs.combine(dir, ("%s (%i).%s"):format(name, i, ext))
+        else
+            newPath = fs.combine(dir, ("%s (%i)"):format(name, i))
+        end
+        i = i + 1
+    until not fs.exists(newPath)
+    if
+        pcall(
+            function()
+                fs.copy(path, newPath)
+            end
+        )
+     then
         updateListView(manager, listView)
-        return true
+        manager:draw()
+    else
+        assert(loadfile("os/sys/infoBox.lua"))({x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, text = "Access denied.\nFolder is read only.", label = "Copy file failed", select = select, button1 = "Ok"})
     end
 end
 
@@ -621,12 +650,12 @@ for i = 1, _w * _h do
         manager.buffer.textBackgroundColor[i] = colors.white
     end
 end
-local fileButton = ui.button.new(manager, "File", nil, theme.button1, 1, 1, 6, 1)
-local exitButton = ui.button.new(manager, "<", nil, theme.button2, _w - 2, 1, 3, 1)
-local upButton = ui.button.new(manager, "^", nil, theme.button1, 8, 1, 3, 1)
-local backButton = ui.button.new(manager, "<", nil, theme.button1, 11, 1, 3, 1)
-local forwardButton = ui.button.new(manager, ">", nil, theme.button1, 14, 1, 3, 1)
-local pathField = ui.inputField.new(manager, "", getCurrentPath(), false, nil, theme.iField2, 1, 2, _w, 1)
+local fileButton = ui.button.new(manager, "File", theme.button1, 1, 1, 6, 1)
+local exitButton = ui.button.new(manager, "<", theme.button2, _w - 2, 1, 3, 1)
+local upButton = ui.button.new(manager, "^", theme.button1, 8, 1, 3, 1)
+local backButton = ui.button.new(manager, "<", theme.button1, 11, 1, 3, 1)
+local forwardButton = ui.button.new(manager, ">", theme.button1, 14, 1, 3, 1)
+local pathField = ui.inputField.new(manager, "", getCurrentPath(), false, theme.iField2, 1, 2, _w, 1)
 local listView = ui.scrollView.new(manager, nil, 3, theme.sView1, 1, 3, _w, _h - 2)
 local backgroundListView = listView._elements[1]
 local backgroundListViewBuffer = backgroundListView.buffer
@@ -682,7 +711,7 @@ function pathField:_onSubmit(event, text)
     end
     manager:draw()
 end
-function fileButton:_onClick(event)
+function fileButton:onClick(event)
     local select = true
     if event.name == "mouse_up" then
         select = false
@@ -712,7 +741,7 @@ function fileButton:_onClick(event)
         end
     )
 end
-function upButton:_onClick(event)
+function upButton:onClick(event)
     addPath(fs.getDir(getCurrentPath()))
     updatePath()
     updateButton(manager)
@@ -726,7 +755,7 @@ function upButton:_onClick(event)
     updateListView(manager, listView)
     manager:draw()
 end
-function backButton:_onClick(event)
+function backButton:onClick(event)
     pathsIndex = pathsIndex - 1
     updatePath()
     updateButton(manager)
@@ -740,7 +769,7 @@ function backButton:_onClick(event)
     updateListView(manager, listView)
     manager:draw()
 end
-function forwardButton:_onClick(event)
+function forwardButton:onClick(event)
     pathsIndex = pathsIndex + 1
     updatePath()
     updateButton(manager)
@@ -754,7 +783,7 @@ function forwardButton:_onClick(event)
     updateListView(manager, listView)
     manager:draw()
 end
-function exitButton:_onClick(event)
+function exitButton:onClick(event)
     term.setCursorPos(1, 1)
     if term.isColor() then
         term.setBackgroundColor(colors.black)
@@ -786,8 +815,8 @@ pathGroup.current = pathField
 if set.mode == "save" then
     listView:setGlobalRect(nil, nil, nil, listView:getHeight() - 1)
     listView:resetLayout()
-    local saveField = ui.inputField.new(manager, "", set.save, false, nil, theme.iField1, 1, _h, _w - 6, 1)
-    local saveButton = ui.button.new(manager, "Save", nil, theme.button1, _w - 5, _h, 6, 1)
+    local saveField = ui.inputField.new(manager, "", set.save, false, theme.iField1, 1, _h, _w - 6, 1)
+    local saveButton = ui.button.new(manager, "Save", theme.button1, _w - 5, _h, 6, 1)
 
     local function checkButton(text)
         if text:len() > 0 and (set.override == true or not fs.exists(getCurrentPath() .. "/" .. text)) then
@@ -799,7 +828,7 @@ if set.mode == "save" then
 
     function saveField:_onSubmit(event, text)
         if checkButton(text) then
-            saveButton:_onClick(event)
+            saveButton:onClick(event)
         end
     end
     function saveField:onTextEdit(event, ...)
@@ -828,7 +857,7 @@ if set.mode == "save" then
             end
         end
     end
-    function saveButton:_onClick(event)
+    function saveButton:onClick(event)
         if saveField ~= "" then
             table.insert(ret, getCurrentPath() .. "/" .. saveField.text)
         end
@@ -848,8 +877,8 @@ elseif set.mode == "move" then
     listView:setGlobalRect(nil, nil, nil, listView:getHeight() - 1)
     listView:resetLayout()
     local label = ui.label.new(manager, set.move, theme.label1, 1, _h, _w - 6, 1)
-    local moveButton = ui.button.new(manager, "Move", nil, theme.button1, _w - 5, _h, 6, 1)
-    function moveButton:_onClick(event)
+    local moveButton = ui.button.new(manager, "Move", theme.button1, _w - 5, _h, 6, 1)
+    function moveButton:onClick(event)
         table.insert(ret, getCurrentPath())
         manager:exit()
     end
@@ -865,8 +894,8 @@ elseif set.mode == "select_many" then
     listView:setGlobalRect(nil, nil, nil, listView:getHeight() - 1)
     listView:resetLayout()
     local selectedLabel = ui.label.new(manager, tostring(#set.items), theme.label1, 1, _h, _w - 15, 1)
-    local clearSelectionButton = ui.button.new(manager, "Clear", nil, theme.button1, _w - 14, _h, 7, 1)
-    clearSelectionButton._onClick = function(event)
+    local clearSelectionButton = ui.button.new(manager, "Clear", theme.button1, _w - 14, _h, 7, 1)
+    clearSelectionButton.onClick = function(event)
         while #set.items > 0 do
             table.remove(set.items)
         end
@@ -874,8 +903,8 @@ elseif set.mode == "select_many" then
         updateListView(manager, listView)
         manager:draw()
     end
-    local selectSelectionButton = ui.button.new(manager, "Select", nil, theme.button1, _w - 7, _h, 8, 1)
-    selectSelectionButton._onClick = function()
+    local selectSelectionButton = ui.button.new(manager, "Select", theme.button1, _w - 7, _h, 8, 1)
+    selectSelectionButton.onClick = function()
         table.insert(ret, set.items)
         manager:exit()
     end

@@ -435,7 +435,7 @@ function ui.buffer.text(buffer, t, tC, tBG, align, scaleW, scaleH, richText, lef
                 local word = words[wordIndex]
                 wordIndex = wordIndex + 1
                 if word == "\n" then
-                    wordIndex = wordIndex + 1
+                    -- wordIndex = wordIndex + 1
                     break
                 else
                     for j = 1, word:len() do

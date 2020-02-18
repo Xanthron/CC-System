@@ -3,15 +3,13 @@ ui.button = {}
 ---@return button
 ---@param parent element
 ---@param text string
---TODO remove
----@param func function
 ---@param style style.button
 ---@param x integer
 ---@param y integer
 ---@param w integer
 ---@param h integer
 ---@return button
-function ui.button.new(parent, text, func, style, x, y, w, h)
+function ui.button.new(parent, text, style, x, y, w, h)
     ---A simple button
     ---@class button:element
     local this = ui.element.new(parent, "button", x, y, w, h)
@@ -23,22 +21,22 @@ function ui.button.new(parent, text, func, style, x, y, w, h)
     ---@type boolean
     this._inAnimation = false
 
-    --TODO remove
-    this._onClick = func
-
     ---Animation when button is pressed, so it is visible at a short click. return false when animation is finished
     ---@param data table
     ---@return boolean
-    function this._pressAnimation(data)
-        local clock = data[1] - os.clock() + 0.15
-        if clock > 0 then
-            sleep(clock)
+    this.animation =
+        ui.parallelElement.new(
+        function(data)
+            local clock = data[1] - os.clock() + 0.15
+            if clock > 0 then
+                sleep(clock)
+            end
+            this._inAnimation = false
+            this:recalculate()
+            this:repaint("this")
+            return false
         end
-        this._inAnimation = false
-        this:recalculate()
-        this:repaint("this")
-        return false
-    end
+    )
     ---Function for handling every event dedicated to the mouse
     ---@param event event
     ---@param x integer|optional
@@ -55,24 +53,19 @@ function ui.button.new(parent, text, func, style, x, y, w, h)
                     self._inAnimation = true
                     self:recalculate()
                     self:repaint("this", x, y, w, h)
-                    self:getManager().parallelManager:addFunction(self._pressAnimation, {os.clock()})
+                    self.animation.data[1] = os.clock()
+                    self:getManager().parallelManager:addFunction(self.animation)
                 end
                 return self
             end
         elseif event.name == "mouse_drag" then
-            if
-                self.mode == 3 and event.param2 >= x and event.param2 < x + w and event.param3 >= y and
-                    event.param3 < y + h
-             then
+            if self.mode == 3 and event.param2 >= x and event.param2 < x + w and event.param3 >= y and event.param3 < y + h then
                 self.mode = 4
                 if self._inAnimation == false then
                     self:recalculate()
                     self:repaint("this", x, y, w, h)
                 end
-            elseif
-                self.mode == 4 and
-                    (event.param2 < x or event.param2 >= x + w or event.param3 < y or event.param3 >= y + h)
-             then
+            elseif self.mode == 4 and (event.param2 < x or event.param2 >= x + w or event.param3 < y or event.param3 >= y + h) then
                 self.mode = 3
                 if self._inAnimation == false then
                     self:recalculate()
@@ -80,23 +73,17 @@ function ui.button.new(parent, text, func, style, x, y, w, h)
                 end
             end
         elseif event.name == "mouse_up" then
-            if
-                self.mode == 4 and event.param2 >= x and event.param2 < x + w and event.param3 >= y and
-                    event.param3 < y + h
-             then
+            if self.mode == 4 and event.param2 >= x and event.param2 < x + w and event.param3 >= y and event.param3 < y + h then
                 self.mode = 1
                 if self._inAnimation == false then
                     self:recalculate()
                     self:repaint("this", x, y, w, h)
                 end
-                if self._onClick then
-                    self:_onClick(event)
+                if self.onClick then
+                    self:onClick(event)
                 end
                 return self
-            elseif
-                self.mode == 3 and
-                    (event.param2 < x or event.param2 >= x + w or event.param3 < y or event.param3 >= y + h)
-             then
+            elseif self.mode == 3 and (event.param2 < x or event.param2 >= x + w or event.param3 < y or event.param3 >= y + h) then
                 self.mode = 1
                 if self._inAnimation == false then
                     self:recalculate()
@@ -116,20 +103,18 @@ function ui.button.new(parent, text, func, style, x, y, w, h)
                 self:recalculate()
                 self:repaint("this", self:getCompleteMaskRect())
                 self._inAnimation = true
-                self:getManager().parallelManager:addFunction(self._pressAnimation, {os.clock()})
+                self.animation.data[1] = os.clock()
+                self:getManager().parallelManager:addFunction(self.animation)
             end
             return self
-        elseif
-            event.name == "key_up" and self.mode == 4 and
-                (event.param1 == 57 or event.param1 == 28 or event.param1 == 29)
-         then
+        elseif event.name == "key_up" and self.mode == 4 and (event.param1 == 57 or event.param1 == 28 or event.param1 == 29) then
             self.mode = 3
             if self._inAnimation == false then
                 self:recalculate()
                 self:repaint("this", self:getCompleteMaskRect())
             end
-            if self._onClick then
-                self:_onClick(event)
+            if self.onClick then
+                self:onClick(event)
             end
             return self
         end
@@ -148,16 +133,7 @@ function ui.button.new(parent, text, func, style, x, y, w, h)
         else
             theme = self.style.pTheme
         end
-        ui.buffer.borderLabelBox(
-            self.buffer,
-            self.text,
-            theme.tC,
-            theme.tBG,
-            theme.b,
-            theme.bC,
-            theme.bBG,
-            self.style.align
-        )
+        ui.buffer.borderLabelBox(self.buffer, self.text, theme.tC, theme.tBG, theme.b, theme.bC, theme.bBG, self.style.align)
     end
 
     this:recalculate()

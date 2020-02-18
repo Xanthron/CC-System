@@ -1,18 +1,3 @@
---[[
-Strip Miner                           
-Position:  x:       y:       z:       
-
-Fuel:            10 / 100 
-Facing:          Forward 
-Distance Moved:  120
-Total    Moved:  200
-Detected Blocks: 100
-
-Mode:            Mine
-
-
-                   [Pause][Stop][Exit]
-]]
 local inMove = false
 local start = vector.zero:copy()
 local way = vector.up:copy()
@@ -52,14 +37,14 @@ label_mode:setGlobalRect(nil, nil, _w, 3)
 label_mode.scaleH = false
 label_mode.scaleW = false
 
-local button_pause = ui.button.new(manager, "Pause", nil, theme.button1, _x, _h, 8, 1)
+local button_pause = ui.button.new(manager, "Pause", theme.button1, _x, _h, 8, 1)
 if move and move.pause then
     button_pause.text = "Resume"
     button_pause:recalculate()
     button_pause:repaint("this")
 end
-local button_stop = ui.button.new(manager, "Stop", nil, theme.button1, _x + _w - 12, _h, 6, 1)
-local button_exit = ui.button.new(manager, "Exit", nil, theme.button1, _x + _w - 6, _h, 6, 1)
+local button_stop = ui.button.new(manager, "Stop", theme.button1, _x + _w - 12, _h, 6, 1)
+local button_exit = ui.button.new(manager, "Exit", theme.button1, _x + _w - 6, _h, 6, 1)
 
 local group_mainMenu = manager.selectionManager:addNewGroup()
 group_mainMenu.current = button_pause
@@ -928,17 +913,17 @@ local function waitForPause()
     end
 end
 
-function button_pause:_onClick(event)
+function button_pause:onClick(event)
     checkPause = false
 end
 
-function button_stop:_onClick(event)
+function button_stop:onClick(event)
     data.length = -1
     button_pause:changeMode(2, true)
     button_stop:changeMode(2, true)
     button_exit:changeMode(2, true)
 end
-function button_exit:_onClick(event)
+function button_exit:onClick(event)
     manager:exit()
 end
 

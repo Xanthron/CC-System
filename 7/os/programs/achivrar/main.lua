@@ -77,15 +77,15 @@ end
 local manager = ui.uiManager.new(_x, _y, _w, _h)
 ui.buffer.fill(manager.buffer, " ", colors.black, colors.white)
 local label_title = ui.label.new(manager, "Achivrar", theme.label1, 1, 1, _w - 3, 1)
-local button_exit = ui.button.new(manager, "<", nil, theme.button2, _w - 2, 1, 3, 1)
+local button_exit = ui.button.new(manager, "<", theme.button2, _w - 2, 1, 3, 1)
 local tBox_files = ui.textBox.new(manager, "Files:", "", theme.tBox2, 1, 2, _w, _h - 8)
-local button_files = ui.button.new(tBox_files, "Edit", nil, theme.button1, _w - 5, _h - 7, 6, 1)
-local toggle_compress = ui.toggleButton.new(manager, "Compress", true, nil, theme.toggle1, 1, _h - 5, _w, 1)
-local toggle_upload = ui.toggleButton.new(manager, "Upload to PasteBin", false, nil, theme.toggle1, 1, _h - 3, _w, 1)
+local button_files = ui.button.new(tBox_files, "Edit", theme.button1, _w - 5, _h - 7, 6, 1)
+local toggle_compress = ui.toggleButton.new(manager, "Compress", true, theme.toggle1, 1, _h - 5, _w, 1)
+local toggle_upload = ui.toggleButton.new(manager, "Upload to PasteBin", false, theme.toggle1, 1, _h - 3, _w, 1)
 local label_savePath = ui.label.new(manager, "Save: /", theme.label2, 1, _h - 2, _w - 6, 1)
-local button_savePath = ui.button.new(manager, "Edit", nil, theme.button1, _w - 5, _h - 2, 6, 1)
+local button_savePath = ui.button.new(manager, "Edit", theme.button1, _w - 5, _h - 2, 6, 1)
 local label_info = ui.label.new(manager, "", theme.label1, 1, _h, _w - 6, 1)
-local button_start = ui.button.new(manager, "Save", nil, theme.button1, _w - 5, _h, 6, 1)
+local button_start = ui.button.new(manager, "Save", theme.button1, _w - 5, _h, 6, 1)
 
 local function updateSaveButton()
     if #selected > 0 and (toggle_upload._checked == true or fs.exists(fs.getDir(savePath))) then
@@ -107,10 +107,10 @@ local function updateLabelText()
     label_savePath:recalculate()
 end
 
-function button_exit:_onClick(event)
+function button_exit:onClick(event)
     manager:exit()
 end
-function button_files:_onClick(event)
+function button_files:onClick(event)
     manager:callFunction(
         function()
             local select = true
@@ -127,7 +127,7 @@ function button_files:_onClick(event)
         end
     )
 end
-function button_savePath:_onClick(event)
+function button_savePath:onClick(event)
     manager:callFunction(
         function()
             local select = true
@@ -152,7 +152,7 @@ function button_savePath:_onClick(event)
         end
     )
 end
-function toggle_upload:_onToggle(event, toggle)
+function toggle_upload:onToggle(event, toggle)
     if toggle then
         updateLabelText()
         button_savePath.isVisible = false
@@ -164,7 +164,7 @@ function toggle_upload:_onToggle(event, toggle)
     updateSaveButton()
     manager:draw()
 end
-function button_start:_onClick(event)
+function button_start:onClick(event)
     manager:callFunction(
         function()
             if toggle_upload._checked then

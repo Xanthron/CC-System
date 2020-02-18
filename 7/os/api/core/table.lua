@@ -98,8 +98,7 @@ end
 local function _tableToString(list, contains)
     for i = 1, #contains do
         if contains[i] == list then
-            error("Error", #contains + 2)
-        --TODO error message
+            error("Table is recursive and can not converted to string.", #contains + 2)
         end
     end
     table.insert(contains, v)

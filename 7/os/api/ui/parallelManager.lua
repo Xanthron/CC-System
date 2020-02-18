@@ -22,7 +22,7 @@ function ui.parallelManager.new()
                     return
                 end
             end
-            func.caller = self
+            func.executer = self
             if data then
                 func.data = data
             end
@@ -33,7 +33,9 @@ function ui.parallelManager.new()
                     return
                 end
             end
-            table.insert(self._parallelElements, ui.parallelElement.new(self, func, data))
+            local parallelElement = ui.parallelElement.new(func, data)
+            parallelElement.executer = self
+            table.insert(self._parallelElements, parallelElement)
         end
         self:stop()
     end

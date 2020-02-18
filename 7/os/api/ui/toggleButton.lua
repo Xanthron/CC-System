@@ -2,15 +2,13 @@ ui.toggleButton = {}
 ---@param parent element
 ---@param text string
 ---@param checked boolean
---TODO remove
----@param func function
 ---@param style style.toggleButton
 ---@param x integer
 ---@param y integer
 ---@param w integer
 ---@param h integer
 ---@return toggle
-function ui.toggleButton.new(parent, text, checked, func, style, x, y, w, h)
+function ui.toggleButton.new(parent, text, checked, style, x, y, w, h)
     ---@class toggle:element
     local this = ui.element.new(parent, "toggle", x, y, w, h)
 
@@ -22,23 +20,29 @@ function ui.toggleButton.new(parent, text, checked, func, style, x, y, w, h)
     this._checked = checked
     ---@type boolean
     this._inAnimation = false
+    ---Animation when button is pressed, so it is visible at a short click. return false when animation is finished
     ---@type function
-    this._onToggle = func
-    --TODO edit to parallelElement in button file too
+    this.animation =
+        ui.parallelElement.new(
+        function(data)
+            local clock = data[1] - os.clock() + 0.15
+            if clock > 0 then
+                sleep(clock)
+            end
+            this._inAnimation = false
+            this:recalculate()
+            local x, y, w, h, possible = this:getCompleteMaskRect()
+            if possible then
+                this:repaint("this", x, y, w, h)
+            end
+            return false
+        end
+    )
+
     ---@type function
-    this._pressAnimation = function(data)
-        local clock = data[1] - os.clock() + 0.15
-        if clock > 0 then
-            sleep(clock)
-        end
-        this._inAnimation = false
-        this:recalculate()
-        local x, y, w, h, possible = this:getCompleteMaskRect()
-        if possible then
-            this:repaint("this", x, y, w, h)
-        end
-        return false
-    end
+    ---@param event event
+    ---@return nil
+    this.onToggle = nil
 
     ---Assigned function for every event dedicated to the mouse
     ---@param event event
@@ -56,24 +60,19 @@ function ui.toggleButton.new(parent, text, checked, func, style, x, y, w, h)
                     self._inAnimation = true
                     self:recalculate()
                     self:repaint("this", x, y, w, h)
-                    self:getManager().parallelManager:addFunction(self._pressAnimation, {os.clock()})
+                    self.animation.data[1] = os.clock()
+                    self:getManager().parallelManager:addFunction(self.animation)
                 end
                 return self
             end
         elseif event.name == "mouse_drag" then
-            if
-                self.mode == 3 and event.param2 >= x and event.param2 < x + w and event.param3 >= y and
-                    event.param3 < y + h
-             then
+            if self.mode == 3 and event.param2 >= x and event.param2 < x + w and event.param3 >= y and event.param3 < y + h then
                 self.mode = 4
                 if self._inAnimation == false then
                     self:recalculate()
                     self:repaint("this", x, y, w, h)
                 end
-            elseif
-                self.mode == 4 and
-                    (event.param2 < x or event.param2 >= x + w or event.param3 < y or event.param3 >= y + h)
-             then
+            elseif self.mode == 4 and (event.param2 < x or event.param2 >= x + w or event.param3 < y or event.param3 >= y + h) then
                 self.mode = 3
                 if self._inAnimation == false then
                     self:recalculate()
@@ -81,24 +80,18 @@ function ui.toggleButton.new(parent, text, checked, func, style, x, y, w, h)
                 end
             end
         elseif event.name == "mouse_up" then
-            if
-                self.mode == 4 and event.param2 >= x and event.param2 < x + w and event.param3 >= y and
-                    event.param3 < y + h
-             then
+            if self.mode == 4 and event.param2 >= x and event.param2 < x + w and event.param3 >= y and event.param3 < y + h then
                 self._checked = self._checked == false
                 self.mode = 1
                 if self._inAnimation == false then
                     self:recalculate()
                     self:repaint("this", x, y, w, h)
                 end
-                if self._onToggle then
-                    self:_onToggle(event, self._checked)
+                if self.onToggle then
+                    self:onToggle(event, self._checked)
                 end
                 return self
-            elseif
-                self.mode == 3 and
-                    (event.param2 < x or event.param2 >= x + w or event.param3 < y or event.param3 >= y + h)
-             then
+            elseif self.mode == 3 and (event.param2 < x or event.param2 >= x + w or event.param3 < y or event.param3 >= y + h) then
                 self.mode = 1
                 if self._inAnimation == false then
                     self:recalculate()
@@ -118,7 +111,8 @@ function ui.toggleButton.new(parent, text, checked, func, style, x, y, w, h)
                 self._inAnimation = true
                 self:recalculate()
                 self:repaint("this", self:getCompleteMaskRect())
-                self:getManager().parallelManager:addFunction(self._pressAnimation, {os.clock()})
+                self.animation.data[1] = os.clock()
+                self:getManager().parallelManager:addFunction(self.animation)
             end
             return true
         elseif event.name == "key_up" and self.mode == 4 and (event.param1 == 57 or event.param1 == 28) then
@@ -128,8 +122,8 @@ function ui.toggleButton.new(parent, text, checked, func, style, x, y, w, h)
                 self:recalculate()
                 self:repaint("this", self:getCompleteMaskRect())
             end
-            if self._onToggle then
-                self:_onToggle(event, self._checked)
+            if self.onToggle then
+                self:onToggle(event, self._checked)
             end
             return true
         end

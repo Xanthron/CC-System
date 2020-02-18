@@ -19,7 +19,8 @@ table.checkType(set, "label", "string", false)
 table.checkType(set, "select", "boolean", true)
 table.checkType(set, "tBoxT", "table", true, theme.tBox1)
 table.checkType(set, "buttonT", "table", true, theme.button1)
-table.checkType(set, "button1", "string", true, theme.button1)
+table.checkType(set, "button1", "string", true)
+table.checkType(set, "button2", "string", false)
 
 local manager = ui.uiManager.new(x, y, w, h)
 local textBox = ui.textBox.new(manager, set.label, set.text, set.tBoxT, x, y, w, h)
@@ -39,40 +40,22 @@ local button1, button2
 
 if set.button1 then
     local length = set.button1:len() + 2
-    button1 =
-        ui.button.new(
-        textBox,
-        set.button1,
-        function(self, event)
-            ret = 1
-            select = event.name ~= "mouse_up"
-            manager:exit()
-        end,
-        set.buttonT or theme.button1,
-        x + w - right - 1 - length,
-        y + h - math.floor(bottom / 2) - 1,
-        length,
-        1
-    )
+    button1 = ui.button.new(textBox, set.button1, set.buttonT or theme.button1, x + w - right - 1 - length, y + h - math.floor(bottom / 2) - 1, length, 1)
+    function button1:onClick(event)
+        ret = 1
+        select = event.name ~= "mouse_up"
+        manager:exit()
+    end
     textBox.selectionGroup:addElement(button1)
 end
 if set.button2 then
     local length = set.button2:len() + 2
-    button2 =
-        ui.button.new(
-        textBox,
-        set.button2,
-        function(self, event)
-            ret = 2
-            select = event.name ~= "mouse_up"
-            manager:exit()
-        end,
-        set.buttonT or theme.button1,
-        x + left + 1,
-        y + h - math.floor(bottom / 2) - 1,
-        length,
-        1
-    )
+    button2 = ui.button.new(textBox, set.button2, set.buttonT or theme.button1, x + left + 1, y + h - math.floor(bottom / 2) - 1, length, 1)
+    function button2:onClick(self, event)
+        ret = 2
+        select = event.name ~= "mouse_up"
+        manager:exit()
+    end
     textBox.selectionGroup:addElement(button2, nil, nil, button1, nil, true)
 end
 manager.selectionManager:addGroup(textBox.selectionGroup)
