@@ -120,7 +120,7 @@ elseif set.mode == "select_many" then
 end
 local pathsIndex, paths = 0, {}
 local ret = {}
-local rename, move, duplicate, delete, create
+local rename, move, copy, delete, create
 
 local hasUnderMenu = false
 
@@ -296,11 +296,19 @@ local function updateListView(manager, listView)
                     function()
                         local options = {}
                         if set.edit then
-                            table.insert(options, "Rename")
-                            table.insert(options, "Move")
-                            table.insert(options, "Duplicate")
-                            table.insert(options, "-")
-                            table.insert(options, "Delete")
+                            if fs.isReadOnly(getCurrentPath()) or fs.isReadOnly(files[i]) then
+                                table.insert(options, "*Rename")
+                                table.insert(options, "*Move")
+                                table.insert(options, "Copy")
+                                table.insert(options, "-")
+                                table.insert(options, "*Delete")
+                            else
+                                table.insert(options, "Rename")
+                                table.insert(options, "Move")
+                                table.insert(options, "Copy")
+                                table.insert(options, "-")
+                                table.insert(options, "Delete")
+                            end
                         end
                         local select = true
                         if event.name == "mouse_up" then
@@ -321,8 +329,11 @@ local function updateListView(manager, listView)
                         end
                         if #options > 0 then
                             local y = self:getGlobalPosY() + 1
-                            if y + #options + 3 > _h + _y then
+                            if y + #options + 2 > _h + _y then
                                 y = y - 3 - #options
+                                if y < 1 then
+                                    y = 1
+                                end
                             end
                             local name, indexes, select = assert(loadfile("os/sys/listBox.lua"))({x = self:getGlobalPosX(), y = y, manager = manager, label = "File", select = select, buttons = options})
                             if name then
@@ -332,9 +343,9 @@ local function updateListView(manager, listView)
                                 elseif name == "Move" then
                                     manager.parallelManager:removeFunction(self.animation)
                                     move(manager, listView, dirs[i], select)
-                                elseif name == "Duplicate" then
+                                elseif name == "Copy" then
                                     manager.parallelManager:removeFunction(self.animation)
-                                    duplicate(manager, listView, dirs[i], select)
+                                    copy(manager, listView, dirs[i], select)
                                 elseif name == "Delete" then
                                     manager.parallelManager:removeFunction(self.animation)
                                     delete(manager, listView, dirs[i], select)
@@ -399,11 +410,19 @@ local function updateListView(manager, listView)
                     function()
                         local options = {}
                         if set.edit then
-                            table.insert(options, "Rename")
-                            table.insert(options, "Move")
-                            table.insert(options, "Duplicate")
-                            table.insert(options, "-")
-                            table.insert(options, "Delete")
+                            if fs.isReadOnly(getCurrentPath()) or fs.isReadOnly(files[i]) then
+                                table.insert(options, "*Rename")
+                                table.insert(options, "*Move")
+                                table.insert(options, "Copy")
+                                table.insert(options, "-")
+                                table.insert(options, "*Delete")
+                            else
+                                table.insert(options, "Rename")
+                                table.insert(options, "Move")
+                                table.insert(options, "Copy")
+                                table.insert(options, "-")
+                                table.insert(options, "Delete")
+                            end
                         end
                         if #options > 0 then
                             local select = true
@@ -411,8 +430,11 @@ local function updateListView(manager, listView)
                                 select = false
                             end
                             local y = self:getGlobalPosY() + 1
-                            if y + #options + 3 > _h + _y then
+                            if y + #options + 2 > _h + _y then
                                 y = y - 3 - #options
+                                if y < 1 then
+                                    y = 1
+                                end
                             end
                             local name, indexes, select = assert(loadfile("os/sys/listBox.lua"))({x = self:getGlobalPosX(), y = y, manager = manager, label = "File", select = select, buttons = options})
                             if name then
@@ -422,9 +444,9 @@ local function updateListView(manager, listView)
                                 elseif name == "Move" then
                                     manager.parallelManager:removeFunction(self.animation)
                                     move(manager, listView, files[i], select)
-                                elseif name == "Duplicate" then
+                                elseif name == "Copy" then
                                     manager.parallelManager:removeFunction(self.animation)
-                                    duplicate(manager, listView, files[i], select)
+                                    copy(manager, listView, files[i], select)
                                 elseif name == "Delete" then
                                     manager.parallelManager:removeFunction(self.animation)
                                     delete(manager, listView, files[i], select)
@@ -551,33 +573,52 @@ end
 create = function(manager, listView, name, path, isDir)
     local submit = function(self, event, text)
         local newPath = fs.combine(path, text)
-        if text ~= "" and fs.exists(newPath) == false then
+        if text ~= "" then
+            if fs.exists(newPath) then
+                if isDir then
+                    assert(loadfile("os/sys/infoBox.lua"))({x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, text = "Directory already exist.\nA new Directory is not created.", label = "Directory already exist", select = true, button1 = "Ok"})
+                    manager:draw()
+                    return
+                else
+                    if assert(loadfile("os/sys/infoBox.lua"))({x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, text = "File already exist.\nShould the file still be created?", label = "File already exist", select = true, button1 = "Cancel", button2 = "Create"}) == 1 then
+                        manager:draw()
+                        return
+                    end
+                end
+            end
             if isDir then
                 fs.makeDir(newPath)
             else
                 local file = io.open(newPath, "w+")
                 file:close()
             end
-        end
-        updateListView(manager, listView)
-        for _, e in ipairs(listView:getContainer()._elements) do
-            if e.path == newPath then
-                manager.selectionManager:select(e, "code", 3)
-                return
+            updateListView(manager, listView)
+            for _, e in ipairs(listView:getContainer()._elements) do
+                if e.path == newPath then
+                    manager.selectionManager:select(e, "code", 3)
+                    return
+                end
             end
+            manager.selectionManager:select(listView.selectionGroup, "code", 3)
         end
-        manager.selectionManager:select(listView.selectionGroup, "code", 3)
     end
     nameItem(manager, name, submit, 1, 2, _w, 1)
 end
 delete = function(manager, listView, path, select)
-    fs.delete(path)
-    updateListView(manager, listView)
-    if select then
-        if listView:getContainer()._elements[1] then
-            manager.selectionManager:select(listView.selectionGroup, "key", 3)
+    if fs.isReadOnly(path) then
+        assert(loadfile("os/sys/infoBox.lua"))({x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, text = "Directory is read only.", label = "Directory is read only", select = true, button1 = "Ok"})
+    else
+        if assert(loadfile("os/sys/infoBox.lua"))({x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, text = ("Do you realy want to delete %q?\nA recovery is not possible"):format(fs.getName(path)), label = "Delete", select = select, button1 = "Cancel", button2 = "Delete"}) == 1 then
         else
-            manager.selectionManager:select(manager.selectionManager.groups[2].elements[1], "key", 3)
+            fs.delete(path)
+            updateListView(manager, listView)
+            if select then
+                if listView:getContainer()._elements[1] then
+                    manager.selectionManager:select(listView.selectionGroup, "key", 3)
+                else
+                    manager.selectionManager:select(manager.selectionManager.groups[2].elements[1], "key", 3)
+                end
+            end
         end
     end
     manager:draw()
@@ -604,32 +645,50 @@ move = function(manager, listView, path, select)
         end
     end
 end
-duplicate = function(manager, listView, path, select)
-    local dir = fs.getDir(path)
-    local name = fs.getClearName(path)
-    local ext = fs.getExtension(path)
-    local i = 1
-    local newPath
-    repeat
-        if ext then
-            newPath = fs.combine(dir, ("%s (%i).%s"):format(name, i, ext))
+copy = function(manager, listView, path, select)
+    local dirPath, name = fs.getDir(path), fs.getName(path)
+    local save = assert(loadfile("os/sys/explorer/main.lua"))({select = select, mode = "move", files = false, path = dirPath, move = name, edit = false})
+    if save then
+        if fs.isReadOnly(save) then
+            assert(loadfile("os/sys/infoBox.lua"))({x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, text = "Access denied.\nFolder is read only.", label = "Copy file failed", select = select, button1 = "Ok"})
         else
-            newPath = fs.combine(dir, ("%s (%i)"):format(name, i))
-        end
-        i = i + 1
-    until not fs.exists(newPath)
-    if
-        pcall(
-            function()
+            if save == dirPath then
+                local dir = fs.getDir(path)
+                local name = fs.getClearName(path)
+                local ext = fs.getExtension(path)
+                local i = 1
+                local newPath
+                repeat
+                    if ext then
+                        newPath = fs.combine(dir, ("%s (%i).%s"):format(name, i, ext))
+                    else
+                        newPath = fs.combine(dir, ("%s (%i)"):format(name, i))
+                    end
+                    i = i + 1
+                until not fs.exists(newPath)
                 fs.copy(path, newPath)
+            else
+                local T, t
+                if fs.isDir(path) then
+                    T = "Directory"
+                    t = "directory"
+                else
+                    T = "File"
+                    t = "file"
+                end
+                local newPath = fs.combine(save, name)
+                if fs.exists(newPath) then
+                    if assert(loadfile("os/sys/infoBox.lua"))({x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, text = ("%s already exist.\nShould the %s still be created?"):format(T, t), label = ("%s already exist"):format(T), select = true, button1 = "Cancel", button2 = "Copy"}) == 2 then
+                        fs.delete(newPath)
+                        fs.copy(path, newPath)
+                    end
+                else
+                    fs.copy(path, newPath)
+                end
             end
-        )
-     then
-        updateListView(manager, listView)
-        manager:draw()
-    else
-        assert(loadfile("os/sys/infoBox.lua"))({x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, text = "Access denied.\nFolder is read only.", label = "Copy file failed", select = select, button1 = "Ok"})
+        end
     end
+    manager:draw()
 end
 
 addPath(set.path)
@@ -721,11 +780,15 @@ function fileButton:onClick(event)
     manager:callFunction(
         function()
             local options = {}
-            if set.edit == true then
+            if fs.isReadOnly(getCurrentPath()) then
+                table.insert(options, "*New Folder")
+                table.insert(options, "*New File")
+            elseif set.edit == true then
                 table.insert(options, "New Folder")
                 table.insert(options, "New File")
             elseif set.mode == "move" or set.mode == "save" then
                 table.insert(options, "New Folder")
+                table.insert(options, "*New File")
             end
             if #options > 0 then
                 local name = assert(loadfile("os/sys/listBox.lua"))({x = 1, y = 1, manager = manager, label = "File", select = select, buttons = options})

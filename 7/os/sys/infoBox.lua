@@ -51,7 +51,7 @@ end
 if set.button2 then
     local length = set.button2:len() + 2
     button2 = ui.button.new(textBox, set.button2, set.buttonT or theme.button1, x + left + 1, y + h - math.floor(bottom / 2) - 1, length, 1)
-    function button2:onClick(self, event)
+    function button2:onClick(event)
         ret = 2
         select = event.name ~= "mouse_up"
         manager:exit()

@@ -101,7 +101,7 @@ function ui.buffer.labelBox(buffer, t, tC, tBG, align, space, left, top, right, 
     local totalWidth, totalHeight = buffer.rect.w, buffer.rect.h
     local width, height = totalWidth - left - right, totalHeight - top - bottom
     local textLines = {}
-    for line in t:gmatch(".*[^\r\n]") do
+    for line in t:gmatch("[^\r\n]*.") do
         table.insert(textLines, line)
     end
     local topPadding = 0
@@ -336,7 +336,7 @@ function ui.buffer.text(buffer, t, tC, tBG, align, scaleW, scaleH, richText, lef
     local totalWidth, totalHeight = buffer.rect.w, buffer.rect.h
     local width, height = totalWidth - left - right, totalHeight - top - bottom
     local words = {}
-    for line in t:gmatch(".[^\r\n]*") do
+    for line in t:gmatch("[^\r\n]*.") do
         for word in line:gmatch("[^%s]*") do
             if word:len() > 0 then
                 table.insert(words, word)

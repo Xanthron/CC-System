@@ -128,3 +128,13 @@ end
 function table.toString(list)
     return _tableToString(list, {})
 end
+
+function table.crop(list, i, j)
+    i, j = math.min(i, j), math.max(i, j)
+    while j < #list do
+        table.remove(list)
+    end
+    for i = 2, i do
+        table.remove(list, 1)
+    end
+end

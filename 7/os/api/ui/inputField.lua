@@ -86,6 +86,39 @@ function ui.inputField.new(parent, label, text, multiLine, style, x, y, w, h)
     }
     ---@type integer
     this.cursorOffset = 0
+    function this:getOffset()
+        if self.multiLine and self.cursorOffset > 0 then
+            local i, length, total = 0, 0, self.text:len()
+            for line in self.text:gmatch("[^\n\r]*.") do
+                local len = line:len()
+                if length + len > self.cursorOffset or (length + len == total and self.text:sub(total) ~= "\n") then
+                    break
+                end
+                length = length + len
+                i = i + 1
+            end
+            return self.cursorOffset - length, i
+        else
+            return self.cursorOffset, 0
+        end
+    end
+
+    function this:moveCursorVertical(amount)
+        local i, s, e, lengths = 0, 0, 0, {}
+
+        repeat
+            table.insert(lengths, s - 1)
+            if s >= self.cursorOffset then
+                if i + amount < #lengths then
+                    break
+                end
+            else
+                i = i + 1
+            end
+            s, e = text:find("[\n\r]", s + 1)
+        until s == nil
+        self.cursorOffset = lengths[math.max(1, math.min(#lengths, i + amount + 1))] + math.min(lengths[math.max(1, math.min(#lengths, i + amount + 2))] + lengths[math.max(1, math.min(#lengths, i + amount + 1))], lengths[i])
+    end
 
     this.getCursorPos = function()
         if this.mode == 3 then
@@ -146,49 +179,88 @@ function ui.inputField.new(parent, label, text, multiLine, style, x, y, w, h)
         local right = #theme.b[6]
         local bottom = #theme.b[8]
         local width = self:getWidth()
-        local length = self.text:len()
+        local height = self:getHeight()
+
         if self.mode <= 2 then
             local text
-            if length > width then
-                local align = self.style.align
-                if align == 1 or align == 4 or align == 7 then
-                    text = self.text:sub(1, width - left - right - 3) .. "..."
-                elseif align == 2 or align == 1 or align == 8 then
-                    local w = width - left - right - 3
-                    text = self.text:sub(1, math.floor(w / 2)) .. "..." .. self.text:sub(length - math.ceil(w / 2))
-                else
-                    text = "..." .. self.text:sub(length - width + left + right + 3)
-                end
-            else
+            if self.multiLine then
                 text = self.text
+            else
+                local length = self.text:len()
+                if length > width then
+                    local align = self.style.align
+                    if align == 1 or align == 4 or align == 7 then
+                        text = self.text:sub(1, width - left - right - 3) .. "..."
+                    elseif align == 2 or align == 1 or align == 8 then
+                        local w = width - left - right - 3
+                        text = self.text:sub(1, math.floor(w / 2)) .. "..." .. self.text:sub(length - math.ceil(w / 2))
+                    else
+                        text = "..." .. self.text:sub(length - width + left + right + 3)
+                    end
+                else
+                    text = self.text
+                end
             end
             ui.buffer.labelBox(self.buffer, text, theme.tC, theme.tBG, 1, theme.b[5][1], left, top, right, bottom)
         else
             self:getManager().getCursorPos = self.getCursorPos
+
+            local lines = {}
+            if self.multiLine then
+                for line in self.text:gmatch("[^\n\r]*.") do
+                    if line then
+                        table.insert(lines, line)
+                    else
+                        table.insert(lines, "")
+                    end
+                end
+            else
+                lines[1] = self.text:gsub("[\n\r]", " ")
+            end
+            if #lines == 0 then
+                lines[1] = ""
+            end
+
             local completeText
             if #self.autoComplete > 0 then
                 completeText = self.autoComplete[self.autoCompleteIndex]
             else
                 completeText = ""
             end
+
+            local offsetX, offsetY = self:getOffset()
+            local length = lines[math.min(1, offsetY + 1)]:len()
+
+            local cropStart = math.max(1, offsetY + 1 - height + top + bottom + 1)
+            table.crop(lines, cropStart, cropStart + height - top - bottom)
+
             local completeLength = completeText:len()
             local offsetT = length - (width - left - right) + 1
-            offsetT = math.min(offsetT, self.cursorOffset - width + left + right + 1)
+            offsetT = math.min(offsetT, offsetX - width + left + right + 1)
             local offsetC = math.max(0, math.min(width - left - right - 3, completeLength, length + completeLength - width - left - right + 3))
             offsetT = offsetT + offsetC
             offsetT = math.max(0, offsetT)
-            self._cursorX = self.buffer.rect.x + left + self.cursorOffset - offsetT - self:getGlobalPosX()
-            self._cursorY = self.buffer.rect.y + top - self:getGlobalPosY()
-            if completeText == "" then
-                local text = self.text:sub(offsetT + 1, math.min(offsetT + width - left - right, length))
-                ui.buffer.labelBox(self.buffer, text, theme.tC, theme.tBG, 1, theme.b[5][1], left, top, right, bottom)
-            else
-                local text = self.text:sub(offsetT + 1, math.min(offsetT + width - left - right - offsetC, length))
-                ui.buffer.labelBox(self.buffer, text, theme.tC, theme.tBG, 1, theme.b[5][1], left, top, right, bottom)
-                ui.buffer.labelBox(self.buffer, completeText, theme.complC, theme.complBG, 1, theme.b[5][1], left + self.cursorOffset - offsetT, top, right, bottom)
-                text = self.text:sub(offsetT + width - left - right - offsetC, math.min(offsetT + width - left - right, length))
-                ui.buffer.labelBox(self.buffer, text, theme.tC, theme.tBG, 1, theme.b[5][1], left + length + completeLength - offsetT, top, right, bottom)
+            self._cursorX = self.buffer.rect.x + left + offsetX - offsetT - self:getGlobalPosX()
+            self._cursorY = self.buffer.rect.y + top - self:getGlobalPosY() + offsetY - cropStart + 1
+            for i = 1, #lines do
+                if true or completeText == "" then
+                    --local text = self.text:sub(offsetT + 1, math.min(offsetT + width - left - right, length))
+                    --ui.buffer.labelBox(self.buffer, text, theme.tC, theme.tBG, 1, theme.b[5][1], left, top, right, bottom)
+                    lines[i] = lines[i]:sub(offsetT + 1)
+                    if lines[i] == "" then
+                        lines[i] = "\n"
+                    end
+                else
+                    local text = self.text:sub(offsetT + 1, math.min(offsetT + width - left - right - offsetC, length))
+                    ui.buffer.labelBox(self.buffer, text, theme.tC, theme.tBG, 1, theme.b[5][1], left, top, right, bottom)
+                    ui.buffer.labelBox(self.buffer, completeText, theme.complC, theme.complBG, 1, theme.b[5][1], left + self.cursorOffset - offsetT, top, right, bottom)
+                    text = self.text:sub(offsetT + width - left - right - offsetC, math.min(offsetT + width - left - right, length))
+                    ui.buffer.labelBox(self.buffer, text, theme.tC, theme.tBG, 1, theme.b[5][1], left + length + completeLength - offsetT, top, right, bottom)
+                end
             end
+
+            local text = table.concat(lines, "")
+            ui.buffer.labelBox(self.buffer, text, theme.tC, theme.tBG, 1, theme.b[5][1], left, top, right, bottom)
         end
     end
     ---Recalculate the buffer of this element
@@ -305,27 +377,55 @@ function ui.inputField.new(parent, label, text, multiLine, style, x, y, w, h)
                         self:repaint("this")
                     end
                 elseif key == "up" then
-                    if #self.autoComplete > 0 then
-                        if self.autoCompleteIndex <= 1 then
-                            self.autoCompleteIndex = #self.autoComplete
-                        else
-                            self.autoCompleteIndex = self.autoCompleteIndex - 1
-                        end
+                    if self.multiLine then
+                        self:moveCursorVertical(-1)
                         self:recalculateText()
                         self:repaint("this")
                         return self
+                    else
+                        if #self.autoComplete > 0 then
+                            if self.autoCompleteIndex <= 1 then
+                                self.autoCompleteIndex = #self.autoComplete
+                            else
+                                self.autoCompleteIndex = self.autoCompleteIndex - 1
+                            end
+                            self:recalculateText()
+                            self:repaint("this")
+                            return self
+                        end
                     end
                 elseif key == "down" then
-                    if #self.autoComplete > 0 then
-                        if self.autoCompleteIndex >= #self.autoComplete then
-                            self.autoCompleteIndex = 1
-                        else
-                            self.autoCompleteIndex = self.autoCompleteIndex + 1
-                        end
+                    if self.multiLine then
+                        self:moveCursorVertical(1)
                         self:recalculateText()
                         self:repaint("this")
                         return self
+                    else
+                        if #self.autoComplete > 0 then
+                            if self.autoCompleteIndex >= #self.autoComplete then
+                                self.autoCompleteIndex = 1
+                            else
+                                self.autoCompleteIndex = self.autoCompleteIndex + 1
+                            end
+                            self:recalculateText()
+                            self:repaint("this")
+                            return self
+                        end
                     end
+                elseif key == "enter" and self.multiLine then
+                    local char
+                    if self.onTextEdit then
+                        char = self:onTextEdit("enter")
+                    end
+                    if not char then
+                        char = "\n"
+                    end
+                    self.text = self:combinedText(char)
+                    self.cursorOffset = self.cursorOffset + char:len()
+                    self:getAutoComplete()
+                    self:recalculateText()
+                    self:repaint("this")
+                    return self
                 end
                 for index, value in ipairs(self.ignoreKeys) do
                     if key == value then
@@ -335,7 +435,7 @@ function ui.inputField.new(parent, label, text, multiLine, style, x, y, w, h)
                 return self
             elseif event.name == "key_up" then
                 local key = keys.getName(event.param1)
-                if key == "enter" then
+                if key == "enter" and not self.multiLine then
                     if self._onSubmit then
                         self:_onSubmit(event, self.text)
                     end
