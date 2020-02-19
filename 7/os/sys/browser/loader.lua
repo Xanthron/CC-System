@@ -52,7 +52,7 @@ local y = 2
 local label_code, element_code, button_uploadPath, label_uploadPath, button_copy
 if mode == "Upload" then
     element_code = ui.label.new(container_item, "", theme.label2, 7, y, _w - 8, 1)
-    label_code = ui.label.new(container_item, "Code: ", theme.label2, 1, y, 6)
+    label_code = ui.label.new(container_item, "File: ", theme.label2, 1, y, 6)
     y = y + 1
     button_uploadPath = ui.button.new(container_item, "Path", theme.button1, 1, y, 6, 1)
     label_uploadPath = ui.label.new(container_item, "No Selection", theme.label2, 8, y, _w - 9, 1)
@@ -88,11 +88,11 @@ local toggle_color = ui.toggleButton.new(container_item, "Need Color", false, th
 y = y + 2
 local label_name = ui.label.new(container_item, "Name:", theme.label2, 3, y, _w - 3, 1)
 y = y + 1
-local iField_name = ui.inputField.new(container_item, "", args.name or "", true, theme.iField1, 3, y, _w - 4, 1)
+local iField_name = ui.inputField.new(container_item, "", args.name or "", false, theme.iField1, 3, y, _w - 4, 1)
 y = y + 2
 local label_description = ui.label.new(container_item, "Description:", theme.label2, 3, y, _w - 3, 1)
 y = y + 1
-local iField_description = ui.inputField.new(container_item, "", "", true, theme.iField1, 3, y, _w - 4, 1)
+local iField_description = ui.inputField.new(container_item, "", "", true, theme.iField1, 3, y, _w - 4, 5)
 
 local button_load = ui.button.new(manager, mode, theme.button1, _w - 9, _h, 10, 1)
 button_load.mode = 2
@@ -125,7 +125,14 @@ group_list:addElement(iField_description, nil, iField_name, nil, button_load)
 group_download:addElement(button_load, nil, iField_description, nil, nil)
 
 local function checkDownloadButton(codeText, nameText)
-    if (mode == "Upload" or (codeText or element_code.text:len() - 7) == 1) and (mode ~= "Upload" or pathUpload or file) and (not toggle_toList._checked or ((toggle_desktop._checked or toggle_pocket._checked or toggle_turtle._checked) and (nameText or iField_name.text:len()) > 0)) and (toggle_run._checked or pathSave) then
+    if
+        (mode == "Upload" or (codeText or element_code.text:len() - 7) == 1) and
+            (mode ~= "Upload" or pathUpload or file) and
+            (not toggle_toList._checked or
+                ((toggle_desktop._checked or toggle_pocket._checked or toggle_turtle._checked) and
+                    (nameText or iField_name.text:len()) > 0)) and
+            (toggle_run._checked or pathSave)
+     then
         button_load.mode = 1
     else
         button_load.mode = 2
@@ -147,7 +154,10 @@ if mode == "Upload" then
                 if pathUpload then
                     path = fs.getDir(pathUpload)
                 end
-                path = assert(loadfile("os/sys/explorer/main.lua"))({mode = "select_one", path = path, edit = false, select = event.name ~= "mouse_up"})
+                path =
+                    assert(loadfile("os/sys/explorer/main.lua"))(
+                    {mode = "select_one", path = path, edit = false, select = event.name ~= "mouse_up"}
+                )
                 if path then
                     pathUpload = path
                     label_uploadPath.text = pathUpload
@@ -209,7 +219,17 @@ function button_savePath:onClick(event)
                 name = fs.getName(pathSave)
                 path = fs.getDir(pathSave)
             end
-            path = assert(loadfile("os/sys/explorer/main.lua"))({mode = "save", save = name, path = path, edit = false, override = true, select = event.name ~= "mouse_up"})
+            path =
+                assert(loadfile("os/sys/explorer/main.lua"))(
+                {
+                    mode = "save",
+                    save = name,
+                    path = path,
+                    edit = false,
+                    override = true,
+                    select = event.name ~= "mouse_up"
+                }
+            )
             if path then
                 local wasSame = true
                 if pathSave then
@@ -366,7 +386,14 @@ function button_load:onClick(event)
                         path = "run"
                     end
 
-                    local data = {name = iField_name.text, description = iField_description.text, color = toggle_color._checked, type = table.concat(types, ""), url = code, path = path}
+                    local data = {
+                        name = iField_name.text,
+                        description = iField_description.text,
+                        color = toggle_color._checked,
+                        type = table.concat(types, ""),
+                        url = code,
+                        path = path
+                    }
 
                     local datas = dofile("os/sys/browser/unofficial")
                     for i, v in ipairs(datas) do

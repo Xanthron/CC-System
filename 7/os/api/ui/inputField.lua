@@ -3,7 +3,6 @@ ui.inputField = {}
 ---@param parent element
 ---@param label string|nil
 ---@param text string
---TODO remove multiline, it is not in use
 ---@param multiLine boolean
 ---@param style style.inputField
 ---@param x integer
@@ -104,20 +103,29 @@ function ui.inputField.new(parent, label, text, multiLine, style, x, y, w, h)
     end
 
     function this:moveCursorVertical(amount)
-        local i, s, e, lengths = 0, 0, 0, {}
-
-        repeat
-            table.insert(lengths, s - 1)
-            if s >= self.cursorOffset then
-                if i + amount < #lengths then
-                    break
-                end
-            else
+        local i, length, total, lengths, lens = 1, 0, self.text:len(), {0}, {0}
+        for line in self.text:gmatch("[^\n\r]*.") do
+            local len = line:len()
+            length = length + len
+            table.insert(lengths, length)
+            if length == total and self.text:sub(total) ~= "\n" then
+                table.insert(lens, len + 1)
+                break
+            end
+            table.insert(lens, len)
+            if not (length > self.cursorOffset) then
                 i = i + 1
             end
-            s, e = text:find("[\n\r]", s + 1)
-        until s == nil
-        self.cursorOffset = lengths[math.max(1, math.min(#lengths, i + amount + 1))] + math.min(lengths[math.max(1, math.min(#lengths, i + amount + 2))] + lengths[math.max(1, math.min(#lengths, i + amount + 1))], lengths[i])
+        end
+        local newLength = lengths[math.max(1, math.min(#lengths, i + amount))]
+        newLength =
+            newLength +
+            math.min(self.cursorOffset - lengths[i], lens[math.max(1, math.min(#lengths, i + amount + 1))] - 1)
+        if newLength >= 0 and newLength <= total and i + amount < #lengths then
+            self.cursorOffset = newLength
+            return true
+        end
+        return false
     end
 
     this.getCursorPos = function()
@@ -205,9 +213,18 @@ function ui.inputField.new(parent, label, text, multiLine, style, x, y, w, h)
         else
             self:getManager().getCursorPos = self.getCursorPos
 
+            local completeText
+            if #self.autoComplete > 0 then
+                completeText = self.autoComplete[self.autoCompleteIndex]
+            else
+                completeText = ""
+            end
+
             local lines = {}
+            local text = self:combinedText(completeText)
+
             if self.multiLine then
-                for line in self.text:gmatch("[^\n\r]*.") do
+                for line in text:gmatch("[^\n\r]*.") do
                     if line then
                         table.insert(lines, line)
                     else
@@ -221,15 +238,8 @@ function ui.inputField.new(parent, label, text, multiLine, style, x, y, w, h)
                 lines[1] = ""
             end
 
-            local completeText
-            if #self.autoComplete > 0 then
-                completeText = self.autoComplete[self.autoCompleteIndex]
-            else
-                completeText = ""
-            end
-
             local offsetX, offsetY = self:getOffset()
-            local length = lines[math.min(1, offsetY + 1)]:len()
+            local length = lines[math.max(1, math.min(#lines, offsetY + 1))]:len()
 
             local cropStart = math.max(1, offsetY + 1 - height + top + bottom + 1)
             table.crop(lines, cropStart, cropStart + height - top - bottom)
@@ -237,30 +247,39 @@ function ui.inputField.new(parent, label, text, multiLine, style, x, y, w, h)
             local completeLength = completeText:len()
             local offsetT = length - (width - left - right) + 1
             offsetT = math.min(offsetT, offsetX - width + left + right + 1)
-            local offsetC = math.max(0, math.min(width - left - right - 3, completeLength, length + completeLength - width - left - right + 3))
+            local offsetC =
+                math.max(
+                0,
+                math.min(width - left - right - 3, completeLength, length + completeLength - width - left - right + 3)
+            )
             offsetT = offsetT + offsetC
             offsetT = math.max(0, offsetT)
             self._cursorX = self.buffer.rect.x + left + offsetX - offsetT - self:getGlobalPosX()
             self._cursorY = self.buffer.rect.y + top - self:getGlobalPosY() + offsetY - cropStart + 1
             for i = 1, #lines do
-                if true or completeText == "" then
-                    --local text = self.text:sub(offsetT + 1, math.min(offsetT + width - left - right, length))
-                    --ui.buffer.labelBox(self.buffer, text, theme.tC, theme.tBG, 1, theme.b[5][1], left, top, right, bottom)
-                    lines[i] = lines[i]:sub(offsetT + 1)
-                    if lines[i] == "" then
-                        lines[i] = "\n"
-                    end
-                else
-                    local text = self.text:sub(offsetT + 1, math.min(offsetT + width - left - right - offsetC, length))
-                    ui.buffer.labelBox(self.buffer, text, theme.tC, theme.tBG, 1, theme.b[5][1], left, top, right, bottom)
-                    ui.buffer.labelBox(self.buffer, completeText, theme.complC, theme.complBG, 1, theme.b[5][1], left + self.cursorOffset - offsetT, top, right, bottom)
-                    text = self.text:sub(offsetT + width - left - right - offsetC, math.min(offsetT + width - left - right, length))
-                    ui.buffer.labelBox(self.buffer, text, theme.tC, theme.tBG, 1, theme.b[5][1], left + length + completeLength - offsetT, top, right, bottom)
+                lines[i] = lines[i]:sub(offsetT + 1)
+                if lines[i] == "" then
+                    lines[i] = "\n"
                 end
             end
 
-            local text = table.concat(lines, "")
+            text = table.concat(lines, "")
             ui.buffer.labelBox(self.buffer, text, theme.tC, theme.tBG, 1, theme.b[5][1], left, top, right, bottom)
+            local newLeft = left + self.cursorOffset - offsetT
+            if completeText ~= "" then
+                ui.buffer.labelBox(
+                    self.buffer,
+                    completeText,
+                    theme.complC,
+                    theme.complBG,
+                    1,
+                    theme.b[5][1],
+                    newLeft,
+                    top,
+                    math.max(right, width - newLeft - completeLength),
+                    height - top - 1
+                )
+            end
         end
     end
     ---Recalculate the buffer of this element
@@ -281,7 +300,18 @@ function ui.inputField.new(parent, label, text, multiLine, style, x, y, w, h)
         ui.buffer.borderBox(self.buffer, theme.b, theme.bC, theme.bBG)
         if self.label then
             local yPos = math.max(0, math.floor((#theme.b[2] - 1) / 2))
-            ui.buffer.labelBox(self.buffer, self.label, labelTheme.tC, labelTheme.tBG, self.style.label.align, nil, #theme.b[4], yPos, #theme.b[6], self.buffer.rect.h - yPos)
+            ui.buffer.labelBox(
+                self.buffer,
+                self.label,
+                labelTheme.tC,
+                labelTheme.tBG,
+                self.style.label.align,
+                nil,
+                #theme.b[4],
+                yPos,
+                #theme.b[6],
+                self.buffer.rect.h - yPos
+            )
         end
         self:recalculateText()
     end
@@ -321,7 +351,10 @@ function ui.inputField.new(parent, label, text, multiLine, style, x, y, w, h)
             elseif event.name == "key" then
                 local key = keys.getName(event.param1)
                 if key == "backspace" then
-                    if self.cursorOffset > 0 and self.repeatItem:call() and (not self.onTextEdit or not (self:onTextEdit("delete", self.cursorOffset) == false)) then
+                    if
+                        self.cursorOffset > 0 and self.repeatItem:call() and
+                            (not self.onTextEdit or not (self:onTextEdit("delete", self.cursorOffset) == false))
+                     then
                         self.text = self.text:sub(1, self.cursorOffset - 1) .. self.text:sub(self.cursorOffset + 1)
                         self.cursorOffset = self.cursorOffset - 1
                         self:getAutoComplete()
@@ -363,7 +396,12 @@ function ui.inputField.new(parent, label, text, multiLine, style, x, y, w, h)
                         local success = false
                         if #self.autoComplete > 0 then
                             local text
-                            success, text, self.cursorOffset = self:onAutoCompletion(self.text, self.cursorOffset, self.autoComplete[self.autoCompleteIndex])
+                            success, text, self.cursorOffset =
+                                self:onAutoCompletion(
+                                self.text,
+                                self.cursorOffset,
+                                self.autoComplete[self.autoCompleteIndex]
+                            )
                             if self.onTextEdit then
                                 text = self:onTextEdit("autocomplete", text)
                             end
@@ -378,10 +416,11 @@ function ui.inputField.new(parent, label, text, multiLine, style, x, y, w, h)
                     end
                 elseif key == "up" then
                     if self.multiLine then
-                        self:moveCursorVertical(-1)
-                        self:recalculateText()
-                        self:repaint("this")
-                        return self
+                        if self:moveCursorVertical(-1) then
+                            self:recalculateText()
+                            self:repaint("this")
+                            return self
+                        end
                     else
                         if #self.autoComplete > 0 then
                             if self.autoCompleteIndex <= 1 then
@@ -396,10 +435,11 @@ function ui.inputField.new(parent, label, text, multiLine, style, x, y, w, h)
                     end
                 elseif key == "down" then
                     if self.multiLine then
-                        self:moveCursorVertical(1)
-                        self:recalculateText()
-                        self:repaint("this")
-                        return self
+                        if self:moveCursorVertical(1) then
+                            self:recalculateText()
+                            self:repaint("this")
+                            return self
+                        end
                     else
                         if #self.autoComplete > 0 then
                             if self.autoCompleteIndex >= #self.autoComplete then
@@ -468,19 +508,31 @@ function ui.inputField.new(parent, label, text, multiLine, style, x, y, w, h)
                 return self
             end
         elseif event.name == "mouse_drag" then
-            if self.mode == 4 and event.param2 >= x and event.param2 < x + w and event.param3 >= y and event.param3 < y + h then
+            if
+                self.mode == 4 and event.param2 >= x and event.param2 < x + w and event.param3 >= y and
+                    event.param3 < y + h
+             then
                 self.mode = 3
                 self:recalculate()
                 self:repaint("this", x, y, w, h)
-            elseif self.mode == 3 and (event.param2 < x or event.param2 >= x + w or event.param3 < y or event.param3 >= y + h) then
+            elseif
+                self.mode == 3 and
+                    (event.param2 < x or event.param2 >= x + w or event.param3 < y or event.param3 >= y + h)
+             then
                 self.mode = 4
                 self:recalculate()
                 self:repaint("this", x, y, w, h)
             end
         elseif event.name == "mouse_up" then
-            if self.mode == 3 and event.param2 >= x and event.param2 < x + w and event.param3 >= y and event.param3 < y + h then
+            if
+                self.mode == 3 and event.param2 >= x and event.param2 < x + w and event.param3 >= y and
+                    event.param3 < y + h
+             then
                 return self
-            elseif self.mode == 4 and (event.param2 < x or event.param2 >= x + w or event.param3 < y or event.param3 >= y + h) then
+            elseif
+                self.mode == 4 and
+                    (event.param2 < x or event.param2 >= x + w or event.param3 < y or event.param3 >= y + h)
+             then
                 self.mode = 1
                 self:recalculate()
                 self:repaint("this", x, y, w, h)
