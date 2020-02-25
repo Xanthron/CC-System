@@ -1,5 +1,4 @@
 --[[
-    Fetchers:
         download list of downloadable files
         description for downloadable files
         create additional own list
@@ -41,7 +40,11 @@ local function createSViewButton(manager, sView, official, data, elements, x, y,
     local container = sView:getContainer()
     local name = data.name
     local image = ui.element.new(container, "image", x, y, 1, h)
-    if (data.type == "all" or (pocket and data.type:find("p")) or (turtle and data.type:find("t")) or data.type:find("d")) and (term.isColor() or not data.color) then
+    if
+        (data.type == "all" or (pocket and data.type:find("p")) or (turtle and data.type:find("t")) or
+            data.type:find("d")) and
+            (term.isColor() or not data.color)
+     then
         image.buffer.text[1] = "\7"
         image.buffer.textColor[1] = colors.green
         image.buffer.textBackgroundColor[1] = colors.white
@@ -79,10 +82,32 @@ local function createSViewButton(manager, sView, official, data, elements, x, y,
                 )
                 if success then
                     text = text .. "Succeeded."
-                    assert(loadfile("os/sys/infoBox.lua"))({label = "Information", text = text, x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, button1 = "Ok", select = event.name ~= "mouse_up"})
+                    assert(loadfile("os/sys/infoBox.lua"))(
+                        {
+                            label = "Information",
+                            text = text,
+                            x = _x + 2,
+                            y = _y + 2,
+                            w = _w - 4,
+                            h = _h - 4,
+                            button1 = "Ok",
+                            select = event.name ~= "mouse_up"
+                        }
+                    )
                 else
                     text = text .. "failed.\n\n" .. content
-                    assert(loadfile("os/sys/infoBox.lua"))({label = "Information", text = text, x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, button1 = "Ok", select = event.name ~= "mouse_up"})
+                    assert(loadfile("os/sys/infoBox.lua"))(
+                        {
+                            label = "Information",
+                            text = text,
+                            x = _x + 2,
+                            y = _y + 2,
+                            w = _w - 4,
+                            h = _h - 4,
+                            button1 = "Ok",
+                            select = event.name ~= "mouse_up"
+                        }
+                    )
                 end
                 manager:draw()
             end
@@ -108,7 +133,15 @@ local function createSViewButton(manager, sView, official, data, elements, x, y,
         if #types == 0 then
             table.insert(types, "all")
         end
-        local text = string.format("%s\n\n%s\n\nColor: %s\n Type:  %s\n\n\nSource:\n%s", name, data.description, color, table.concat(types, ", "), data.url)
+        local text =
+            string.format(
+            "%s\n\n%s\n\nColor: %s\n Type:  %s\n\n\nSource:\n%s",
+            name,
+            data.description,
+            color,
+            table.concat(types, ", "),
+            data.url
+        )
         local button2
         if not official then
             button2 = "Remove"
@@ -116,7 +149,20 @@ local function createSViewButton(manager, sView, official, data, elements, x, y,
         manager.parallelManager:removeFunction(self.animation)
         manager:callFunction(
             function()
-                local number, select = assert(loadfile("os/sys/infoBox.lua"))({label = "Information", text = text, x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, button1 = "Ok", button2 = button2, select = event.name ~= "mouse_up"})
+                local number, select =
+                    assert(loadfile("os/sys/infoBox.lua"))(
+                    {
+                        label = "Information",
+                        text = text,
+                        x = _x + 2,
+                        y = _y + 2,
+                        w = _w - 4,
+                        h = _h - 4,
+                        button1 = "Ok",
+                        button2 = button2,
+                        select = event.name ~= "mouse_up"
+                    }
+                )
                 if number == 2 then
                     for i = 1, #unofficial do
                         if unofficial[i] == data then
@@ -212,7 +258,7 @@ local button_update = ui.button.new(manager, "\21", theme.button1, 1, 1, 3, 1)
 local button_upload = ui.button.new(manager, "\24", theme.button1, 5, 1, 3, 1)
 local button_download = ui.button.new(manager, "\25", theme.button1, 9, 1, 3, 1)
 local button_option = ui.button.new(manager, "\164", theme.button1, _w - 5, 1, 3, 1)
-local button_exit = ui.button.new(manager, "x", theme.button2, _w - 2, 1, 3, 1)
+local button_exit = ui.button.new(manager, "<", theme.button2, _w - 2, 1, 3, 1)
 local sView_list = ui.scrollView.new(manager, "", 3, theme.sView1, 1, 2, _w, _h - 1)
 
 local group_menu = manager.selectionManager:addNewGroup()
