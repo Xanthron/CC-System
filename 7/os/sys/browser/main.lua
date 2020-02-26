@@ -24,13 +24,11 @@ local function downloadScreen(...)
 end
 
 local function updateFiles()
-    local success, content = www.pasteBinSave(defaultPasteBin, "os/sys/browser/official", true)
-    if success then
-        official = dofile("os/sys/browser/official")
-    else
-        official = {}
-    end
-    unofficial = dofile("os/sys/browser/unofficial")
+    downloadScreen(
+        function()
+            official, unofficial = dofile("os/sys/browser/getList.lua")
+        end
+    )
 end
 
 ---@param manager uiManager
@@ -40,11 +38,7 @@ local function createSViewButton(manager, sView, official, data, elements, x, y,
     local container = sView:getContainer()
     local name = data.name
     local image = ui.element.new(container, "image", x, y, 1, h)
-    if
-        (data.type == "all" or (pocket and data.type:find("p")) or (turtle and data.type:find("t")) or
-            data.type:find("d")) and
-            (term.isColor() or not data.color)
-     then
+    if (data.type == "all" or (pocket and data.type:find("p")) or (turtle and data.type:find("t")) or data.type:find("d")) and (term.isColor() or not data.color) then
         image.buffer.text[1] = "\7"
         image.buffer.textColor[1] = colors.green
         image.buffer.textBackgroundColor[1] = colors.white
@@ -133,15 +127,7 @@ local function createSViewButton(manager, sView, official, data, elements, x, y,
         if #types == 0 then
             table.insert(types, "all")
         end
-        local text =
-            string.format(
-            "%s\n\n%s\n\nColor: %s\n Type:  %s\n\n\nSource:\n%s",
-            name,
-            data.description,
-            color,
-            table.concat(types, ", "),
-            data.url
-        )
+        local text = string.format("%s\n\n%s\n\nColor: %s\n Type:  %s\n\n\nSource:\n%s", name, data.description, color, table.concat(types, ", "), data.url)
         local button2
         if not official then
             button2 = "Remove"
@@ -273,7 +259,7 @@ manager.selectionManager:addGroup(sView_list.selectionGroup)
 sView_list.selectionGroup.previous = group_menu
 sView_list.selectionGroup.next = group_menu
 
-downloadScreen(updateFiles)
+updateFiles()
 updateSView(manager, sView_list)
 
 function button_exit:onClick(event)
@@ -282,7 +268,7 @@ end
 function button_update:onClick(event)
     manager:callFunction(
         function()
-            downloadScreen(updateFiles)
+            updateFiles()
             updateSView(manager, sView_list)
             manager:draw()
         end

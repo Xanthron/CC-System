@@ -34,10 +34,7 @@ local function pathsToText(paths, compress)
                         table.insert(s, t)
                         return ("s%s" .. "@"):format(#s)
                     end
-                ):gsub("%-%-[^\n]+%[%[", "--"):gsub("%-%-%[%[.-%]%]+", ""):gsub("%-%-.-\n+", "\n"):gsub("\n%s+", "\n"):gsub(
-                    "[%a%d_]%s[^%a%d_]",
-                    emptySpace
-                ):gsub("[^%d%a_]%s+[%a%d_]", emptySpace):gsub(
+                ):gsub("%-%-[^\n]+%[%[", "--"):gsub("%-%-%[%[.-%]%]+", ""):gsub("%-%-.-\n+", "\n"):gsub("\n%s+", "\n"):gsub("[%a%d_]%s[^%a%d_]", emptySpace):gsub("[^%d%a_]%s+[%a%d_]", emptySpace):gsub(
                     "s[0-9]+@",
                     function(t)
                         local i = tonumber(t:sub(2, t:len() - 1))
@@ -60,10 +57,7 @@ local function pathsToText(paths, compress)
         table.insert(strings, string.format('["%s"] = "%s"', key, value))
     end
     local filesText = string.format("{ %s }", table.concat(strings, ","))
-    return string.format(
-        'for key, value in pairs(%s) do\nlocal s, e = key:find(".*/")\nif s then\nlocal path = key:sub(s, e)\nif not fs.exists(path) then\nfs.makeDir(path)\nend\nend\nlocal file = io.open(key, "w+")\nfile:write(value)\nfile:close()\nend',
-        filesText
-    )
+    return string.format('for key, value in pairs(%s) do\nlocal s, e = key:find(".*/")\nif s then\nlocal path = key:sub(s, e)\nif not fs.exists(path) then\nfs.makeDir(path)\nend\nend\nlocal file = io.open(key, "w+")\nfile:write(value)\nfile:close()\nend', filesText)
 end
 
 local function saveText(text, path)
@@ -89,9 +83,9 @@ local button_exit = ui.button.new(manager, "<", theme.button2, _w - 2, 1, 3, 1)
 local sView_main = ui.scrollView.new(manager, "", 3, theme.sView1, 1, 2, _w, _h - 2)
 local container_main = sView_main:getContainer()
 
-local tBox_files = ui.textBox.new(container_main, "Files:", "", theme.tBox2, 1, 2, _w - 1, 7)
+local tBox_files = ui.textBox.new(container_main, "", "", theme.tBox2, 1, 2, _w - 1, 7)
 
-local button_files = ui.button.new(tBox_files, "Edit", theme.button1, _w - 6, 8, 6, 1)
+local button_files = ui.button.new(tBox_files, "Files", theme.button1, 1, 2, 7, 1)
 
 local toggle_compress = ui.toggleButton.new(container_main, "Compress", true, theme.toggle1, 1, 10, _w, 1)
 
@@ -106,6 +100,29 @@ local iField_arguments = ui.inputField.new(container_main, "", "", true, theme.i
 local label_info = ui.label.new(manager, "", theme.label1, 1, _h, _w - 6, 1)
 local button_start = ui.button.new(manager, "Save", theme.button1, _w - 5, _h, 6, 1)
 
+local group_menu = manager.selectionManager:addNewGroup()
+local group_main = sView_main.selectionGroup
+manager.selectionManager:addGroup(group_main)
+local group_save = manager.selectionManager:addNewGroup()
+
+group_menu:addElement(button_exit, nil, nil, nil, button_files)
+group_main:addElement(button_files, nil, button_exit, nil, toggle_compress)
+group_main:addElement(toggle_compress, nil, button_files, nil, toggle_upload)
+group_main:addElement(toggle_upload, nil, toggle_compress, nil, button_savePath)
+group_main:addElement(button_savePath, nil, toggle_upload, nil, iField_arguments)
+group_main:addElement(iField_arguments, nil, button_savePath, nil, button_start)
+group_save:addElement(button_start, nil, iField_arguments, nil, nil)
+
+group_menu.previous = group_main
+group_menu.next = group_main
+group_main.previous = group_menu
+group_main.next = group_menu
+group_save.previous = group_main
+group_save.next = group_menu
+
+manager.selectionManager:addGroup(tBox_files.selectionGroup)
+manager.selectionManager:select(button_files, "code", 3)
+
 --sView_main:resetLayout()
 sView_main:recalculate()
 --sView_main:resetLayout()
@@ -115,8 +132,12 @@ sView_main:repaint("this")
 local function updateSaveButton()
     if #selected > 0 and (toggle_upload._checked == true or fs.exists(fs.getDir(savePath))) then
         button_start.mode = 1
+        group_menu.previous = group_save
+        group_main.next = group_save
     else
         button_start.mode = 2
+        group_menu.previous = group_main
+        group_main.next = group_menu
     end
     button_start:recalculate()
 end
@@ -133,10 +154,7 @@ function button_files:onClick(event)
             if event.name == "mouse_up" then
                 select = false
             end
-            local s =
-                assert(loadfile("os/sys/explorer/main.lua"))(
-                {select = true, mode = "select_many", select = select, edit = false}
-            )
+            local s = assert(loadfile("os/sys/explorer/main.lua"))({select = true, mode = "select_many", select = select, edit = false})
             if s then
                 selected = s
             end
@@ -161,10 +179,7 @@ function button_savePath:onClick(event)
             if not fs.exists(path) then
                 path = ""
             end
-            path =
-                assert(loadfile("os/sys/explorer/main.lua"))(
-                {select = true, mode = "save", override = true, type = "avr", path = path, save = name, select = select}
-            )
+            path = assert(loadfile("os/sys/explorer/main.lua"))({select = true, mode = "save", override = true, type = "avr", path = path, save = name, select = select})
             if path then
                 savePath = path
                 label_savePath.text = savePath
@@ -191,9 +206,9 @@ function button_start:onClick(event)
     manager:callFunction(
         function()
             if toggle_upload._checked then
-                uploadText(pathsToText(selected, toggle_compress._checked))
+                uploadText(pathsToText(selected, toggle_compress._checked) .. "\n" .. iField_arguments.text)
             else
-                if saveText(pathsToText(selected, toggle_compress._checked), savePath) then
+                if saveText(pathsToText(selected, toggle_compress._checked) .. "\n" .. iField_arguments.text, savePath) then
                     label_info.text = "File created"
                 else
                     label_info.text = "File creation Failed"
@@ -204,19 +219,6 @@ function button_start:onClick(event)
         end
     )
 end
-local group_menu = manager.selectionManager:addNewGroup()
-group_menu:addElement(button_exit, nil, nil, nil, button_files)
-
-local group_main = sView_main.selectionGroup
-manager.selectionManager:addGroup(group_main)
-
-group_main:addElement(button_files, nil, button_exit, nil, toggle_compress)
-group_main:addElement(toggle_compress, nil, button_files, nil, toggle_upload)
-group_main:addElement(toggle_upload, nil, toggle_compress, nil, button_savePath)
-group_main:addElement(button_savePath, nil, toggle_upload, nil, button_start)
-group_main:addElement(button_start, nil, button_savePath, nil, nil)
-manager.selectionManager:addGroup(tBox_files.selectionGroup)
-manager.selectionManager:select(button_files, "code", 3)
 
 manager:draw()
 manager:execute()

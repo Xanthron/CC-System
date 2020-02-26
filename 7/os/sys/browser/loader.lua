@@ -4,8 +4,7 @@
     ####################################################################################################################
 ]]
 local args = ...
-local mode = args.mode
-local file = args.file
+local mode, file = args.mode, args.file
 ---@type integer
 local _x, _y, _w, _h = 1, 1, term.getSize()
 local pathSave, pathUpload = args.savePath, args.filePath
@@ -22,8 +21,7 @@ end
     SetUp
     ####################################################################################################################
 ]]
-local manager = ui.uiManager.new(_x, _y, _w, _h)
-local index
+local manager, index = ui.uiManager.new(_x, _y, _w, _h), nil
 for i = 1, _w * _h do
     if i <= _w or i > (_h - 1) * _w then
         manager.buffer.text[i] = " "
@@ -125,14 +123,7 @@ group_list:addElement(iField_description, nil, iField_name, nil, button_load)
 group_download:addElement(button_load, nil, iField_description, nil, nil)
 
 local function checkDownloadButton(codeText, nameText)
-    if
-        (mode == "Upload" or (codeText or element_code.text:len() - 7) == 1) and
-            (mode ~= "Upload" or pathUpload or file) and
-            (not toggle_toList._checked or
-                ((toggle_desktop._checked or toggle_pocket._checked or toggle_turtle._checked) and
-                    (nameText or iField_name.text:len()) > 0)) and
-            (toggle_run._checked or pathSave)
-     then
+    if (mode == "Upload" or (codeText or element_code.text:len() - 7) == 1) and (mode ~= "Upload" or pathUpload or file) and (not toggle_toList._checked or ((toggle_desktop._checked or toggle_pocket._checked or toggle_turtle._checked) and (nameText or iField_name.text:len()) > 0)) and (toggle_run._checked or pathSave) then
         button_load.mode = 1
     else
         button_load.mode = 2
@@ -154,10 +145,7 @@ if mode == "Upload" then
                 if pathUpload then
                     path = fs.getDir(pathUpload)
                 end
-                path =
-                    assert(loadfile("os/sys/explorer/main.lua"))(
-                    {mode = "select_one", path = path, edit = false, select = event.name ~= "mouse_up"}
-                )
+                path = assert(loadfile("os/sys/explorer/main.lua"))({mode = "select_one", path = path, edit = false, select = event.name ~= "mouse_up"})
                 if path then
                     pathUpload = path
                     label_uploadPath.text = pathUpload
