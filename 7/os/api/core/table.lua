@@ -138,3 +138,11 @@ function table.crop(list, i, j)
         table.remove(list, 1)
     end
 end
+
+function table.removeAt(list, at)
+    if type(at) == "number" then
+        table.remove(list, at)
+    else
+        list[at] = nil
+    end
+end

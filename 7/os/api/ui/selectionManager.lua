@@ -22,12 +22,15 @@ function ui.selectionManager.new()
         if var1:isClass("element") then
             ---@type selectionGroup
             local newGroup
-            for i = 1, #self.groups do
-                local group = self.groups[i]
-                if group:hasElement(var1) then
-                    newGroup = group
+            for k, v in pairs(self.groups) do
+                if v:hasElement(var1) then
+                    newGroup = v
                     break
                 end
+            end
+
+            if not newGroup then
+                return
             end
             if newGroup and newGroup == self.current and newGroup.current ~= var1 then
                 if newGroup:callListener("selection_change", source, newGroup.current, var1) then
@@ -191,10 +194,10 @@ function ui.selectionManager.new()
     ---@param group selectionGroup
     ---@return nil
     function this:removeGroup(group)
-        for i, v in ipairs(self.groups) do
+        for k, v in pairs(self.groups) do
             if v == group then
                 self.current = group.previous or group.next
-                table.remove(self.groups, i)
+                table.removeAt(self.groups, k)
                 return
             end
         end

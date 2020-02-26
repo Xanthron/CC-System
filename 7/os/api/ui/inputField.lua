@@ -9,11 +9,12 @@ ui.inputField = {}
 ---@param y integer
 ---@param w integer
 ---@param h integer
+---@param key string|optional
 ---@return inputField
-function ui.inputField.new(parent, label, text, multiLine, style, x, y, w, h)
+function ui.inputField.new(parent, label, text, multiLine, style, x, y, w, h, key)
     ---Input field
     ---@class inputField:element
-    local this = ui.element.new(parent, "inputField", x, y, w, h)
+    local this = ui.element.new(parent, "inputField", x, y, w, h, key)
 
     ---@type style.inputField
     this.style = style

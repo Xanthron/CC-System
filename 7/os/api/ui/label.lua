@@ -7,11 +7,12 @@ ui.label = {}
 ---@param y integer
 ---@param w integer
 ---@param h integer
+---@param key string|optional
 ---@return label
-function ui.label.new(parent, text, style, x, y, w, h)
+function ui.label.new(parent, text, style, x, y, w, h, key)
     ---A simple label without function
     ---@class label:element
-    local this = ui.element.new(parent, "label", x, y, w, h)
+    local this = ui.element.new(parent, "label", x, y, w, h, key)
 
     ---@type style.label
     this.style = style

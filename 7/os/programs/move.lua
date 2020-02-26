@@ -5,43 +5,43 @@ ui.buffer.fill(manager.buffer, " ", colors.white, colors.white)
 
 local button1 = ui.button.new(manager, "move", theme.button1, 1, 1, 6, 1)
 
-local element_m1 = ui.element.new(manager, "image", 1, 2, 9, 9)
-ui.buffer.fill(element_m1.buffer, " ", colors.blue, colors.blue)
-local element_m2 = ui.element.new(element_m1, "image", 2, 3, 7, 7)
-ui.buffer.fill(element_m2.buffer, " ", colors.lime, colors.lime)
-local element_m3 = ui.element.new(element_m2, "image", 3, 4, 5, 5)
-ui.buffer.fill(element_m3.buffer, " ", colors.yellow, colors.yellow)
-local element_m4 = ui.element.new(element_m3, "image", 4, 5, 3, 3)
-ui.buffer.fill(element_m4.buffer, " ", colors.red, colors.red)
-local element_m5 = ui.element.new(element_m4, "image", 5, 6, 1, 1)
-ui.buffer.fill(element_m5.buffer, " ", colors.magenta, colors.magenta)
+local element = ui.scrollView.new(manager, "scroll View", 1, theme.sView1, 1, 2, 9, 9) --ui.textBox.new(manager, "text", "test", theme.tBox1, 1, 2, 9, 9)
+local element2 = ui.element.new(element, "image", 1, 2, 9, 1)
+
+ui.buffer.fill(element2.buffer, " ", colors.blue, colors.blue)
 
 manager.selectionManager:addNewGroup():addElement(button1)
 
-local down, right = true, true
+local r = true
+local d = nil
 function button1:onClick(event)
-    if down then
-        element_m1:setGlobalRect(element_m1:getGlobalPosX() + 1)
-        if element_m1:getGlobalPosX() + element_m1:getWidth() + 1 >= w then
-            down = false
-        end
-    else
-        element_m1:setGlobalRect(element_m1:getGlobalPosX() - 1)
-        if element_m1:getGlobalPosX() - 1 <= x then
-            down = true
-        end
-    end
-    if right then
-        element_m1:setGlobalRect(nil, element_m1:getGlobalPosY() + 1)
-        if element_m1:getGlobalPosY() + element_m1:getHeight() + 1 >= h then
-            right = false
-        end
-    else
-        element_m1:setGlobalRect(nil, element_m1:getGlobalPosY() - 1)
-        if element_m1:getGlobalPosY() - 1 <= y + 1 then
-            right = true
+    if r ~= nil then
+        if r then
+            element:setLocalRect(1)
+            if element:getGlobalPosX() + element:getWidth() + 1 > w + x then
+                r = false
+            end
+        else
+            element:setLocalRect(-1)
+            if element:getGlobalPosX() - 1 < x then
+                r = true
+            end
         end
     end
+    if d ~= nil then
+        if d then
+            element:setGlobalRect(nil, element:getGlobalPosY() + 1)
+            if element:getGlobalPosY() + element:getHeight() + 1 > h + y then
+                d = false
+            end
+        else
+            element:setGlobalRect(nil, element:getGlobalPosY() - 1)
+            if element:getGlobalPosY() - 1 < y + 1 then
+                d = true
+            end
+        end
+    end
+    ui.buffer.fill(manager.buffer, " ", colors.white, colors.white)
     manager:draw()
 end
 

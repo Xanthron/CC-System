@@ -1,13 +1,14 @@
 ui.element = {}
 ---Create a new element
 ---@param parent element
+---@param name string
 ---@param x integer
 ---@param y integer
 ---@param w integer
 ---@param h integer
----@param T string
+---@param key string|optional
 ---@return element
-function ui.element.new(parent, name, x, y, w, h)
+function ui.element.new(parent, name, x, y, w, h, key)
     ---Base of every ui element
     ---@class element:class
     local this = class.new("element")
@@ -46,9 +47,9 @@ function ui.element.new(parent, name, x, y, w, h)
 
     ---Set the parent of an element
     ---@param element element
-    ---@param index index|optional
+    ---@param key index|optional
     ---@return boolean
-    function this:setParent(element, index)
+    function this:setParent(element, key)
         if element == self then
             return false
         end
@@ -56,17 +57,21 @@ function ui.element.new(parent, name, x, y, w, h)
             return false
         end
         if self._parent then
-            for i = 1, #self._parent._elements do
-                if self._parent._elements[i] == self then
-                    table.remove(self._parent._elements, i)
+            for k, v in pairs(self._parent._elements) do
+                if v == self then
+                    table.removeAt(self._parent._elements, k)
                     break
                 end
             end
         end
         self._parent = element
         if element then
-            if index then
-                table.insert(element._elements, index, self)
+            if key then
+                if type(key) == "number" then
+                    table.insert(element._elements, key, self)
+                else
+                    element._elements[key] = self
+                end
             else
                 table.insert(element._elements, self)
             end
@@ -86,11 +91,11 @@ function ui.element.new(parent, name, x, y, w, h)
     ---@param checkChildren boolean
     ---@return boolean
     function this:containsElement(element, checkChildren)
-        for i = 1, #self._elements do
-            if self._elements[i] == element then
+        for k, v in pairs(self._elements) do
+            if v == element then
                 return true
             end
-            if checkChildren == true and self._elements[i]:containsElement(element) then
+            if checkChildren and v:containsElement(element) then
                 return true
             end
         end
@@ -158,19 +163,8 @@ function ui.element.new(parent, name, x, y, w, h)
     ---@param h integer
     ---@return nil
     function this:setGlobalRect(x, y, w, h)
-        local newX, newY = self:getGlobalRect()
-        self.buffer.rect:set(x, y, w, h)
-        if x then
-            x = x - newX
-        end
-        if y then
-            y = y - newY
-        end
-        if x and y then
-            for i = 1, #self._elements do
-                self._elements[i]:setLocalRect(x, y, nil, nil)
-            end
-        end
+        local rectX, rectY = self:getGlobalRect()
+        self:setLocalRect((x or rectX) - rectX, (y or rectY) - rectY, w, h)
     end
     ---Set the local rect
     ---@param x integer
@@ -179,15 +173,11 @@ function ui.element.new(parent, name, x, y, w, h)
     ---@param h integer
     ---@return nil
     function this:setLocalRect(x, y, w, h)
-        if x == nil then
-            x = 0
-        end
-        if y == nil then
-            y = 0
-        end
+        x = x or 0
+        y = y or 0
         self.buffer.rect:set(x + self:getGlobalPosX(), y + self:getGlobalPosY(), w, h)
-        for i = 1, #self._elements do
-            self._elements[i]:setLocalRect(x, y, nil, nil)
+        for k, v in pairs(self._elements) do
+            v:setLocalRect(x, y, nil, nil)
         end
     end
     ---Get the unpacked rect in consideration of all parent rects and paddings
@@ -260,8 +250,8 @@ function ui.element.new(parent, name, x, y, w, h)
             local possible = true
             x, y, w, h, possible = ui.rect.overlaps(x, y, w, h, self:getCompleteMaskRect())
             if possible then
-                for i = 1, #self._elements do
-                    self._elements[i]:doDraw(buffer, x, y, w, h)
+                for k, v in pairs(self._elements) do
+                    v:doDraw(buffer, x, y, w, h)
                 end
             end
         end
@@ -305,10 +295,10 @@ function ui.element.new(parent, name, x, y, w, h)
     function this:doPointerEvent(event, x, y, w, h)
         local maskX, maskY, maskW, maskH, possible = self:getSimpleMaskRect(x, y, w, h)
         if possible then
-            for i = #self._elements, 1, -1 do
-                local element = self._elements[i]:doPointerEvent(event, maskX, maskY, maskW, maskH)
-                if element then
-                    return element
+            for k, v in pairs(self._elements) do
+                local e = v:doPointerEvent(event, maskX, maskY, maskW, maskH)
+                if e then
+                    return e
                 end
             end
         end
@@ -320,10 +310,10 @@ function ui.element.new(parent, name, x, y, w, h)
     ---@param event event
     ---@return element|nil
     function this:doNormalEvent(event)
-        for i = #self._elements, 1, -1 do
-            local element = self._elements[i]:doNormalEvent(event)
-            if element then
-                return element
+        for k, v in pairs(self._elements) do
+            local e = v:doNormalEvent(event)
+            if e then
+                return e
             end
         end
         if self.mode ~= 2 then
@@ -351,7 +341,7 @@ function ui.element.new(parent, name, x, y, w, h)
     function this:recalculate()
     end
 
-    this:setParent(parent)
+    this:setParent(parent, key)
 
     return this
 end

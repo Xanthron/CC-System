@@ -13,8 +13,8 @@ function ui.selectionGroup.new(previous, next, listener)
     this.listener = listener
 
     function this:hasElement(element)
-        for i = 1, #self.elements do
-            if self.elements[i] == element then
+        for k, v in pairs(self.elements) do
+            if v == element then
                 return true
             end
         end
@@ -28,7 +28,7 @@ function ui.selectionGroup.new(previous, next, listener)
         element.select.down = down
         table.insert(self.elements, element)
         if reverse then
-            for i, v in pairs(self.elements) do
+            for k, v in pairs(self.elements) do
                 if v == left then
                     v.select.right = element
                 elseif v == up then
@@ -43,9 +43,9 @@ function ui.selectionGroup.new(previous, next, listener)
     end
 
     function this:removeElement(element, reference)
-        for i, v in ipairs(self.elements) do
+        for k, v in pairs(self.elements) do
             if v == element then
-                table.remove(self.elements, i)
+                table.removeAt(self.elements, k)
                 if not reference then
                     return
                 end
