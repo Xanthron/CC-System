@@ -70,18 +70,7 @@ local function errorHandler(text)
         end
         message = message .. "\n\n\n" .. debug.traceback()
     end
-    assert(loadfile("os/sys/infoBox.lua"))(
-        {
-            label = "Error",
-            text = message,
-            x = 3,
-            y = 3,
-            w = w - 4,
-            h = h - 4,
-            button1 = "Ok",
-            select = set.select
-        }
-    )
+    callfile("os/sys/infoBox.lua", {label = "Error", text = message, x = 3, y = 3, w = w - 4, h = h - 4, button1 = "Ok", select = set.select})
 end
 local function executionHandler()
     term.setCursorPos(1, 1)
@@ -90,7 +79,7 @@ local function executionHandler()
         term.setTextColor(colors.white)
     end
     term.clear()
-    local button, select = assert(loadfile(set.file))(table.unpack(set.args))
+    local button, select = callfile(set.file, table.unpack(set.args))
     return select
 end
 

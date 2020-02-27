@@ -86,8 +86,7 @@ function www.pasteBinGet(url)
         return false, "No code found."
     end
 
-    local response, err =
-        http.get(("https://pastebin.com/raw/%s?cb=%x"):format(textutils.urlEncode(code), math.random(0, 2 ^ 30)))
+    local response, err = http.get(("https://pastebin.com/raw/%s?cb=%x"):format(textutils.urlEncode(code), math.random(0, 2 ^ 30)))
     if not response then
         return false, err or "Failed."
     end
@@ -105,7 +104,7 @@ end
 function www.pasteBinRun(url)
     local success, content = www.pasteBinGet(url)
     if success then
-        return www._run(content, wwww._getFileName(url))
+        return www._run(content, www._getFileName(url))
     else
         return false, content
     end
@@ -123,17 +122,7 @@ end
 ---@param text string
 function www.pasteBinPut(text)
     local key = "0ec2eb25b6166c0c27a394ae118ad829"
-    local response =
-        http.post(
-        "https://pastebin.com/api/api_post.php",
-        "api_option=paste&" ..
-            "api_dev_key=" ..
-                key ..
-                    "&" ..
-                        "api_paste_format=lua&" ..
-                            "api_paste_name=" ..
-                                textutils.urlEncode("file") .. "&" .. "api_paste_code=" .. textutils.urlEncode(text)
-    )
+    local response = http.post("https://pastebin.com/api/api_post.php", "api_option=paste&" .. "api_dev_key=" .. key .. "&" .. "api_paste_format=lua&" .. "api_paste_name=" .. textutils.urlEncode("file") .. "&" .. "api_paste_code=" .. textutils.urlEncode(text))
     if response then
         local responseText = response.readAll()
         response.close()

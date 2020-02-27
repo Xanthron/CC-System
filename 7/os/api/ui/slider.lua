@@ -69,7 +69,7 @@ function ui.slider.new(parent, orientation, startValue, endValue, size, style, x
             theme = self.style.nTheme
         end
         local totalSize = self.endValue - self.startValue
-        local value = math.max(0, (self.value) / math.max(1, (totalSize + self.startValue - self.size)))
+        local value = math.max(0, (self.value) / math.max(1, (self.endValue - self.size)))
         if self.orientation == 1 then
             local height = self.buffer.rect.h
             local barHeight
@@ -78,14 +78,7 @@ function ui.slider.new(parent, orientation, startValue, endValue, size, style, x
                 barHeight = height - 2
                 offset = 1
             else
-                barHeight =
-                    math.max(
-                    1,
-                    math.min(
-                        math.floor(size / (totalSize + self.startValue) * (height - 2)),
-                        height - math.min(4, totalSize - size + 2)
-                    )
-                )
+                barHeight = math.max(1, math.min(math.floor(size / (totalSize + self.startValue) * (height - 2)), height - math.min(4, totalSize - size + 2)))
                 offset = math.max(0, math.floor((height - 3 - barHeight) * value)) + 1
                 if value > 0 then
                     offset = offset + 1
@@ -166,14 +159,7 @@ function ui.slider.new(parent, orientation, startValue, endValue, size, style, x
                 barWidth = width - 2
                 offset = 1
             else
-                barWidth =
-                    math.max(
-                    1,
-                    math.min(
-                        math.floor(size / (totalSize + self.startValue) * (width - 2)),
-                        width - math.min(4, totalSize - size + 2)
-                    )
-                )
+                barWidth = math.max(1, math.min(math.floor(size / (totalSize + self.startValue) * (width - 2)), width - math.min(4, totalSize - size + 2)))
                 offset = math.max(0, math.floor((width - 3 - barWidth) * value)) + 1
                 if value > 0 then
                     offset = offset + 1
@@ -257,7 +243,7 @@ function ui.slider.new(parent, orientation, startValue, endValue, size, style, x
     ---@param w integer|optional
     ---@param h integer|optional
     ---@return element|nil
-    function this:_doPointerEvent(event, x, y, w, h)
+    function this:pointerEvent(event, x, y, w, h)
         local rectX, rectY, rectW, rectH = self:getGlobalRect()
         x, y, w, h = ui.rect.overlaps(x, y, w, h, rectX, rectY, rectW, rectH)
         if self.orientation == 1 then
@@ -287,11 +273,7 @@ function ui.slider.new(parent, orientation, startValue, endValue, size, style, x
                     end
                 end
             elseif event.name == "mouse_drag" then
-                if
-                    event.param2 >= x and event.param2 < x + w and self.mode == 3 and
-                        ((self._pressedButton == 1 and event.param3 == y) or
-                            (self._pressedButton == 2 and event.param3 == y + h - 1))
-                 then
+                if event.param2 >= x and event.param2 < x + w and self.mode == 3 and ((self._pressedButton == 1 and event.param3 == y) or (self._pressedButton == 2 and event.param3 == y + h - 1)) then
                     self.mode = 4
                     self:recalculate()
                     self:repaint("this", x, y, w, h)
@@ -348,11 +330,7 @@ function ui.slider.new(parent, orientation, startValue, endValue, size, style, x
                     end
                 end
             elseif event.name == "mouse_drag" then
-                if
-                    event.param3 >= y and event.param3 < y + h and self.mode == 3 and
-                        ((self._pressedButton == 1 and event.param2 == x) or
-                            (self._pressedButton == 2 and event.param2 == x + w - 1))
-                 then
+                if event.param3 >= y and event.param3 < y + h and self.mode == 3 and ((self._pressedButton == 1 and event.param2 == x) or (self._pressedButton == 2 and event.param2 == x + w - 1)) then
                     self.mode = 4
                     self:recalculate()
                     self:repaint("this", x, y, w, h)

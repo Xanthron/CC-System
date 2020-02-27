@@ -37,7 +37,7 @@ local label_title = ui.label.new(manager, "Strip Miner", theme.label1, _x, _y, _
 local button_exit = ui.button.new(manager, "<", theme.button2, _x + _w - 3, _y, 3, 1)
 
 local label_length = ui.label.new(manager, "Length: ", theme.label2, _x, _y + 1, 8, 1)
-local iField_length = ui.inputField.new(manager, "", tostring(set.length), false, theme.iField1, _x + 8, _y + 1, _w - 8, 1)
+local iField_length = ui.inputField.new(manager, nil, tostring(set.length), false, theme.iField1, _x + 8, _y + 1, _w - 8, 1)
 
 local label_searchList = ui.label.new(manager, "Search List", theme.label2, _x, _y + 3, 12, 1)
 local button_searchList = ui.button.new(manager, set.searchWhiteList, theme.button1, 13, _y + 3, math.floor(_w / 2), 1)
@@ -167,7 +167,7 @@ end
 function button_pathSearchList:onClick(event)
     manager:callFunction(
         function()
-            local file = assert(loadfile("os/sys/explorer/main.lua"))({select = event.name ~= "mouse_up", mode = "select_one", edit = false, type = "list"})
+            local file = callfile("os/sys/explorer/main.lua", {select = event.name ~= "mouse_up", mode = "select_one", edit = false, type = "list"})
             if file then
                 set.pathSearchList = file
                 label_pathSearchList.text = set.pathSearchList
@@ -195,7 +195,7 @@ end
 function button_pathTrashList:onClick(event)
     manager:callFunction(
         function()
-            local file = assert(loadfile("os/sys/explorer/main.lua"))({select = event.name ~= "mouse_up", mode = "select_one", edit = false, type = "list"})
+            local file = callfile("os/sys/explorer/main.lua", {select = event.name ~= "mouse_up", mode = "select_one", edit = false, type = "list"})
             if file then
                 set.pathTrashList = file
                 label_pathTrashList.text = set.pathTrashList

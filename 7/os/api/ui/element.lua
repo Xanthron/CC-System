@@ -23,7 +23,7 @@ function ui.element.new(parent, name, x, y, w, h, key)
     ---@type buffer
     this.buffer = ui.buffer.new(x, y, w, h)
     ---@type element[]
-    this._elements = {}
+    this.element = {}
     ---@type element
     this._parent = nil
     ---@type padding
@@ -57,9 +57,9 @@ function ui.element.new(parent, name, x, y, w, h, key)
             return false
         end
         if self._parent then
-            for k, v in pairs(self._parent._elements) do
+            for k, v in pairs(self._parent.element) do
                 if v == self then
-                    table.removeAt(self._parent._elements, k)
+                    table.removeAt(self._parent.element, k)
                     break
                 end
             end
@@ -68,12 +68,12 @@ function ui.element.new(parent, name, x, y, w, h, key)
         if element then
             if key then
                 if type(key) == "number" then
-                    table.insert(element._elements, key, self)
+                    table.insert(element.element, key, self)
                 else
-                    element._elements[key] = self
+                    element.element[key] = self
                 end
             else
-                table.insert(element._elements, self)
+                table.insert(element.element, self)
             end
         else
             self._parent = nil
@@ -91,7 +91,7 @@ function ui.element.new(parent, name, x, y, w, h, key)
     ---@param checkChildren boolean
     ---@return boolean
     function this:containsElement(element, checkChildren)
-        for k, v in pairs(self._elements) do
+        for k, v in pairs(self.element) do
             if v == element then
                 return true
             end
@@ -176,7 +176,7 @@ function ui.element.new(parent, name, x, y, w, h, key)
         x = x or 0
         y = y or 0
         self.buffer.rect:set(x + self:getGlobalPosX(), y + self:getGlobalPosY(), w, h)
-        for k, v in pairs(self._elements) do
+        for k, v in pairs(self.element) do
             v:setLocalRect(x, y, nil, nil)
         end
     end
@@ -244,13 +244,13 @@ function ui.element.new(parent, name, x, y, w, h, key)
         end
         if self.isVisible then
             buffer:contract(self.buffer, x, y, w, h)
-            if self._elements == 0 then
+            if self.element == 0 then
                 return
             end
             local possible = true
             x, y, w, h, possible = ui.rect.overlaps(x, y, w, h, self:getCompleteMaskRect())
             if possible then
-                for k, v in pairs(self._elements) do
+                for k, v in pairs(self.element) do
                     v:doDraw(buffer, x, y, w, h)
                 end
             end
@@ -295,7 +295,7 @@ function ui.element.new(parent, name, x, y, w, h, key)
     function this:doPointerEvent(event, x, y, w, h)
         local maskX, maskY, maskW, maskH, possible = self:getSimpleMaskRect(x, y, w, h)
         if possible then
-            for k, v in pairs(self._elements) do
+            for k, v in pairs(self.element) do
                 local e = v:doPointerEvent(event, maskX, maskY, maskW, maskH)
                 if e then
                     return e
@@ -303,21 +303,21 @@ function ui.element.new(parent, name, x, y, w, h, key)
             end
         end
         if self.mode ~= 2 then
-            return self:_doPointerEvent(event, x, y, w, h)
+            return self:pointerEvent(event, x, y, w, h)
         end
     end
     ---Intern function for every event except events dedicated to the mouse
     ---@param event event
     ---@return element|nil
     function this:doNormalEvent(event)
-        for k, v in pairs(self._elements) do
+        for k, v in pairs(self.element) do
             local e = v:doNormalEvent(event)
             if e then
                 return e
             end
         end
         if self.mode ~= 2 then
-            return self:_doNormalEvent(event)
+            return self:normalEvent(event)
         end
     end
     ---Assigned function for every event dedicated to the mouse
@@ -327,13 +327,13 @@ function ui.element.new(parent, name, x, y, w, h, key)
     ---@param w integer|optional
     ---@param h integer|optional
     ---@return element|nil
-    function this:_doPointerEvent(event, x, y, w, h)
+    function this:pointerEvent(event, x, y, w, h)
         return nil
     end
     ---Assigned function for every event except events dedicated to the mouse
     ---@param event event
     ---@return element|nil
-    function this:_doNormalEvent(event)
+    function this:normalEvent(event)
         return nil
     end
     ---Recalculate the buffer of this element

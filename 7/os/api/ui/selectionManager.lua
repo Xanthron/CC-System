@@ -16,6 +16,11 @@ function ui.selectionManager.new()
     ---@param source string
     ---@return nil
     function this:select(var1, source, mode)
+        if mode == true then
+            mode = 3
+        elseif mode == false then
+            mode = 1
+        end
         local newElement = var1.current
         ---@type element
         local currentElement
@@ -53,11 +58,7 @@ function ui.selectionManager.new()
             if self.current then
                 currentElement = self.current.current
             end
-            if
-                (not self.current or
-                    self.current:callListener("selection_lose_focus", source, currentElement, newElement)) and
-                    var1:callListener("selection_get_focus", source, currentElement, newElement)
-             then
+            if (not self.current or self.current:callListener("selection_lose_focus", source, currentElement, newElement)) and var1:callListener("selection_get_focus", source, currentElement, newElement) then
                 if currentElement then
                     currentElement:changeMode(1)
                 end
@@ -82,10 +83,7 @@ function ui.selectionManager.new()
     ---@return nil
     function this:keyEvent(event)
         if event.name == "key" then
-            if
-                not self.current or not self.current:callListener("key", "key", event.param1, event.param2) or
-                    self.repeatItem:call() == false
-             then
+            if not self.current or not self.current:callListener("key", "key", event.param1, event.param2) or self.repeatItem:call() == false then
                 return
             end
 

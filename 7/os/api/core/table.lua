@@ -146,3 +146,23 @@ function table.removeAt(list, at)
         list[at] = nil
     end
 end
+
+function table.combine(...)
+    local list = {}
+    for _, v in ipairs({...}) do
+        if type(v) == "table" then
+            for i = 1, #v do
+                table.insert(list, v[i])
+            end
+        elseif type(v) ~= "nil" then
+            table.insert(list, v)
+        end
+    end
+    return list
+end
+
+function table.reverse(list)
+    for i = 1, math.floor(#list / 2) do
+        table.swap(list, i, #list - i + 1)
+    end
+end

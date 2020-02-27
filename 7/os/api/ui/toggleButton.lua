@@ -52,7 +52,7 @@ function ui.toggleButton.new(parent, text, checked, style, x, y, w, h, key)
     ---@param w integer|optional
     ---@param h integer|optional
     ---@return element|nil
-    function this:_doPointerEvent(event, x, y, w, h)
+    function this:pointerEvent(event, x, y, w, h)
         x, y, w, h = ui.rect.overlaps(x, y, w, h, self.buffer.rect:getUnpacked())
         if event.name == "mouse_click" then
             if event.param2 >= x and event.param2 < x + w and event.param3 >= y and event.param3 < y + h then
@@ -67,19 +67,13 @@ function ui.toggleButton.new(parent, text, checked, style, x, y, w, h, key)
                 return self
             end
         elseif event.name == "mouse_drag" then
-            if
-                self.mode == 3 and event.param2 >= x and event.param2 < x + w and event.param3 >= y and
-                    event.param3 < y + h
-             then
+            if self.mode == 3 and event.param2 >= x and event.param2 < x + w and event.param3 >= y and event.param3 < y + h then
                 self.mode = 4
                 if self._inAnimation == false then
                     self:recalculate()
                     self:repaint("this", x, y, w, h)
                 end
-            elseif
-                self.mode == 4 and
-                    (event.param2 < x or event.param2 >= x + w or event.param3 < y or event.param3 >= y + h)
-             then
+            elseif self.mode == 4 and (event.param2 < x or event.param2 >= x + w or event.param3 < y or event.param3 >= y + h) then
                 self.mode = 3
                 if self._inAnimation == false then
                     self:recalculate()
@@ -87,10 +81,7 @@ function ui.toggleButton.new(parent, text, checked, style, x, y, w, h, key)
                 end
             end
         elseif event.name == "mouse_up" then
-            if
-                self.mode == 4 and event.param2 >= x and event.param2 < x + w and event.param3 >= y and
-                    event.param3 < y + h
-             then
+            if self.mode == 4 and event.param2 >= x and event.param2 < x + w and event.param3 >= y and event.param3 < y + h then
                 self._checked = self._checked == false
                 self.mode = 1
                 if self._inAnimation == false then
@@ -101,10 +92,7 @@ function ui.toggleButton.new(parent, text, checked, style, x, y, w, h, key)
                     self:onToggle(event, self._checked)
                 end
                 return self
-            elseif
-                self.mode == 3 and
-                    (event.param2 < x or event.param2 >= x + w or event.param3 < y or event.param3 >= y + h)
-             then
+            elseif self.mode == 3 and (event.param2 < x or event.param2 >= x + w or event.param3 < y or event.param3 >= y + h) then
                 self.mode = 1
                 if self._inAnimation == false then
                     self:recalculate()
@@ -117,7 +105,7 @@ function ui.toggleButton.new(parent, text, checked, style, x, y, w, h, key)
     ---Intern function for every event except events dedicated to the mouse
     ---@param event event
     ---@return element|nil
-    function this:_doNormalEvent(event)
+    function this:normalEvent(event)
         if event.name == "key" and self.mode == 3 and (event.param1 == 57 or event.param1 == 28) then
             self.mode = 4
             if self._inAnimation == false then

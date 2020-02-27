@@ -58,7 +58,7 @@ local function updateList(manager, sView)
                         if event.name == "mouse_up" then
                             mode = 1
                         end
-                        manager.selectionManager:select(sView:getContainer()._elements[id * 2], "code", mode)
+                        manager.selectionManager:select(sView:getContainer().element[id * 2], "code", mode)
                     end
                     manager:draw()
                 end
@@ -70,7 +70,7 @@ local function updateList(manager, sView)
         y = y + 1
     end
 
-    local elements = sView:getContainer()._elements
+    local elements = sView:getContainer().element
     for i = 2, #elements, 2 do
         sView.selectionGroup:addElement(elements[i], nil, elements[i - 2], nil, elements[i + 2])
     end
@@ -157,7 +157,7 @@ end
 function button_load:onClick(event)
     manager:callFunction(
         function()
-            local selection = assert(loadfile("os/sys/explorer/main.lua"))({mode = "select_one", path = "os/programs", type = "list", edit = false, select = event ~= "mouse_up"})
+            local selection = callfile("os/sys/explorer/main.lua", {mode = "select_one", path = "os/programs", type = "list", edit = false, select = event ~= "mouse_up"})
             if selection then
                 path = selection
                 loadFile(path)
@@ -182,7 +182,7 @@ function button_add:onClick(event)
                 local data = turtle.getItemDetail()
                 if data and addItem(data.name) then
                     updateList(manager, sView_list)
-                    local elements = sView_list:getContainer()._elements
+                    local elements = sView_list:getContainer().element
                     sView_list:focusElement(elements[#elements])
                     sView_list:repaint("this")
                 end
@@ -204,7 +204,7 @@ function button_save:onClick(event)
                 name = fs.getName(path)
                 save = fs.getDir(path)
             end
-            local save = assert(loadfile("os/sys/explorer/main.lua"))({mode = "save", override = true, save = name, path = save, type = "list", edit = false, select = event.name ~= "mouse_up"})
+            local save = callfile("os/sys/explorer/main.lua", {mode = "save", override = true, save = name, path = save, type = "list", edit = false, select = event.name ~= "mouse_up"})
             if save then
                 if
                     pcall(
@@ -215,9 +215,9 @@ function button_save:onClick(event)
                         end
                     )
                  then
-                    assert(loadfile("os/sys/infoBox.lua"))({x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, text = "File creation succeeded.", button1 = "Ok", select = event.name ~= "mouse_up"})
+                    callfile("os/sys/infoBox.lua", {x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, text = "File creation succeeded.", button1 = "Ok", select = event.name ~= "mouse_up"})
                 else
-                    assert(loadfile("os/sys/infoBox.lua"))({x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, text = "File creation failed.", button1 = "Ok", select = event.name ~= "mouse_up"})
+                    callfile("os/sys/infoBox.lua", {x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, text = "File creation failed.", button1 = "Ok", select = event.name ~= "mouse_up"})
                 end
             end
             manager:draw()

@@ -2,7 +2,7 @@ local args = {...}
 local official, unofficial
 
 local function downloadScreen(...)
-    assert(loadfile("os/sys/wait.lua"))("Downloading", ...)
+    callfile("os/sys/wait.lua", "Downloading", ...)
 end
 
 local function doData(data)

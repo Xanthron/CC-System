@@ -12,23 +12,78 @@
 local defaultPasteBin = "ZbWvc7x9"
 ---@type integer
 local _x, _y, _w, _h = 1, 1, term.getSize()
+local sortType = 1
 ---@type table
-local official, unofficial, updateSView
+local official, unofficial, installed, list, updateSView
+
 --[[
     ####################################################################################################################
     Functions
     ####################################################################################################################
 ]]
-local function downloadScreen(...)
-    assert(loadfile("os/sys/wait.lua"))("Downloading", ...)
+local function getInstalled(name)
+    for k, v in pairs(installed) do
+        if v.name == name then
+            return true, v.version, v.delete
+        end
+    end
+    return false
 end
 
+local function downloadScreen(...)
+    callfile("os/sys/wait.lua", "Downloading", ...)
+end
+
+local function applyData(list, removable)
+    for k, v in pairs(list) do
+        v.removable = removable
+        local installed, version, path = getInstalled(v.name)
+        if installed then
+            v.status = 2
+            for i = 1, math.min(#v.version or 0, #version) do
+                if v.version[i] < version[i] then
+                    v.status = 1
+                    break
+                end
+            end
+            v.path = path
+        else
+            if (v.type == "all" or (pocket and v.type:find("p")) or (turtle and v.type:find("t")) or v.type:find("d")) and (term.isColor() or not v.color) then
+                v.status = 3
+            else
+                v.status = 4
+            end
+        end
+    end
+end
+local function sortFiles()
+    list = table.combine(official, unofficial)
+    if sortType > 1 then
+        table.orderComplex(
+            list,
+            function(data)
+                return data.name:byte(1, data.name:len())
+            end
+        )
+        if sortType == 3 then
+            table.orderComplex(
+                list,
+                function(data)
+                    return data.status
+                end
+            )
+        end
+    end
+end
 local function updateFiles()
     downloadScreen(
         function()
-            official, unofficial = dofile("os/sys/browser/getList.lua")
+            official, unofficial, installed = dofile("os/sys/browser/getList.lua")
         end
     )
+    applyData(official, false)
+    applyData(unofficial, true)
+    sortFiles()
 end
 
 ---@param manager uiManager
@@ -38,15 +93,20 @@ local function createSViewButton(manager, sView, official, data, elements, x, y,
     local container = sView:getContainer()
     local name = data.name
     local image = ui.element.new(container, "image", x, y, 1, h)
-    if (data.type == "all" or (pocket and data.type:find("p")) or (turtle and data.type:find("t")) or data.type:find("d")) and (term.isColor() or not data.color) then
-        image.buffer.text[1] = "\7"
+    if data.status == 1 then
+        image.buffer.text[1] = "\21"
+        image.buffer.textColor[1] = colors.orange
+    elseif data.status == 2 then
+        image.buffer.text[1] = "\25"
         image.buffer.textColor[1] = colors.green
-        image.buffer.textBackgroundColor[1] = colors.white
+    elseif data.status == 3 then
+        image.buffer.text[1] = "\7"
+        image.buffer.textColor[1] = colors.blue
     else
-        image.buffer.text[1] = "<"
+        image.buffer.text[1] = "x"
         image.buffer.textColor[1] = colors.red
-        image.buffer.textBackgroundColor[1] = colors.white
     end
+    image.buffer.textBackgroundColor[1] = colors.white
     local button_item = ui.button.new(container, name, theme.button3, x + 2, y, w - 5, h)
     local button_info = ui.button.new(container, "i", theme.button4, x + w - 3, y, 3, h)
 
@@ -76,32 +136,10 @@ local function createSViewButton(manager, sView, official, data, elements, x, y,
                 )
                 if success then
                     text = text .. "Succeeded."
-                    assert(loadfile("os/sys/infoBox.lua"))(
-                        {
-                            label = "Information",
-                            text = text,
-                            x = _x + 2,
-                            y = _y + 2,
-                            w = _w - 4,
-                            h = _h - 4,
-                            button1 = "Ok",
-                            select = event.name ~= "mouse_up"
-                        }
-                    )
+                    callfile("os/sys/infoBox.lua", {label = "Information", text = text, x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, button1 = "Ok", select = event.name ~= "mouse_up"})
                 else
                     text = text .. "failed.\n\n" .. content
-                    assert(loadfile("os/sys/infoBox.lua"))(
-                        {
-                            label = "Information",
-                            text = text,
-                            x = _x + 2,
-                            y = _y + 2,
-                            w = _w - 4,
-                            h = _h - 4,
-                            button1 = "Ok",
-                            select = event.name ~= "mouse_up"
-                        }
-                    )
+                    callfile("os/sys/infoBox.lua", {label = "Information", text = text, x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, button1 = "Ok", select = event.name ~= "mouse_up"})
                 end
                 manager:draw()
             end
@@ -135,30 +173,18 @@ local function createSViewButton(manager, sView, official, data, elements, x, y,
         manager.parallelManager:removeFunction(self.animation)
         manager:callFunction(
             function()
-                local number, select =
-                    assert(loadfile("os/sys/infoBox.lua"))(
-                    {
-                        label = "Information",
-                        text = text,
-                        x = _x + 2,
-                        y = _y + 2,
-                        w = _w - 4,
-                        h = _h - 4,
-                        button1 = "Ok",
-                        button2 = button2,
-                        select = event.name ~= "mouse_up"
-                    }
-                )
-                if number == 2 then
-                    for i = 1, #unofficial do
-                        if unofficial[i] == data then
-                            table.remove(unofficial, i)
-                            break
-                        end
-                    end
-                    table.save(unofficial, "os/sys/browser/unofficial")
-                    updateSView(manager, sView)
-                end
+                callfile("os/sys/browser/info.lua", data)
+                -- local number, select = callfile("os/sys/infoBox.lua", {label = "Information", text = text, x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, button1 = "Ok", button2 = button2, select = event.name ~= "mouse_up"})
+                -- if number == 2 then
+                --     for i = 1, #unofficial do
+                --         if unofficial[i] == data then
+                --             table.remove(unofficial, i)
+                --             break
+                --         end
+                --     end
+                --     table.save(unofficial, "os/sys/browser/unofficial")
+                --     updateSView(manager, sView)
+                -- end
                 manager:draw()
             end
         )
@@ -176,23 +202,23 @@ function updateSView(manager, sView)
     ---@type element[]
     local elements = {}
     local x, y, w, h = 1, 2, _w - 1, 1
-    for _, data in ipairs(official) do
+    for _, data in ipairs(list) do
         createSViewButton(manager, sView, true, data, elements, x, y, w, h)
         y = y + 1
     end
-    if #official > 0 and #unofficial > 0 then
-        local element = ui.element.new(container, "image", x, y, w, h)
-        for i = 1, w do
-            element.buffer.text[i] = "-"
-            element.buffer.textColor[i] = colors.lightGray
-            element.buffer.textBackgroundColor[i] = colors.white
-        end
-        y = y + 1
-    end
-    for _, data in ipairs(unofficial) do
-        createSViewButton(manager, sView, false, data, elements, x, y, w, h)
-        y = y + 1
-    end
+    -- if #official > 0 and #unofficial > 0 then
+    --     local element = ui.element.new(container, "image", x, y, w, h)
+    --     for i = 1, w do
+    --         element.buffer.text[i] = "-"
+    --         element.buffer.textColor[i] = colors.lightGray
+    --         element.buffer.textBackgroundColor[i] = colors.white
+    --     end
+    --     y = y + 1
+    -- end
+    -- for _, data in ipairs(unofficial) do
+    --     createSViewButton(manager, sView, false, data, elements, x, y, w, h)
+    --     y = y + 1
+    -- end
     local group_menu = manager.selectionManager.groups[1]
     if #elements > 0 then
         for i = 1, #elements, 2 do
@@ -215,6 +241,7 @@ function updateSView(manager, sView)
         end
     end
 
+    sView:resizeContainer()
     sView:recalculate()
 end
 --[[
@@ -243,6 +270,7 @@ end
 local button_update = ui.button.new(manager, "\21", theme.button1, 1, 1, 3, 1)
 local button_upload = ui.button.new(manager, "\24", theme.button1, 5, 1, 3, 1)
 local button_download = ui.button.new(manager, "\25", theme.button1, 9, 1, 3, 1)
+local button_sort = ui.button.new(manager, "Sort", theme.button1, _w - 11, 1, 6, 1)
 local button_option = ui.button.new(manager, "\164", theme.button1, _w - 5, 1, 3, 1)
 local button_exit = ui.button.new(manager, "<", theme.button2, _w - 2, 1, 3, 1)
 local sView_list = ui.scrollView.new(manager, "", 3, theme.sView1, 1, 2, _w, _h - 1)
@@ -277,8 +305,8 @@ end
 function button_download:onClick(event)
     manager:callFunction(
         function()
-            assert(loadfile("os/sys/browser/loader.lua"))({mode = "download"})
-            unofficial = dofile("os/sys/browser/unofficial")
+            callfile("os/sys/browser/loader.lua", {mode = 2})
+            unofficial = dofile("os/sys/browser/data/unofficial")
             updateSView(manager, sView_list)
             manager:draw()
         end
@@ -287,9 +315,27 @@ end
 function button_upload:onClick(event)
     manager:callFunction(
         function()
-            assert(loadfile("os/sys/browser/loader.lua"))({mode = "upload"})
-            unofficial = dofile("os/sys/browser/unofficial")
+            callfile("os/sys/browser/loader.lua", {mode = 1})
+            unofficial = dofile("os/sys/browser/data/unofficial")
             updateSView(manager, sView_list)
+            manager:draw()
+        end
+    )
+end
+function button_sort:onClick(event)
+    manager:callFunction(
+        function()
+            local buttons = {"Normal", "Name", "Status", "Version", "Type"}
+            buttons[sortType] = "*" .. buttons[sortType]
+            local name = callfile("os/sys/listBox.lua", {x = _w - 11, y = 1, w = 10, h = 6, label = "Sort", buttons = buttons, manager = manager})
+            for i, v in ipairs(buttons) do
+                if v == name then
+                    sortType = i
+                    sortFiles()
+                    updateSView(manager, sView_list)
+                    break
+                end
+            end
             manager:draw()
         end
     )

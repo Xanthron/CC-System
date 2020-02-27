@@ -4,18 +4,20 @@
     ####################################################################################################################
 ]]
 local args = ...
-local mode, file = args.mode, args.file
 ---@type integer
 local _x, _y, _w, _h = 1, 1, term.getSize()
-local pathSave, pathUpload = args.savePath, args.filePath
+local mode = args.mode
 --[[
     ####################################################################################################################
     Functions
     ####################################################################################################################
 ]]
 local function loadScreen(label, ...)
-    assert(loadfile("os/sys/wait.lua"))(label, ...)
+    callfile("os/sys/wait.lua", label, ...)
 end
+
+local modeName = IF(mode == 1, "Upload", "Download")
+
 --[[
     ####################################################################################################################
     SetUp
@@ -34,43 +36,32 @@ for i = 1, _w * _h do
     end
 end
 
-if mode == "upload" then
-    mode = "Upload"
-else
-    mode = "Download"
-end
-
-local label_title = ui.label.new(manager, mode .. " File", theme.label1, 1, 1, _w - 3, 1)
+local label_title = ui.label.new(manager, modeName .. " File", theme.label1, 1, 1, _w - 3, 1)
 local button_exit = ui.button.new(manager, "<", theme.button2, _w - 2, 1, 3, 1)
 local sView_item = ui.scrollView.new(manager, "", 3, theme.sView1, 1, 2, _w, _h - 2)
 local container_item = sView_item:getContainer()
 
 local y = 2
 
-local label_code, element_code, button_uploadPath, label_uploadPath, button_copy
-if mode == "Upload" then
-    element_code = ui.label.new(container_item, "", theme.label2, 7, y, _w - 8, 1)
-    label_code = ui.label.new(container_item, "File: ", theme.label2, 1, y, 6)
-    y = y + 1
-    button_uploadPath = ui.button.new(container_item, "Path", theme.button1, 1, y, 6, 1)
-    label_uploadPath = ui.label.new(container_item, "No Selection", theme.label2, 8, y, _w - 9, 1)
-    if file then
-        button_uploadPath.mode = 2
-        label_uploadPath.text = "File passed."
-        button_uploadPath:recalculate()
-        label_uploadPath:recalculate()
-    end
-    y = y + 2
+local iField_code, label_code
+if mode == 1 then
+    label_code = ui.label.new(manager, "", theme.label1, 1, _h, _w - 8, 1)
 else
-    label_code = ui.label.new(container_item, "Code: ", theme.label2, 1, y, 6)
-    element_code = ui.inputField.new(container_item, "", "", false, theme.iField1, 7, y, _w - 8, 1)
+    label_code = ui.label.new(container_item, "Code:", theme.label2, 1, y, 6)
+    iField_code = ui.inputField.new(container_item, nil, "", false, theme.iField2, 7, y, _w - 8, 1)
     y = y + 2
 end
 
-local toggle_run = ui.toggleButton.new(container_item, "Run", args.run or false, theme.toggle1, 1, y, _w - 1, 1)
+local label_file = ui.label.new(container_item, IF(mode == 1, "File Path:", "Save Path:"), theme.label2, 1, y, _w - 1)
 y = y + 1
-local button_savePath = ui.button.new(container_item, "Path", theme.button1, 1, y, 6, 1)
-local label_savePath = ui.label.new(container_item, "No Selection", theme.label2, 8, y, _w - 9, 1)
+local button_path = ui.button.new(container_item, "Path", theme.button1, 1, y, 6, 1)
+local label_path = ui.label.new(container_item, "No Selection", theme.label2, 8, y, _w - 9, 1)
+if args.file then
+    button_path.mode = 2
+    label_path.text = "File passed."
+    button_path:recalculate()
+    label_path:recalculate()
+end
 y = y + 2
 local toggle_toList = ui.toggleButton.new(container_item, "Add to list", true, theme.toggle1, 1, y, _w - 1, 1)
 y = y + 1
@@ -84,17 +75,19 @@ local toggle_pocket = ui.toggleButton.new(container_item, "Pocket", true, theme.
 y = y + 2
 local toggle_color = ui.toggleButton.new(container_item, "Need Color", false, theme.toggle1, 2, y, _w - 2, 1)
 y = y + 2
-local label_name = ui.label.new(container_item, "Name:", theme.label2, 3, y, _w - 3, 1)
-y = y + 1
-local iField_name = ui.inputField.new(container_item, "", args.name or "", false, theme.iField1, 3, y, _w - 4, 1)
-y = y + 2
-local label_description = ui.label.new(container_item, "Description:", theme.label2, 3, y, _w - 3, 1)
-y = y + 1
-local iField_description = ui.inputField.new(container_item, "", "", true, theme.iField1, 3, y, _w - 4, 5)
+local iField_name = ui.inputField.new(container_item, "Name", args.name or "", false, theme.iField1, 3, y, _w - 4, 3)
+y = y + 4
+local iField_version = ui.inputField.new(container_item, "Version", args.version or "", false, theme.iField1, 3, y, _w - 4, 3)
+y = y + 4
+local iField_category = ui.inputField.new(container_item, "Category", args.version or "", false, theme.iField1, 3, y, _w - 4, 3)
+y = y + 4
+local iField_description = ui.inputField.new(container_item, "Description", "", true, theme.iField1, 3, y, _w - 4, 7)
 
-local button_load = ui.button.new(manager, mode, theme.button1, _w - 9, _h, 10, 1)
+local button_load = ui.button.new(manager, modeName, theme.button1, _w - 9, _h, 10, 1)
 button_load.mode = 2
 button_load:recalculate()
+
+--local label_code = ui.label.new(manager, "", theme.label1, 1, _h, _w - 8, 1)
 
 sView_item:resetLayout()
 sView_item:recalculate()
@@ -103,27 +96,28 @@ local group_menu = manager.selectionManager:addNewGroup()
 manager.selectionManager:addGroup(sView_item.selectionGroup)
 local group_list = sView_item.selectionGroup
 local group_download = manager.selectionManager:addNewGroup()
-if mode == "Upload" then
-    group_menu:addElement(button_exit, nil, nil, nil, button_uploadPath)
-    group_list:addElement(button_uploadPath, nil, button_exit, nil, toggle_run)
-    group_list:addElement(toggle_run, nil, button_uploadPath, nil, button_savePath)
+if mode == 1 then
+    group_menu:addElement(button_exit, nil, nil, nil, button_path)
+    group_list:addElement(button_path, nil, button_exit, nil, toggle_toList)
 else
-    group_menu:addElement(button_exit, nil, nil, nil, element_code)
-    group_list:addElement(element_code, nil, button_exit, nil, toggle_run)
-    group_list:addElement(toggle_run, nil, element_code, nil, button_savePath)
+    group_menu:addElement(button_exit, nil, nil, nil, iField_code)
+    group_list:addElement(iField_code, nil, button_exit, nil, button_path)
+    group_list:addElement(button_path, nil, iField_code, nil, toggle_toList)
 end
-group_list:addElement(button_savePath, nil, toggle_run, nil, toggle_toList)
-group_list:addElement(toggle_toList, nil, button_savePath, nil, toggle_desktop)
+
+group_list:addElement(toggle_toList, nil, button_path, nil, toggle_desktop)
 group_list:addElement(toggle_desktop, nil, toggle_toList, nil, toggle_turtle)
 group_list:addElement(toggle_turtle, nil, toggle_desktop, nil, toggle_pocket)
 group_list:addElement(toggle_pocket, nil, toggle_turtle, nil, toggle_color)
 group_list:addElement(toggle_color, nil, toggle_pocket, nil, iField_name)
-group_list:addElement(iField_name, nil, toggle_color, nil, iField_description)
-group_list:addElement(iField_description, nil, iField_name, nil, button_load)
+group_list:addElement(iField_name, nil, toggle_color, nil, iField_version)
+group_list:addElement(iField_version, nil, iField_name, nil, iField_category)
+group_list:addElement(iField_category, nil, iField_version, nil, iField_description)
+group_list:addElement(iField_description, nil, iField_category, nil, button_load)
 group_download:addElement(button_load, nil, iField_description, nil, nil)
 
-local function checkDownloadButton(codeText, nameText)
-    if (mode == "Upload" or (codeText or element_code.text:len() - 7) == 1) and (mode ~= "Upload" or pathUpload or file) and (not toggle_toList._checked or ((toggle_desktop._checked or toggle_pocket._checked or toggle_turtle._checked) and (nameText or iField_name.text:len()) > 0)) and (toggle_run._checked or pathSave) then
+local function checkDownloadButton(codeText, nameText, versionText)
+    if (args.run or args.path) and (toggle_toList._checked == false or ((toggle_desktop._checked or toggle_pocket._checked or toggle_turtle._checked) and (nameText or iField_name.text:len() > 0) and #textutils.split(versionText or iField_version.text, "[^%.]+") == 3)) then
         button_load.mode = 1
     else
         button_load.mode = 2
@@ -136,43 +130,8 @@ function button_exit:onClick(event)
     manager:exit()
 end
 
-if mode == "Upload" then
-    function button_uploadPath:onClick(event)
-        manager:callFunction(
-            function()
-                local wasSame = pathUpload == pathSave
-                local path = ""
-                if pathUpload then
-                    path = fs.getDir(pathUpload)
-                end
-                path = assert(loadfile("os/sys/explorer/main.lua"))({mode = "select_one", path = path, edit = false, select = event.name ~= "mouse_up"})
-                if path then
-                    pathUpload = path
-                    label_uploadPath.text = pathUpload
-                    label_uploadPath:recalculate()
-                    if wasSame then
-                        if pathSave then
-                            wasSame = iField_name.text == textutils.getNeatName(pathSave)
-                        else
-                            wasSame = true
-                        end
-                        pathSave = path
-                        label_savePath.text = pathUpload
-                        label_savePath:recalculate()
-                        if wasSame then
-                            iField_name:setText(textutils.getNeatName(pathSave))
-                            iField_name:recalculate()
-                            iField_name:repaint("this")
-                        end
-                    end
-                end
-                checkDownloadButton()
-                manager:draw()
-            end
-        )
-    end
-else
-    function element_code:onTextEdit(event, ...)
+if mode == 2 then
+    function iField_code:onTextEdit(event, ...)
         if event == "char" or event == "paste" then
             local var1 = ...
             if self.text:len() < 8 then
@@ -183,51 +142,32 @@ else
             if self.text:len() + var1:len() == 8 then
                 checkDownloadButton(1)
             else
-                button_load.mode = 2
-                button_load:recalculate()
-                button_load:repaint("this")
+                button_load:changeMode(2)
             end
 
             return var1
         elseif event == "delete" then
-            button_load.mode = 2
-            button_load:recalculate()
-            button_load:repaint("this")
+            button_load:changeMode(2)
             return true
         end
     end
 end
 
-function button_savePath:onClick(event)
+function button_path:onClick(event)
     manager:callFunction(
         function()
+            local changeName = textutils.getNeatName(args.path or "") == iField_name.text or iField_name.text:len() == 0
             local path = ""
-            local name = ""
-            if pathSave then
-                name = fs.getName(pathSave)
-                path = fs.getDir(pathSave)
+            if args.path then
+                path = fs.getDir(args.path)
             end
-            path =
-                assert(loadfile("os/sys/explorer/main.lua"))(
-                {
-                    mode = "save",
-                    save = name,
-                    path = path,
-                    edit = false,
-                    override = true,
-                    select = event.name ~= "mouse_up"
-                }
-            )
+            path = callfile("os/sys/explorer/main.lua", IF(mode == 1, {mode = "select_one", path = path, edit = false, select = event.name ~= "mouse_up"}, {mode = "save", save = iField_name.text, override = true, path = path, edit = false, select = event.name ~= "mouse_up"}))
             if path then
-                local wasSame = true
-                if pathSave then
-                    wasSame = iField_name.text == textutils.getNeatName(pathSave)
-                end
-                pathSave = path
-                label_savePath.text = pathSave
-                label_savePath:recalculate()
-                if wasSame then
-                    iField_name:setText(textutils.getNeatName(pathSave))
+                args.path = path
+                label_path.text = path
+                label_path:recalculate()
+                if changeName then
+                    iField_name:setText(textutils.getNeatName(path))
                     iField_name:recalculate()
                     iField_name:repaint("this")
                 end
@@ -239,38 +179,21 @@ function button_savePath:onClick(event)
 end
 
 function toggle_toList:onToggle(event, checked)
+    local m = 2
     if checked then
-        label_types.mode = 1
-        toggle_desktop.mode = 1
-        toggle_turtle.mode = 1
-        toggle_pocket.mode = 1
-        toggle_color.mode = 1
-        label_name.mode = 1
-        iField_name.mode = 1
-        label_description.mode = 1
-        iField_description.mode = 1
-    else
-        label_types.mode = 2
-        toggle_desktop.mode = 2
-        toggle_turtle.mode = 2
-        toggle_pocket.mode = 2
-        toggle_color.mode = 2
-        label_name.mode = 2
-        iField_name.mode = 2
-        label_description.mode = 2
-        iField_description.mode = 2
+        m = 1
     end
-    label_types:recalculate()
-    toggle_desktop:recalculate()
-    toggle_turtle:recalculate()
-    toggle_pocket:recalculate()
-    toggle_color:recalculate()
-    label_name:recalculate()
-    iField_name:recalculate()
-    label_description:recalculate()
-    iField_description:recalculate()
+    label_types:changeMode(m, true)
+    toggle_desktop:changeMode(m, true)
+    toggle_turtle:changeMode(m, true)
+    toggle_pocket:changeMode(m, true)
+    toggle_color:changeMode(m, true)
+    iField_name:changeMode(m, true)
+    iField_version:changeMode(m, true)
+    iField_category:changeMode(m, true)
+    iField_description:changeMode(m, true)
     checkDownloadButton()
-    manager:repaint("this")
+    manager:draw()
 end
 
 function toggle_desktop:onToggle(event, checked)
@@ -280,21 +203,6 @@ function toggle_turtle:onToggle(event, checked)
     checkDownloadButton()
 end
 function toggle_pocket:onToggle(event, checked)
-    checkDownloadButton()
-end
-
-function toggle_run:onToggle(event, checked)
-    if checked then
-        label_savePath.mode = 2
-        button_savePath.mode = 2
-    else
-        label_savePath.mode = 1
-        button_savePath.mode = 1
-    end
-    label_savePath:recalculate()
-    button_savePath:recalculate()
-    label_savePath:repaint("this")
-    button_savePath:repaint("this")
     checkDownloadButton()
 end
 
@@ -309,22 +217,35 @@ function iField_name:onTextEdit(event, ...)
     end
 end
 
+function iField_version:onTextEdit(event, ...)
+    if event == "char" then
+        local c = ...
+        if ((c == "." and self.text:gsub("[^%.]+", ""):len() < 2) or tonumber(c) ~= nil) and c ~= "-" then
+            checkDownloadButton(nil, nil, self.text .. c)
+            return c
+        end
+        return ""
+    elseif event == "delete" then
+        if self.text:len() <= 1 then
+            checkDownloadButton(nil, nil, self.text:sub(1, self.text:len() - 1))
+        end
+    end
+end
+
 function button_load:onClick(event)
     manager:callFunction(
         function()
-            local code = element_code.text
-            local success, content, text
+            local success, content, text, code
 
-            if mode == "Upload" then
+            if mode == 1 then
                 local fileText
-                if file then
-                    fileText = file
+                if args.file then
+                    fileText = args.file
                 else
-                    local file = fs.open(pathUpload, "r")
+                    local file = fs.open(args.path, "r")
                     fileText = file.readAll()
                     file:close()
                 end
-
                 loadScreen(
                     "Upload",
                     function()
@@ -336,23 +257,19 @@ function button_load:onClick(event)
                 end
                 if success then
                     code = content
-                    element_code.text = code
-                    element_code:recalculate()
-                    text = ("Uploading from\n%s\nto: %s\n"):format(pathUpload or "Program", code)
+                    label_code.text = code
+                    label_code:recalculate()
+                    text = ("Uploading from\n%s\nto: %s\n"):format(args.path or "Program", code)
                 else
-                    text = ("Uploading  %s from\n%s\n"):format(pathUpload)
+                    text = ("Uploading  %s from\n%s\n"):format(args.path)
                 end
             else
+                code = iField_code.text
                 loadScreen(
-                    "Download",
+                    modeName,
                     function()
-                        if toggle_run._checked then
-                            success, content = www.pasteBinRun(code)
-                            text = ("Run %s "):format(code)
-                        else
-                            success, content = www.pasteBinSave(code, pathSave, true)
-                            text = ("Save %s at\n%s\n"):format(code, pathSave)
-                        end
+                        success, content = www.pasteBinSave(code, args.path, true)
+                        text = ("Save %s at\n%s\n"):format(code, args.path)
                     end
                 )
             end
@@ -369,21 +286,18 @@ function button_load:onClick(event)
                     if toggle_pocket._checked then
                         table.insert(types, "p")
                     end
-                    local path = pathSave
-                    if toggle_run._checked then
-                        path = "run"
-                    end
-
                     local data = {
                         name = iField_name.text,
                         description = iField_description.text,
                         color = toggle_color._checked,
                         type = table.concat(types, ""),
                         url = code,
-                        path = path
+                        path = args.path or "run",
+                        delete = args.path or args.delete,
+                        version = textutils.split(iField_version.text, "[^%.]+")
                     }
 
-                    local datas = dofile("os/sys/browser/unofficial")
+                    local datas = dofile("os/sys/browser/data/unofficial")
                     for i, v in ipairs(datas) do
                         if v.name == iField_name.text then
                             table.remove(datas, i)
@@ -392,44 +306,23 @@ function button_load:onClick(event)
                     end
                     table.insert(datas, data)
 
-                    table.save(datas, "os/sys/browser/unofficial")
+                    table.save(datas, "os/sys/browser/data/unofficial")
+                    callfile("os/sys/browser/install.lua", data, 1)
                 end
                 --error("lol")
-                assert(loadfile("os/sys/infoBox.lua"))(
-                    {
-                        x = _x + 2,
-                        y = _y + 2,
-                        w = _w - 4,
-                        h = _h - 4,
-                        text = ("%sSucceeded"):format(text),
-                        label = mode,
-                        select = true,
-                        button1 = "Ok"
-                    }
-                )
+                callfile("os/sys/infoBox.lua", {x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, text = ("%sSucceeded"):format(text), label = modeName, select = true, button1 = "Ok"})
             else
-                assert(loadfile("os/sys/infoBox.lua"))(
-                    {
-                        x = _x + 2,
-                        y = _y + 2,
-                        w = _w - 4,
-                        h = _h - 4,
-                        text = ("%sFailed\n\n%s"):format(text, content),
-                        label = mode,
-                        select = true,
-                        button1 = "Ok"
-                    }
-                )
+                callfile("os/sys/infoBox.lua", {x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, text = ("%sFailed\n\n%s"):format(text, content), label = modeName, select = true, button1 = "Ok"})
             end
             manager:draw()
         end
     )
 end
 
-if mode == "Upload" then
-    manager.selectionManager:select(button_uploadPath, "code", 3)
+if mode == 1 then
+    manager.selectionManager:select(button_path, "code", 3)
 else
-    manager.selectionManager:select(element_code, "code", 3)
+    manager.selectionManager:select(iField_code, "code", 3)
 end
 manager:draw()
 manager:execute()

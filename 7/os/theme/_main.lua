@@ -280,21 +280,56 @@ tBox2.slider.nTheme.handleLBG = {colors.white}
 tBox2.slider.nTheme.handleLC = {colors.gray}
 tBox2.slider.nTheme.sliderTBG = {colors.white}
 tBox2.slider.nTheme.sliderTC = {colors.black}
+---@type style.inputField
 local iField1 = style("inputField")
-iField1.nTheme.b = {{}, {}, {}, {}, {" "}, {}, {}, {}, {}}
-iField1.dTheme.b = {{}, {}, {}, {}, {" "}, {}, {}, {}, {}}
-iField1.sTheme.b = {{}, {}, {}, {}, {" "}, {}, {}, {}, {}}
+iField1.align = 3
+iField1.nTheme.tC = colors.black
+iField1.nTheme.sTC = colors.black
+iField1.nTheme.tBG = colors.white
+iField1.nTheme.b = {{"+"}, {"-"}, {"+"}, {"|"}, {" "}, {"|"}, {"+"}, {"-"}, {"+"}}
+iField1.nTheme.bC = colors.black
+iField1.nTheme.bBG = colors.white
+
+iField1.dTheme.tC = colors.gray
+iField1.dTheme.sTC = colors.gray
+iField1.dTheme.tBG = colors.white
+iField1.dTheme.b = {{"+"}, {"-"}, {"+"}, {"|"}, {" "}, {"|"}, {"+"}, {"-"}, {"+"}}
+iField1.dTheme.bC = colors.gray
+iField1.dTheme.bBG = colors.white
+
+iField1.sTheme.tC = colors.black
+iField1.sTheme.sTC = colors.orange
+iField1.sTheme.tBG = colors.white
+iField1.sTheme.b = {{"+"}, {"-"}, {"+"}, {"|"}, {" "}, {"|"}, {"+"}, {"-"}, {"+"}}
+iField1.sTheme.bC = colors.orange
+iField1.sTheme.bBG = colors.white
+
+iField1.label = style("label")
+iField1.label.nTheme.prefix = "-"
+iField1.label.nTheme.suffix = "-"
+iField1.label.nTheme.tBG = colors.white
+iField1.label.nTheme.tC = colors.black
+iField1.label.dTheme.prefix = "*"
+iField1.label.dTheme.suffix = "*"
+iField1.label.dTheme.tBG = colors.white
+iField1.label.dTheme.tC = colors.gray
+iField1.label.sTheme.prefix = ">"
+iField1.label.sTheme.suffix = "<"
+iField1.label.sTheme.tBG = colors.white
+iField1.label.sTheme.tC = colors.orange
+
+---@type style.inputField
 local iField2 = style("inputField")
-iField2.align = 3
 iField2.nTheme.b = {{}, {}, {}, {}, {" "}, {}, {}, {}, {}}
-iField2.nTheme.sTC = colors.lime
-iField2.nTheme.tC = colors.black
-iField2.nTheme.tBG = colors.lime
+iField2.nTheme.tC = colors.white
+iField2.nTheme.sTC = colors.white
+iField2.nTheme.tBG = colors.black
 iField2.dTheme.b = {{}, {}, {}, {}, {" "}, {}, {}, {}, {}}
 iField2.sTheme.b = {{}, {}, {}, {}, {" "}, {}, {}, {}, {}}
+
 local label1 = style("label")
 label1.align = 1
 label1.nTheme.tBG = colors.green
 label1.nTheme.tC = colors.black
 local label2 = style("label")
-table.save({button1 = button1, button2 = button2, button3 = button3, button4 = button4, toggle1 = toggle1, activatedButton = activatedButton, deactivatedButton = deactivatedButton, sView1 = sView1, sView2 = sView2, tBox1 = tBox1, tBox2 = tBox2, iField2 = iField2, iField1 = iField1, label1 = label1, label2 = label2}, "os/theme/main.lua")
+table.save({button1 = button1, button2 = button2, button3 = button3, button4 = button4, toggle1 = toggle1, activatedButton = activatedButton, deactivatedButton = deactivatedButton, sView1 = sView1, sView2 = sView2, tBox1 = tBox1, tBox2 = tBox2, iField1 = iField1, iField2 = iField2, label1 = label1, label2 = label2}, "os/theme/main.lua")

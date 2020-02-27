@@ -91,7 +91,8 @@ local function updateSView(manager, sView)
             manager:callFunction(
                 function()
                     local success, select =
-                        assert(loadfile("os/sys/execute.lua"))(
+                        callfile(
+                        "os/sys/execute.lua",
                         {
                             file = file.path,
                             select = event.name ~= "mouse_up",
@@ -107,7 +108,7 @@ local function updateSView(manager, sView)
         y = y + 1
     end
 
-    local elements = sView:getContainer()._elements
+    local elements = sView:getContainer().element
     for i = 1, #elements, 3 do
         sView.selectionGroup:addElement(elements[i], nil, elements[i - 3], elements[i + 1], elements[i + 3])
         sView.selectionGroup:addElement(elements[i + 1], elements[i], elements[i - 2], nil, elements[i + 4])
@@ -155,7 +156,7 @@ local sView_list = ui.scrollView.new(manager, "", 3, theme.sView1, 1, 2, _w, _h 
 function button_browser:onClick(event)
     manager:callFunction(
         function()
-            local success, select = assert(loadfile("os/sys/execute.lua"))({file = "os/sys/browser/main.lua", select = event ~= "mouse_up", args = {{select = event ~= "mouse_up"}}})
+            local success, select = callfile("os/sys/execute.lua", {file = "os/sys/browser/main.lua", select = event ~= "mouse_up", args = {{select = event ~= "mouse_up"}}})
             manager:draw()
         end
     )
@@ -165,7 +166,8 @@ function button_explorer:onClick(event)
     manager:callFunction(
         function()
             local success, select =
-                assert(loadfile("os/sys/execute.lua"))(
+                callfile(
+                "os/sys/execute.lua",
                 {
                     file = "os/sys/explorer/main.lua",
                     select = event ~= "mouse_up",
@@ -208,7 +210,7 @@ local mode = 3
 if term.isColor() then
     mode = 1
 end
-if #sView_list:getContainer()._elements > 0 then
+if #sView_list:getContainer().element > 0 then
     manager.selectionManager:select(group_list, "code", mode)
 else
     manager.selectionManager:select(group_menu, "code", mode)

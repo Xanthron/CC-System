@@ -24,5 +24,12 @@ function textutils.getNeatName(path)
             return t:sub(1, 1) .. " " .. t:sub(2)
         end
     )
-    return name
+    return name or ""
+end
+function textutils.split(str, separator)
+    local list = {}
+    for part in str:gmatch(separator) do
+        table.insert(list, part)
+    end
+    return list
 end

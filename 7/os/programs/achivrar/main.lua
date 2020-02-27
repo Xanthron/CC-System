@@ -34,10 +34,7 @@ local function pathsToText(paths, compress)
                         table.insert(s, t)
                         return ("s%s" .. "@"):format(#s)
                     end
-                ):gsub("%-%-[^\n]+%[%[", "--"):gsub("%-%-%[%[.-%]%]+", ""):gsub("%-%-.-\n+", "\n"):gsub("\n%s+", "\n"):gsub(
-                    "[%a%d_]%s[^%a%d_]",
-                    emptySpace
-                ):gsub("[^%d%a_]%s+[%a%d_]", emptySpace):gsub(
+                ):gsub("%-%-[^\n]+%[%[", "--"):gsub("%-%-%[%[.-%]%]+", ""):gsub("%-%-.-\n+", "\n"):gsub("\n%s+", "\n"):gsub("[%a%d_]%s[^%a%d_]", emptySpace):gsub("[^%d%a_]%s+[%a%d_]", emptySpace):gsub(
                     "s[0-9]+@",
                     function(t)
                         local i = tonumber(t:sub(2, t:len() - 1))
@@ -60,10 +57,7 @@ local function pathsToText(paths, compress)
         table.insert(strings, string.format('["%s"] = "%s"', key, value))
     end
     local filesText = string.format("{ %s }", table.concat(strings, ","))
-    return string.format(
-        'for key, value in pairs(%s) do\nlocal s, e = key:find(".*/")\nif s then\nlocal path = key:sub(s, e)\nif not fs.exists(path) then\nfs.makeDir(path)\nend\nend\nlocal file = io.open(key, "w+")\nfile:write(value)\nfile:close()\nend',
-        filesText
-    )
+    return string.format('for key, value in pairs(%s) do\nlocal s, e = key:find(".*/")\nif s then\nlocal path = key:sub(s, e)\nif not fs.exists(path) then\nfs.makeDir(path)\nend\nend\nlocal file = io.open(key, "w+")\nfile:write(value)\nfile:close()\nend', filesText)
 end
 
 local function saveText(text, path)
@@ -77,7 +71,7 @@ local function saveText(text, path)
 end
 
 local function uploadText(text)
-    assert(loadfile("os/sys/browser/loader.lua"))({mode = "upload", file = text})
+    callfile("os/sys/browser/uploader.lua", {file = text, run = true, delete = selected})
 end
 
 local manager = ui.uiManager.new(_x, _y, _w, _h)
@@ -100,11 +94,13 @@ local toggle_upload = ui.toggleButton.new(container_main, "Upload to PasteBin", 
 local button_savePath = ui.button.new(container_main, "Path", theme.button1, 1, 13, 6, 1)
 local label_savePath = ui.label.new(container_main, "no selection", theme.label2, 8, 13, _w - 8, 1)
 
-local label_arguments = ui.label.new(container_main, "Additional arguments:", theme.label2, 1, 15, _w - 1, 1)
-local iField_arguments = ui.inputField.new(container_main, "", "", true, theme.iField1, 1, 16, _w - 1, 5)
+--local label_arguments = ui.label.new(container_main, "Additional arguments:", theme.label2, 1, 15, _w - 1, 1)
+local iField_arguments = ui.inputField.new(container_main, "Additional arguments", "", true, theme.iField1, 1, 15, _w - 1, 6)
 
 local label_info = ui.label.new(manager, "", theme.label1, 1, _h, _w - 6, 1)
 local button_start = ui.button.new(manager, "Save", theme.button1, _w - 5, _h, 6, 1)
+
+sView_main:resizeContainer()
 
 local group_menu = manager.selectionManager:addNewGroup()
 local group_main = sView_main.selectionGroup
@@ -128,8 +124,6 @@ group_save.next = group_menu
 
 manager.selectionManager:addGroup(tBox_files.selectionGroup)
 manager.selectionManager:select(button_files, "code", 3)
-
-sView_main:resizeContainer()
 
 local function updateSaveButton()
     if #selected > 0 and (toggle_upload._checked == true or fs.exists(fs.getDir(savePath))) then
@@ -156,14 +150,12 @@ function button_files:onClick(event)
             if event.name == "mouse_up" then
                 select = false
             end
-            local s =
-                assert(loadfile("os/sys/explorer/main.lua"))(
-                {select = true, mode = "select_many", select = select, edit = false}
-            )
+            local s = callfile("os/sys/explorer/main.lua", {select = true, mode = "select_many", select = select, edit = false})
             if s then
                 selected = s
             end
             tBox_files:setText(table.concat(selected, "\n"))
+            tBox_files:resizeSlider()
             updateSaveButton()
             manager:draw()
         end
@@ -184,10 +176,7 @@ function button_savePath:onClick(event)
             if not fs.exists(path) then
                 path = ""
             end
-            path =
-                assert(loadfile("os/sys/explorer/main.lua"))(
-                {select = true, mode = "save", override = true, type = "avr", path = path, save = name, select = select}
-            )
+            path = callfile("os/sys/explorer/main.lua", {select = true, mode = "save", override = true, type = "avr", path = path, save = name, select = select})
             if path then
                 savePath = path
                 label_savePath.text = savePath

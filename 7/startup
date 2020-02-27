@@ -1,2 +1,1 @@
-dofile("os/init.lua")
-shell.run("os/main")
+dofile("os/init.lua")dofile("os/main.lua")

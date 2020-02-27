@@ -1,3 +1,5 @@
-return{{name="Official Programs",description="A List of all official programs.",color=false,type="all",url="ZbWvc7x9",path="os/system/download/official"},
-{name="OS",description="Advanced OS with API",color=false,type="dtp",url="y0BFRcDj",path="run"},
-{type="dtp",name="Achivrar",color=nil,url="Ai5cshwy",path="run",description="Program for packaging and compressing multiple files to create a install file."}}
+return {
+    {name = "Official Programs", category = "non", version = {0, 0, 0}, description = "A List of all official programs.", color = false, type = "all", url = "ZbWvc7x9!", path = "os/system/download/official"},
+    {name = "OS", category = "non", version = {0, 0, 0}, description = "Advanced OS with API", color = false, type = "dtp", url = "y0BFRcDj!", path = "run"},
+    {name = "Achivrar", category = "Office", version = {0, 0, 0}, color = nil, type = "dtp", url = "Ai5cshwy!", path = "run", description = "Program for packaging and compressing multiple files to create a install file."}
+}
