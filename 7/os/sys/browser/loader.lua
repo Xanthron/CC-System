@@ -286,6 +286,10 @@ function button_load:onClick(event)
                     if toggle_pocket._checked then
                         table.insert(types, "p")
                     end
+                    local version = textutils.split(iField_version.text, "[^%.]+")
+                    for i = 1, #version do
+                        version[i] = tonumber(version[i])
+                    end
                     local data = {
                         name = iField_name.text,
                         description = iField_description.text,
@@ -295,7 +299,7 @@ function button_load:onClick(event)
                         path = args.path or "run",
                         delete = args.path or args.delete,
                         category = iField_category.text,
-                        version = textutils.split(iField_version.text, "[^%.]+")
+                        version = version
                     }
 
                     local datas = dofile("os/sys/browser/data/unofficial")
@@ -308,7 +312,7 @@ function button_load:onClick(event)
                     table.insert(datas, data)
 
                     table.save(datas, "os/sys/browser/data/unofficial")
-                    callfile("os/sys/browser/install.lua", data, 1)
+                    callfile("os/sys/browser/install.lua", 1, data)
                 end
                 --error("lol")
                 callfile("os/sys/infoBox.lua", {x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, text = ("%sSucceeded"):format(text), label = modeName, select = true, button1 = "Ok"})

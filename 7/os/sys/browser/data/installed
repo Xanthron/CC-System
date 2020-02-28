@@ -1,1 +1,1 @@
-return{[1]={delete={[1]="os/",[2]="startup.lua"},name="OS",version={[3]=0,[1]=1,[2]=0}},[2]={delete="/startup",name="Startup 2",version={[3]="1",[1]="1",[2]="1"}},[3]={delete="startup",name="Startup",version={[3]="3",[1]="1",[2]="2"}}}
+return{{name="OS",version={1,0,2}}}

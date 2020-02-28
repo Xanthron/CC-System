@@ -33,16 +33,16 @@ end
 local function applyData(list, removable)
     for k, v in pairs(list) do
         v.removable = removable
-        local installed, version, path = getInstalled(v.name)
+        local installed, version, delete = getInstalled(v.name)
         if installed then
             v.status = 2
             for i = 1, math.min(#v.version or 0, #version) do
-                if v.version[i] < version[i] then
+                if v.version[i] > version[i] then
                     v.status = 1
                     break
                 end
             end
-            v.path = path
+            v.delete = delete
         else
             if (v.type == "all" or (pocket and v.type:find("p")) or (turtle and v.type:find("t")) or v.type:find("d")) and (term.isColor() or not v.color) then
                 v.status = 3
@@ -80,9 +80,9 @@ local function updateFiles(mode)
             installed = l3
             if mode then
                 official = l1
-                applyData(official, false)
             end
             unofficial = l2
+            applyData(official, false)
             applyData(unofficial, true)
             sortFiles()
         end

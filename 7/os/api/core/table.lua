@@ -103,8 +103,13 @@ local function _tableToString(list, contains)
     end
     table.insert(contains, v)
 
-    local items = {}
+    local i, items = 1, {}
     for k, v in pairs(list) do
+        if i == k then
+            i = i + 1
+        else
+            i = nil
+        end
         local t, value = type(v), nil
         if t == "table" then
             value = _tableToString(v, contains)
@@ -116,9 +121,14 @@ local function _tableToString(list, contains)
             value = tostring(v)
         end
         if type(k) == "number" then
-            k = ("[%s]"):format(k)
+            if i then
+                table.insert(items, value)
+            else
+                table.insert(items, ("[%s]=%s"):format(k, value))
+            end
+        else
+            table.insert(items, ("%s=%s"):format(k, value))
         end
-        table.insert(items, ("%s=%s"):format(k, value))
     end
     table.remove(contains, #contains)
 

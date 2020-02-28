@@ -20,6 +20,9 @@ local function doData(data)
             s, c = www.save(data.url, data.path, true)
         end
     end
+    if s then
+        callfile("os/sys/browser/install.lua", 1, data)
+    end
     return s
 end
 

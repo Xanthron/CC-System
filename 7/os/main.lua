@@ -157,6 +157,7 @@ function button_browser:onClick(event)
     manager:callFunction(
         function()
             local success, select = callfile("os/sys/execute.lua", {file = "os/sys/browser/main.lua", select = event ~= "mouse_up", args = {{select = event ~= "mouse_up"}}})
+            updateSView(manager, sView_list)
             manager:draw()
         end
     )
@@ -203,6 +204,9 @@ group_menu:addElement(button_exit, button_options, nil, nil, nil)
 group_menu.current = button_browser
 
 files = {}
+if not fs.exists("os/programs") then
+    fs.makeDir("os/programs")
+end
 loadFiles("os/programs", files)
 updateSView(manager, sView_list)
 

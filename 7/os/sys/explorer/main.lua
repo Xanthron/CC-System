@@ -357,7 +357,7 @@ local function updateListView(manager, listView)
                                     end
                                     updateSelectionLabel(manager)
                                 elseif name == "Remove All" then
-                                    for _, p in ipairs(fs.listAll.getAllFilePaths(dirs[i])) do
+                                    for _, p in ipairs(fs.listAll(dirs[i])) do
                                         removeSelection(p)
                                     end
                                     updateSelectionLabel(manager)
