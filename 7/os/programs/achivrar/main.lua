@@ -71,7 +71,7 @@ local function saveText(text, path)
 end
 
 local function uploadText(text)
-    callfile("os/sys/browser/uploader.lua", {file = text, run = true, delete = selected})
+    callfile("os/sys/browser/loader.lua", {mode = 1, file = text, run = true, delete = selected})
 end
 
 local manager = ui.uiManager.new(_x, _y, _w, _h)

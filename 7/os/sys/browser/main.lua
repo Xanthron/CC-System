@@ -12,7 +12,7 @@
 local defaultPasteBin = "ZbWvc7x9"
 ---@type integer
 local _x, _y, _w, _h = 1, 1, term.getSize()
-local sortType = 1
+local sortType = 3
 ---@type table
 local official, unofficial, installed, list, updateSView
 
@@ -28,10 +28,6 @@ local function getInstalled(name)
         end
     end
     return false
-end
-
-local function downloadScreen(...)
-    callfile("os/sys/wait.lua", "Downloading", ...)
 end
 
 local function applyData(list, removable)
@@ -75,15 +71,22 @@ local function sortFiles()
         end
     end
 end
-local function updateFiles()
-    downloadScreen(
+local function updateFiles(mode)
+    callfile(
+        "os/sys/wait.lua",
+        "Downloading",
         function()
-            official, unofficial, installed = dofile("os/sys/browser/getList.lua")
+            local l1, l2, l3 = callfile("os/sys/browser/getList.lua", mode)
+            installed = l3
+            if mode then
+                official = l1
+                applyData(official, false)
+            end
+            unofficial = l2
+            applyData(unofficial, true)
+            sortFiles()
         end
     )
-    applyData(official, false)
-    applyData(unofficial, true)
-    sortFiles()
 end
 
 ---@param manager uiManager
@@ -108,90 +111,21 @@ local function createSViewButton(manager, sView, official, data, elements, x, y,
     end
     image.buffer.textBackgroundColor[1] = colors.white
     local button_item = ui.button.new(container, name, theme.button3, x + 2, y, w - 5, h)
-    local button_info = ui.button.new(container, "i", theme.button4, x + w - 3, y, 3, h)
 
     ---@type event
     function button_item:onClick(event)
-        manager:callFunction(
-            function()
-                local success, content, text
-                downloadScreen(
-                    function()
-                        if data.path == "run" then
-                            if data.url:len() == 8 then
-                                success, content = www.pasteBinRun(data.url)
-                            else
-                                success, content = www.run(data.url)
-                            end
-                            text = ("Run\n%s\n"):format(data.name)
-                        else
-                            if data.url:len() == 8 then
-                                success, content = www.pasteBinSave(data.url, data.path, true)
-                            else
-                                success, content = www.save(data.url, data.path, true)
-                            end
-                            text = ("Save\n%s\nat\n%s\n"):format(data.name, data.path)
-                        end
-                    end
-                )
-                if success then
-                    text = text .. "Succeeded."
-                    callfile("os/sys/infoBox.lua", {label = "Information", text = text, x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, button1 = "Ok", select = event.name ~= "mouse_up"})
-                else
-                    text = text .. "failed.\n\n" .. content
-                    callfile("os/sys/infoBox.lua", {label = "Information", text = text, x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, button1 = "Ok", select = event.name ~= "mouse_up"})
-                end
-                manager:draw()
-            end
-        )
-    end
-
-    ---@type event
-    function button_info:onClick(event)
-        local color = "no"
-        if data.color then
-            color = "yes"
-        end
-        local types = {}
-        if data.type:find("d") then
-            table.insert(types, "desktop")
-        end
-        if data.type:find("t") then
-            table.insert(types, "turtle")
-        end
-        if data.type:find("p") then
-            table.insert(types, "pocket")
-        end
-        if #types == 0 then
-            table.insert(types, "all")
-        end
-        local text = string.format("%s\n\n%s\n\nColor: %s\n Type:  %s\n\n\nSource:\n%s", name, data.description, color, table.concat(types, ", "), data.url)
-        local button2
-        if not official then
-            button2 = "Remove"
-        end
         manager.parallelManager:removeFunction(self.animation)
         manager:callFunction(
             function()
                 callfile("os/sys/browser/info.lua", data)
-                -- local number, select = callfile("os/sys/infoBox.lua", {label = "Information", text = text, x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, button1 = "Ok", button2 = button2, select = event.name ~= "mouse_up"})
-                -- if number == 2 then
-                --     for i = 1, #unofficial do
-                --         if unofficial[i] == data then
-                --             table.remove(unofficial, i)
-                --             break
-                --         end
-                --     end
-                --     table.save(unofficial, "os/sys/browser/unofficial")
-                --     updateSView(manager, sView)
-                -- end
+                updateFiles(false)
+                updateSView(manager, sView)
                 manager:draw()
             end
         )
     end
 
     table.insert(elements, button_item)
-    table.insert(elements, button_info)
 end
 
 ---@param manager uiManager
@@ -206,24 +140,10 @@ function updateSView(manager, sView)
         createSViewButton(manager, sView, true, data, elements, x, y, w, h)
         y = y + 1
     end
-    -- if #official > 0 and #unofficial > 0 then
-    --     local element = ui.element.new(container, "image", x, y, w, h)
-    --     for i = 1, w do
-    --         element.buffer.text[i] = "-"
-    --         element.buffer.textColor[i] = colors.lightGray
-    --         element.buffer.textBackgroundColor[i] = colors.white
-    --     end
-    --     y = y + 1
-    -- end
-    -- for _, data in ipairs(unofficial) do
-    --     createSViewButton(manager, sView, false, data, elements, x, y, w, h)
-    --     y = y + 1
-    -- end
     local group_menu = manager.selectionManager.groups[1]
     if #elements > 0 then
-        for i = 1, #elements, 2 do
-            sView.selectionGroup:addElement(elements[i], nil, elements[i - 2], elements[i + 1], elements[i + 2])
-            sView.selectionGroup:addElement(elements[i + 1], elements[i], elements[i - 1], nil, elements[i + 3])
+        for i = 1, #elements do
+            sView.selectionGroup:addElement(elements[i], nil, elements[i - 1], nil, elements[i + 1])
         end
         sView.selectionGroup.current = elements[1]
         elements[1].select.up = group_menu
@@ -287,7 +207,7 @@ manager.selectionManager:addGroup(sView_list.selectionGroup)
 sView_list.selectionGroup.previous = group_menu
 sView_list.selectionGroup.next = group_menu
 
-updateFiles()
+updateFiles(true)
 updateSView(manager, sView_list)
 
 function button_exit:onClick(event)
@@ -296,7 +216,7 @@ end
 function button_update:onClick(event)
     manager:callFunction(
         function()
-            updateFiles()
+            updateFiles(true)
             updateSView(manager, sView_list)
             manager:draw()
         end
@@ -306,7 +226,7 @@ function button_download:onClick(event)
     manager:callFunction(
         function()
             callfile("os/sys/browser/loader.lua", {mode = 2})
-            unofficial = dofile("os/sys/browser/data/unofficial")
+            updateFiles(false)
             updateSView(manager, sView_list)
             manager:draw()
         end
@@ -316,7 +236,7 @@ function button_upload:onClick(event)
     manager:callFunction(
         function()
             callfile("os/sys/browser/loader.lua", {mode = 1})
-            unofficial = dofile("os/sys/browser/data/unofficial")
+            updateFiles(false)
             updateSView(manager, sView_list)
             manager:draw()
         end

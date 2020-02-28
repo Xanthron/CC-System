@@ -294,6 +294,7 @@ function button_load:onClick(event)
                         url = code,
                         path = args.path or "run",
                         delete = args.path or args.delete,
+                        category = iField_category.text,
                         version = textutils.split(iField_version.text, "[^%.]+")
                     }
 

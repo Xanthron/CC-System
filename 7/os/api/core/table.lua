@@ -109,7 +109,7 @@ local function _tableToString(list, contains)
         if t == "table" then
             value = _tableToString(v, contains)
         elseif t == "string" then
-            value = '"' .. v:gsub('"', '\\"') .. '"'
+            value = '"' .. v:gsub('"', '\\"'):gsub("[\n\r]", "\\n") .. '"'
         elseif t == nil then
             value = t
         else

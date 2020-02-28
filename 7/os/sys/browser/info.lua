@@ -1,6 +1,10 @@
 local data = ...
 local _x, _y, _w, _h = 1, 1, term.getSize()
 
+local function downloadScreen(...)
+    callfile("os/sys/wait.lua", "Downloading", ...)
+end
+
 local manager = ui.uiManager.new(_x, _y, _w, _h)
 ui.buffer.fill(manager.buffer, " ", colors.white, colors.white)
 
@@ -23,28 +27,35 @@ if data.color then
     table.insert(types, "Color", 1)
 end
 
-local tBox_info = ui.textBox.new(manager, "", ("Name:\n%s\n\nDescription:\n%s\n\nCategory:\n%s\n\nType:\n%s\n\nVersion:\n%s\n\nSource:\n%s"):format(data.name, IF(data.description and data.description ~= "", data.description, "No Description."), IF(data.category and data.category ~= "", data.category, "Non."), table.concat(types, ", "), table.concat(data.version or {"No Version"}, "."), data.url), theme.tBox2, _x, _y, _w, _h)
-local label_title = ui.label.new(tBox_info, "Info", theme.label1, 1, 1, _w - 3, 1)
+local tBox_info = ui.textBox.new(manager, "", ("%s\n\nCategory:\n%s\n\nType:\n%s\n\nVersion:\n%s\n\nSource:\n%s"):format(IF(data.description and data.description ~= "", data.description, "No Description."), IF(data.category and data.category ~= "", data.category, "Non."), table.concat(types, ", "), table.concat(data.version or {"No Version"}, "."), data.url), theme.tBox2, _x, _y, _w, _h)
+
+local label_title = ui.label.new(tBox_info, data.name, theme.label1, 1, 1, _w - 3, 1)
 local button_exit = ui.button.new(tBox_info, "<", theme.button2, _w - 2, 1, 3, 1)
-local label_title = ui.label.new(tBox_info, "", theme.label1, 1, _h, _w, 1)
-local button_delete = ui.button.new(tBox_info, "Delete", theme.button1, 1, _h, 8, 1)
+local label_bottom = ui.label.new(tBox_info, "", theme.label1, 1, _h, _w, 1)
+
+local button_delete = ui.button.new(tBox_info, "Delist", theme.button1, 1, _h, 8, 1)
 if not data.delete then
     button_delete.mode = 2
     button_delete:recalculate()
 end
+local button_remove = ui.button.new(tBox_info, "Delete", theme.button1, _w - 16, _h, 8, 1)
 local type_do = "Install"
 if data.status == 1 then
     type_do = "Update"
 elseif data.status == 2 then
-    type_do = "Remove"
+    type_do = "Restore"
+else
+    button_remove.mode = 2
+    button_remove:recalculate()
 end
-local button_do = ui.button.new(tBox_info, type_do, theme.button1, _w - 8, _h, 9, 1)
+local button_do = ui.button.new(tBox_info, type_do, theme.button1, _w - type_do:len() - 1, _h, type_do:len() + 2, 1)
 
 local group_menu = manager.selectionManager:addNewGroup()
 local group_tBox = tBox_info.selectionGroup
 manager.selectionManager:addGroup(group_tBox)
 
-group_menu:addElement(button_exit, nil, nil, nil, group_tBox)
+group_menu:addElement(button_delete, nil, nil, button_exit, group_tBox)
+group_menu:addElement(button_exit, button_delete, nil, nil, group_tBox)
 group_tBox:addElement(button_delete, nil, group_menu, button_do, nil)
 group_tBox:addElement(button_do, button_delete, group_menu, nil, nil)
 
@@ -53,6 +64,79 @@ manager.selectionManager:select(button_do, "code", 3)
 
 function button_exit:onClick(event)
     manager:exit()
+end
+
+function button_delete:onClick(event)
+    manager:callFunction(
+        function()
+            local path = "os/sys/browser/data/unofficial"
+            local list = dofile(path)
+            for i, v in ipairs(list) do
+                if v.name == data.name then
+                    table.remove(list, i)
+                    break
+                end
+            end
+            table.save(list, path)
+            callfile("os/sys/infoBox.lua", {label = "Information", text = data.name .. " is now deleted from the unofficial download list", x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, button1 = "Ok", select = event.name ~= "mouse_up"})
+            manager:exit()
+        end
+    )
+end
+
+function button_remove:onClick(event)
+    manager:callFunction(
+        function()
+            if type(data.delete) == "table" then
+                for i, v in ipairs(data.delete) do
+                    if fs.exists(v) then
+                        fs.delete(v)
+                    end
+                end
+            else
+                if fs.exists(data.delete) then
+                    fs.delete(data.delete)
+                end
+            end
+            callfile("os/sys/browser/install.lua", 2, data)
+            callfile("os/sys/infoBox.lua", {label = "Information", text = data.name .. " is now deleted from the system.", x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, button1 = "Ok", select = event.name ~= "mouse_up"})
+            manager:exit()
+        end
+    )
+end
+
+function button_do:onClick(event)
+    manager:callFunction(
+        function()
+            local success, content, text
+            downloadScreen(
+                function()
+                    if data.path == "run" then
+                        if data.url:len() == 8 then
+                            success, content = www.pasteBinRun(data.url)
+                        else
+                            success, content = www.run(data.url)
+                        end
+                        text = ("%s has now run.\n"):format(data.name)
+                    else
+                        if data.url:len() == 8 then
+                            success, content = www.pasteBinSave(data.url, data.path, true)
+                        else
+                            success, content = www.save(data.url, data.path, true)
+                        end
+                        text = ("%s is now installed to the system.\n\nPath:\n%s\n"):format(data.name, data.path)
+                    end
+                end
+            )
+            if success then
+                callfile("os/sys/browser/install.lua", 1, data)
+                callfile("os/sys/infoBox.lua", {label = "Information", text = text, x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, button1 = "Ok", select = event.name ~= "mouse_up"})
+            else
+                callfile("os/sys/infoBox.lua", {label = "Information", text = data.name .. " failed to download.\n\nReason:\n" .. content, x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, button1 = "Ok", select = event.name ~= "mouse_up"})
+            end
+            manager:exit()
+        end
+    )
 end
 
 manager:draw()

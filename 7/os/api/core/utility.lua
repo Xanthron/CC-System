@@ -6,5 +6,5 @@ function IF(condition, v1, v2)
 end
 
 function callfile(path, ...)
-    assert(loadfile(path))(...)
+    return assert(loadfile(path))(...)
 end
