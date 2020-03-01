@@ -83,9 +83,11 @@ local button_exit = ui.button.new(manager, "<", theme.button2, _w - 2, 1, 3, 1)
 local sView_main = ui.scrollView.new(manager, "", 3, theme.sView1, 1, 2, _w, _h - 2)
 local container_main = sView_main:getContainer()
 
-local tBox_files = ui.textBox.new(container_main, "", "", theme.tBox2, 1, 2, _w - 1, 7)
+local tBox_files = ui.textBox.new(container_main, "Files", "", theme.tBox2, 1, 2, _w - 1, 7)
+tBox_files.selectable = true
+tBox_files.scrollWithoutSelection = false
 
-local button_files = ui.button.new(tBox_files, "Files", theme.button1, 1, 2, 7, 1)
+local button_files = ui.button.new(tBox_files, "Edit", theme.button1, 10, 2, 6, 1)
 
 local toggle_compress = ui.toggleButton.new(container_main, "Compress", true, theme.toggle1, 1, 10, _w, 1)
 
@@ -106,9 +108,15 @@ local group_menu = manager.selectionManager:addNewGroup()
 local group_main = sView_main.selectionGroup
 manager.selectionManager:addGroup(group_main)
 local group_save = manager.selectionManager:addNewGroup()
+local group_tBox = tBox_files.selectionGroup
+manager.selectionManager:addGroup(group_tBox)
+group_tBox.current = tBox_files.element.v
 
 group_menu:addElement(button_exit, nil, nil, nil, button_files)
-group_main:addElement(button_files, nil, button_exit, nil, toggle_compress)
+group_main:addElement(button_files, tBox_files.element.v, button_exit, nil, toggle_compress)
+tBox_files.element.v.select.right = button_files
+tBox_files.element.v.select.up = button_exit
+tBox_files.element.v.select.down = toggle_compress
 group_main:addElement(toggle_compress, nil, button_files, nil, toggle_upload)
 group_main:addElement(toggle_upload, nil, toggle_compress, nil, button_savePath)
 group_main:addElement(button_savePath, nil, toggle_upload, nil, iField_arguments)

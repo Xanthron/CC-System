@@ -24,7 +24,7 @@ local function getErrorText(text)
     if endI then
         file = text:sub(0, startI - 1)
         line = text:sub(startI + 1, endI - 1)
-        message = text:sub(endI + 1)
+        message = text:sub(endI + 2)
     end
     return message, file, line, possibleFiles
 end
@@ -58,7 +58,7 @@ local function errorHandler(text)
         line = _line
     end
     if file ~= "" then
-        message = string.format("%s\n\n%s\n%s\n\n", message, file, line)
+        message = string.format("[tc=red]%s[tc=clear]\n\n%s\n%s\n\n", message, file, line)
         local possibleFiles = {}
         getFilesWithName("", file, possibleFiles)
         if #possibleFiles == 0 then
@@ -68,7 +68,7 @@ local function errorHandler(text)
         else
             message = message .. "Multiple files could be found:\n" .. table.concat(possibleFiles, "\n")
         end
-        message = message .. "\n\n\n" .. debug.traceback()
+        message = message .. "\n\n\n[tc=gray]" .. debug.traceback()
     end
     callfile("os/sys/infoBox.lua", {label = "Error", text = message, x = 3, y = 3, w = w - 4, h = h - 4, button1 = "Ok", select = set.select})
 end
@@ -82,6 +82,6 @@ local function executionHandler()
     local button, select = callfile(set.file, table.unpack(set.args))
     return select
 end
-
+--executionHandler()
 local ret = {xpcall(executionHandler, errorHandler)}
 return table.unpack(ret)

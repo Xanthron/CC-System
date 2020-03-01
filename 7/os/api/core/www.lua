@@ -36,7 +36,7 @@ function www._run(content, name, ...)
 end
 
 function www.run(url, ...)
-    local success, content = get(url)
+    local success, content = www.get(url)
     if success then
         return www._run(content, www._getFileName(url), ...)
     else

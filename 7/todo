@@ -2,12 +2,10 @@
 
 --TODO replace |nil with |"nil" and change optional to nil
 
---TODO sometimes scrollView etc. dose not scroll reason: not selected
-
---TODO error in scrollwiew when group is not set
-
 --TODO Scroll bar handle size is always 1
 
-
---TODO update program list, after browser or explorer
---TODO Program still in list, when main.lua not exist
+Strip Miner:
+--TODO multiple building blocks
+--TODO option ignore path building when build slot empty
+--TODO option ignore torch when torch 
+--TODO Stop und exit does not work properly

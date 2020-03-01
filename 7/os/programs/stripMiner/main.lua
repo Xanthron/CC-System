@@ -7,7 +7,7 @@ set.searchWhiteList = set.searchWhiteList or "White List"
 if set.pathSearchList and not fs.exists(set.pathSearchList) then
     set.pathSearchList = nil
 end
-set.trashWhiteList = set.searchWhiteList or "White List"
+set.trashWhiteList = set.trashWhiteList or "White List"
 if set.pathTrashList and not fs.exists(set.pathTrashList) then
     set.pathTrashList = nil
 end
@@ -23,7 +23,7 @@ set.savePath = set.savePath or false
 
 local manager = ui.uiManager.new(_x, _y, _w, _h)
 for i = 1, _w * _h do
-    if i <= _w or i >= _w * (_h - 1) then
+    if i <= _w or i > _w * (_h - 1) then
         manager.buffer.text[i] = " "
         manager.buffer.textColor[i] = colors.green
         manager.buffer.textBackgroundColor[i] = colors.green
@@ -33,11 +33,12 @@ for i = 1, _w * _h do
         manager.buffer.textBackgroundColor[i] = colors.white
     end
 end
-local label_title = ui.label.new(manager, "Strip Miner", theme.label1, _x, _y, _w - 3, 1)
+--ui.buffer.fill(manager.buffer, " ", colors.white, colors.white)
+local label_title = ui.label.new(manager, "Strip Miner", theme.label1, _x, _y, _w - 3, 2)
 local button_exit = ui.button.new(manager, "<", theme.button2, _x + _w - 3, _y, 3, 1)
 
 local label_length = ui.label.new(manager, "Length: ", theme.label2, _x, _y + 1, 8, 1)
-local iField_length = ui.inputField.new(manager, nil, tostring(set.length), false, theme.iField1, _x + 8, _y + 1, _w - 8, 1)
+local iField_length = ui.inputField.new(manager, nil, tostring(set.length), false, theme.iField2, _x + 8, _y + 1, _w - 8, 1)
 
 local label_searchList = ui.label.new(manager, "Search List", theme.label2, _x, _y + 3, 12, 1)
 local button_searchList = ui.button.new(manager, set.searchWhiteList, theme.button1, 13, _y + 3, math.floor(_w / 2), 1)
@@ -57,7 +58,7 @@ if not set.pathTrashList then
     label_pathTrashList:changeMode(2, true)
 end
 
-local label_slot = ui.label.new(manager, "Slots:\n1: Chest    2: Fuel\n3: Build    4: Torch\n5: Ender Chest", theme.label2, _x, _y + 8, 26, 4)
+local text_slot = ui.text.new(manager, "Slots:\n1: Chest    2: Fuel\n3: Build    4: Torch\n5: Ender Chest", theme.label2, _x, _y + 8, 26, 4)
 local list_slots = {}
 for i = 1, 16 do
     local x = _x + 26 + ((i - 1) % 4) * 3
@@ -249,6 +250,9 @@ function button_start:onClick(event)
             fs.delete("os/programs/stripMiner/data/move.set")
             fs.delete("os/programs/stripMiner/data/data.set")
             table.save(set, "os/programs/stripMiner/data/data.set")
+            local file = fs.open("os/startup/50-stripMiner.lua", "w")
+            file.write('dofile("os/programs/stripMiner/mine.lua")')
+            file.close()
             dofile("os/programs/stripMiner/mine.lua")
             manager:draw()
         end

@@ -1,8 +1,10 @@
 local _x, _y, _w, _h = 1, 1, term.getSize()
 
-local files = {}
+local files
 
-local function loadFiles(path, files)
+local function loadFiles()
+    files = {}
+    local path = "os/programs"
     local list = fs.list(path)
     for _, v in ipairs(list) do
         local path = fs.combine(path, v)
@@ -157,6 +159,7 @@ function button_browser:onClick(event)
     manager:callFunction(
         function()
             local success, select = callfile("os/sys/execute.lua", {file = "os/sys/browser/main.lua", select = event ~= "mouse_up", args = {{select = event ~= "mouse_up"}}})
+            loadFiles()
             updateSView(manager, sView_list)
             manager:draw()
         end
@@ -204,10 +207,7 @@ group_menu:addElement(button_exit, button_options, nil, nil, nil)
 group_menu.current = button_browser
 
 files = {}
-if not fs.exists("os/programs") then
-    fs.makeDir("os/programs")
-end
-loadFiles("os/programs", files)
+loadFiles()
 updateSView(manager, sView_list)
 
 local mode = 3

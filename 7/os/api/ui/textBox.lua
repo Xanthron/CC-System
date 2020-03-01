@@ -16,15 +16,18 @@ function ui.textBox.new(parent, label, text, style, x, y, w, h, key)
     ---@type padding
     this.stylePadding = ui.padding.new(#style.nTheme.b[4], #style.nTheme.b[2], #style.nTheme.b[6], #style.nTheme.b[8])
     ui.element.new(this, "container", this.stylePadding:getPaddedRect(this.buffer.rect:getUnpacked()))
-    ui.label.new(this.element[1], text, style.text, this.element[1]:getGlobalRect())
+    ui.text.new(this.element[1], text, style.text, this.element[1]:getGlobalRect())
     local slideWidth = #style.slider.nTheme.handleL
     ui.slider.new(this, 1, 0, this.element[1].element[1]:getHeight(), this.element[1]:getHeight(), style.slider, x + w - math.max(math.ceil((this.stylePadding.right + slideWidth) / 2), slideWidth), y + this.stylePadding.top, slideWidth, h - this.stylePadding.top - this.stylePadding.bottom, "v")
     ---@type string
     this.label = label
+    this.richText = richText
     ---@type style.textBox
     this.style = style
     ---@type selectionGroup
     this.selectionGroup = ui.selectionGroup.new(nil, nil)
+    this.selectable = false
+    this.scrollWithoutSelection = true
 
     function this:resizeSlider()
         local slider = self.element.v
@@ -83,8 +86,9 @@ function ui.textBox.new(parent, label, text, style, x, y, w, h, key)
     ---@param event event
     ---@return element|nil
     function this:normalEvent(event)
-        if self.mode == 3 and event.name == "mouse_scroll" then
+        if (self.scrollWithoutSelection or not self.selectable or self.mode == 3) and event.name == "mouse_scroll" then
             self.onValueChange(event.param1)
+            return this
         end
     end
     ---Assigned function for every event dedicated to the mouse
@@ -95,10 +99,10 @@ function ui.textBox.new(parent, label, text, style, x, y, w, h, key)
     ---@param h integer|optional
     ---@return element|nil
     function this:pointerEvent(event, x, y, w, h)
-        if event.name == "mouse_click" and self.mode ~= 3 then
+        if self.selectable and event.name == "mouse_click" and self.mode ~= 3 then
             x, y, w, h = ui.rect.overlaps(x, y, w, h, self.buffer.rect:getUnpacked())
             if event.param2 >= x and event.param2 < x + w and event.param3 >= y and event.param3 < y + h then
-                self:getManager().selectionManager:selct(self.selectionGroup, "mouse", 1)
+                self:getManager().selectionManager:select(self.selectionGroup, "mouse", 1)
                 return self
             end
         end
@@ -152,7 +156,7 @@ function ui.textBox.new(parent, label, text, style, x, y, w, h, key)
             else
                 this:changeMode(1)
             end
-        elseif eventName == "selection_get_focus" then
+        elseif this.selectable and eventName == "selection_get_focus" then
             local currentElement, newElement = ...
             this:changeMode(3)
             if newElement == this then
@@ -170,6 +174,8 @@ function ui.textBox.new(parent, label, text, style, x, y, w, h, key)
     end
 
     ui.buffer.fill(this.element[1].buffer, " ", this.style.nTheme.sTC, this.style.nTheme.sTC)
+    this.selectionGroup:addElement(this)
+    this.selectionGroup.current = this
     this.selectionGroup:addElement(this.element.v)
     this.element.v.onValueChange = this.onValueChange
     this:recalculate()

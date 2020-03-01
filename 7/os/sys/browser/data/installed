@@ -1,1 +1,1 @@
-return{{name="OS",version={1,0,2}}}
+return{{name="OS",version={1,0,2}},{delete={"os/programs/itemList.lua"},name="Item List",version={1,0,0}}}

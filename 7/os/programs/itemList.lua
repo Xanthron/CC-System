@@ -11,38 +11,26 @@ local items = {}
     Functions
     ####################################################################################################################
 ]]
-local function addItem(name)
-    for _, v in pairs(items) do
-        if v == name then
-            return false
-        end
-    end
-    table.insert(items, name)
-    return true
-end
-local function loadFile(path)
-    local list = dofile(path)
-    for _, v in pairs(list) do
-        addItem(v)
-    end
-end
 ---@param sView scrollView
 ---@param name string
 ---@param id integer
-local function createListItem(sView, name, func, x, y, w, h)
+local function createListItem(sView, data, func, x, y, w, h)
     local container = sView:getContainer()
-    local element = ui.label.new(container, name, theme.label2, x, y, w - 3, h)
+    ui.label.new(container, data[1], theme.label2, x, y, w - 10, h)
+    if data[2] then
+        ui.label.new(container, tostring(data[2]), theme.label2, x + w - 10, y, 7, h)
+    end
     local button = ui.button.new(container, "x", theme.button2, x + w - 3, y, 3, h)
 
     button.onClick = func
-
-    return element, button
+    return button
 end
 ---@param manager uiManager
 ---@param sView scrollView
 local function updateList(manager, sView)
     sView:clear()
     local x, y, w, h = 1, 2, _w - 1, 1
+    local buttons = {}
     for i, v in ipairs(items) do
         ---@param self button
         ---@param event event
@@ -65,22 +53,21 @@ local function updateList(manager, sView)
             )
         end
 
-        createListItem(sView, v, func, x, y, w, h)
+        table.insert(buttons, createListItem(sView, v, func, x, y, w, h))
 
         y = y + 1
     end
 
-    local elements = sView:getContainer().element
-    for i = 2, #elements, 2 do
-        sView.selectionGroup:addElement(elements[i], nil, elements[i - 2], nil, elements[i + 2])
+    for i = 2, #buttons, 2 do
+        sView.selectionGroup:addElement(buttons[i], nil, buttons[i - 1], nil, buttons[i + 1])
     end
 
-    local element = elements[#elements]
+    local element = buttons[#buttons]
     sView.current = element
     local group_menu = manager.selectionManager.groups[1]
     local group_tool = manager.selectionManager.groups[2]
     if element then
-        group_menu.elements[1].select.down = elements[2]
+        group_menu.elements[1].select.down = buttons[1]
         for _, v in ipairs(group_tool.elements) do
             v.select.up = element
         end
@@ -88,7 +75,7 @@ local function updateList(manager, sView)
         group_menu.next = sView.selectionGroup
         group_tool.previous = sView.selectionGroup
 
-        elements[2].select.up = group_menu
+        buttons[1].select.up = group_menu
         element.select.down = group_tool
 
         sView:focusElement(element)
@@ -103,6 +90,35 @@ local function updateList(manager, sView)
     end
 
     sView:resizeContainer()
+end
+local function addItem(name, data, meta)
+    for _, v in pairs(items) do
+        if v[1] == name and (not meta or v[2] == data) then
+            return false
+        end
+    end
+    table.insert(items, {name, IF(meta, data)})
+    return true
+end
+local function addItems(manager, sView, meta)
+    for i = 1, 16 do
+        turtle.select(i)
+        local data = turtle.getItemDetail()
+        if data and addItem(data.name, data.damage, meta) then
+            updateList(manager, sView)
+            local elements = sView:getContainer().element
+            sView:focusElement(elements[#elements])
+            sView:repaint("this")
+        end
+        turtle.drop()
+    end
+    turtle.select(1)
+end
+local function loadFile(path)
+    local list = dofile(path)
+    for _, v in pairs(list) do
+        addItem(v[1], v[2], true)
+    end
 end
 --[[
     ####################################################################################################################
@@ -129,6 +145,8 @@ local sView_list = ui.scrollView.new(manager, "", 3, theme.sView1, 1, 2, _w, _h 
 local button_load = ui.button.new(manager, "Load", theme.button1, 1, _h, 6, 1)
 local button_clear = ui.button.new(manager, "Clear", theme.button1, 7, _h, 7, 1)
 local button_add = ui.button.new(manager, "Add", theme.button1, 14, _h, 5, 1)
+local button_addPlus = ui.button.new(manager, "Add+", theme.button1, 19, _h, 6, 1)
+local button_sort = ui.button.new(manager, "Sort", theme.button1, _w - 11, _h, 6, 1)
 local button_save = ui.button.new(manager, "Save", theme.button1, _w - 5, _h, 6, 1)
 
 local group_menu = manager.selectionManager:addNewGroup()
@@ -146,8 +164,10 @@ group_menu:addElement(button_exit, nil, nil, nil, group_tool)
 group_menu.current = button_exit
 group_tool:addElement(button_load, nil, group_menu, button_clear, nil)
 group_tool:addElement(button_clear, button_load, group_menu, button_add, nil)
-group_tool:addElement(button_add, button_clear, group_menu, button_save, nil)
-group_tool:addElement(button_save, button_add, group_menu, nil, nil)
+group_tool:addElement(button_add, button_clear, group_menu, button_addPlus, nil)
+group_tool:addElement(button_addPlus, button_add, group_menu, button_sort, nil)
+group_tool:addElement(button_sort, button_addPlus, group_menu, button_save, nil)
+group_tool:addElement(button_save, button_sort, group_menu, nil, nil)
 group_tool.current = button_add
 
 function button_exit:onClick(event)
@@ -177,22 +197,30 @@ end
 function button_add:onClick(event)
     manager:callFunction(
         function()
-            for i = 1, 16 do
-                turtle.select(i)
-                local data = turtle.getItemDetail()
-                if data and addItem(data.name) then
-                    updateList(manager, sView_list)
-                    local elements = sView_list:getContainer().element
-                    sView_list:focusElement(elements[#elements])
-                    sView_list:repaint("this")
-                end
-                turtle.drop()
-            end
-            turtle.select(1)
-            --self:recalculate()
+            addItems(manager, sView_list, false)
             manager:draw()
         end
     )
+end
+function button_addPlus:onClick(event)
+    manager:callFunction(
+        function()
+            addItems(manager, sView_list, true)
+            manager:draw()
+        end
+    )
+end
+function button_sort:onClick(event)
+    table.orderComplex(
+        items,
+        function(v)
+            local ret = {v[1]:byte(1, v[1]:len())}
+            table.insert(ret, v[2])
+            return table.unpack(ret)
+        end
+    )
+    updateList(manager, sView_list)
+    manager:draw()
 end
 
 function button_save:onClick(event)

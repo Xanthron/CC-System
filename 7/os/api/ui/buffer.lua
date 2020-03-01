@@ -336,56 +336,91 @@ function ui.buffer.text(buffer, t, tC, tBG, align, scaleW, scaleH, richText, lef
     local totalWidth, totalHeight = buffer.rect.w, buffer.rect.h
     local width, height = totalWidth - left - right, totalHeight - top - bottom
     local words = {}
-    for line in t:gmatch("[^\r\n]*.") do
-        for word in line:gmatch("[^%s]*") do
-            if word:len() > 0 then
-                table.insert(words, word)
-            else
-                table.insert(words, " ")
+    t = t:gsub("\t", "")
+    for line in t:gmatch("[^\r\n]*") do
+        if line:len() > 0 then
+            for word in line:gmatch("[^ ]*") do
+                if word:len() > 0 then
+                    table.insert(words, word)
+                else
+                    table.insert(words, " ")
+                end
             end
+        else
+            table.insert(words, "\n")
         end
-        table.insert(words, "\n")
     end
     local lineWidth = nil
-    if scaleW then
-        lineWidth = 0
-        local currentLength = -1
-        for i = 1, #words do
-            if words[i] == "\n" then
-                currentLength = -1
-            else
-                currentLength = currentLength + words[i]:len() + 1
-                lineWidth = math.max(lineWidth, currentLength)
-            end
-        end
-    else
-        local lineCount = 0
-        local i = 1
-        while i <= #words do
-            if words[i] == "\n" then
-                lineCount = 0
-            else
-                if richText then
-                end
-                if lineCount == 0 and words[i]:len() > width then
-                    table.insert(words, i + 1, words[i]:sub(width + 1))
-                    words[i] = words[i]:sub(1, width)
-                    table.insert(words, i + 1, "\n")
-                else
-                    if lineCount == 0 then
-                        lineCount = words[i]:len()
-                    else
-                        lineCount = lineCount + words[i]:len()
-                        if lineCount > width then
-                            lineCount = 0
-                            table.insert(words, i, "\n")
+    -- if scaleW then
+    --     lineWidth = 0
+    --     local currentLength = -1
+    --     for i = 1, #words do
+    --         if words[i] == "\n" then
+    --             currentLength = -1
+    --         else
+    --             currentLength = currentLength + words[i]:len() + 1
+    --             lineWidth = math.max(lineWidth, currentLength)
+    --         end
+    --     end
+    -- else
+    local lineCount = 0
+    local i = 1
+    local events = {}
+    local char = 0
+    while i <= #words do
+        if words[i] == "\n" then
+            lineCount = 0
+        else
+            while richText do
+                local s, e = words[i]:find("%[[tb][cg].-%]")
+                if s then
+                    local char = char + s
+                    local kind = words[i]:sub(s + 1, s + 2)
+                    local color = words[i]:sub(s + 4, e - 1)
+                    events[char] = events[char] or {}
+                    if color == "clear" then
+                        if kind == "tc" then
+                            events[char].tc = tC
+                        elseif kind == "bg" then
+                            events[char].bg = tBG
                         end
+                    else
+                        color = tonumber(color) or colors[color]
+                        if kind == "tc" then
+                            events[char].tc = color
+                        elseif kind == "bg" then
+                            events[char].bg = color
+                        end
+                    end
+                    words[i] = words[i]:sub(1, s - 1) .. words[i]:sub(e + 1)
+                else
+                    break
+                end
+            end
+            local wordLen = words[i]:len()
+            char = char + wordLen
+            if lineCount == 0 and wordLen > width then
+                table.insert(words, i + 1, words[i]:sub(width + 1))
+                words[i] = words[i]:sub(1, width)
+                table.insert(words, i + 1, "\n")
+            else
+                if lineCount == 0 then
+                    lineCount = wordLen
+                else
+                    lineCount = lineCount + wordLen
+                    if lineCount > width then
+                        char = char - math.max(0, (wordLen - width))
+                        lineCount = 0
+                        table.insert(words, i, "\n")
+                        char = char - wordLen
                     end
                 end
             end
-            i = i + 1
+            char = char + 1
         end
+        i = i + 1
     end
+    --end
     while words[#words] == "\n" do
         table.remove(words, #words)
     end
@@ -421,12 +456,14 @@ function ui.buffer.text(buffer, t, tC, tBG, align, scaleW, scaleH, richText, lef
     end
     local wordIndex = 1
     local index = top * totalWidth + left + 1
+    local char = 1
+    local tc, bg = tC, tBG
     for i = 1, height do
         if i <= topPadding or i > bottomPadding then
             for j = 1, width do
                 buffer.text[index] = " "
-                buffer.textColor[index] = tC
-                buffer.textBackgroundColor[index] = tBG
+                buffer.textColor[index] = tc
+                buffer.textBackgroundColor[index] = bg
                 index = index + 1
             end
         else
@@ -434,35 +471,47 @@ function ui.buffer.text(buffer, t, tC, tBG, align, scaleW, scaleH, richText, lef
             while wordIndex <= #words do
                 local word = words[wordIndex]
                 wordIndex = wordIndex + 1
+                --char = char + 1
                 if word == "\n" then
-                    -- wordIndex = wordIndex + 1
                     break
                 else
                     for j = 1, word:len() do
+                        if events[char] then
+                            tc = events[char].tc or tc
+                            bg = events[char].bg or bg
+                        end
+                        char = char + 1
+
                         buffer.text[index] = word:sub(j, j)
-                        buffer.textColor[index] = tC
-                        buffer.textBackgroundColor[index] = tBG
+
+                        buffer.textColor[index] = tc
+                        buffer.textBackgroundColor[index] = bg
                         index = index + 1
                         lineCount = lineCount + 1
                     end
+                    if events[char] then
+                        tc = events[char].tc or tc
+                        bg = events[char].bg or bg
+                    end
+                    char = char + 1
                 end
             end
             if align == 1 or align == 4 or align == 7 then
                 for j = 1, width - lineCount do
                     buffer.text[index + j - 1] = " "
-                    buffer.textColor[index + j - 1] = tC
-                    buffer.textBackgroundColor[index + j - 1] = tBG
+                    buffer.textColor[index + j - 1] = tc
+                    buffer.textBackgroundColor[index + j - 1] = bg
                 end
             elseif align == 2 or align == 5 or align == 8 then
                 for j = 1, math.ceil((width - lineCount) / 2) do
                     buffer.text[index + j - 1] = " "
-                    buffer.textColor[index + j - 1] = tC
-                    buffer.textBackgroundColor[index + j - 1] = tBG
+                    buffer.textColor[index + j - 1] = tc
+                    buffer.textBackgroundColor[index + j - 1] = bg
                 end
                 for j = 1, math.floor((width - lineCount) / 2) do
                     table.insert(buffer.text, index - lineCount + j - 1, " ")
-                    table.insert(buffer.textColor, index - lineCount + j - 1, tC)
-                    table.insert(buffer.textBackgroundColor, index - lineCount + j - 1, tBG)
+                    table.insert(buffer.textColor, index - lineCount + j - 1, tc)
+                    table.insert(buffer.textBackgroundColor, index - lineCount + j - 1, bg)
                     if buffer.text[index - lineCount + width + j] then
                         table.remove(buffer.text, index - lineCount + width + j)
                         table.remove(buffer.textColor, index - lineCount + width + j)
@@ -472,8 +521,8 @@ function ui.buffer.text(buffer, t, tC, tBG, align, scaleW, scaleH, richText, lef
             else
                 for j = 1, width - lineCount do
                     table.insert(buffer.text, index - lineCount + j - 1, " ")
-                    table.insert(buffer.textColor, index - lineCount + j - 1, tC)
-                    table.insert(buffer.textBackgroundColor, index - lineCount + j - 1, tBG)
+                    table.insert(buffer.textColor, index - lineCount + j - 1, tc)
+                    table.insert(buffer.textBackgroundColor, index - lineCount + j - 1, bg)
                     if buffer.text[index - lineCount + width + j] then
                         table.remove(buffer.text, index - lineCount + width + j)
                         table.remove(buffer.textColor, index - lineCount + width + j)

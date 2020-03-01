@@ -31,6 +31,8 @@ function ui.scrollView.new(parent, label, mode, style, x, y, w, h, key)
     end
     ---@type selectionGroup
     this.selectionGroup = ui.selectionGroup.new()
+    this.selectable = false
+    this.scrollWithoutSelection = true
 
     ---Get the container
     ---@return nil
@@ -163,11 +165,13 @@ function ui.scrollView.new(parent, label, mode, style, x, y, w, h, key)
     ---@param event event
     ---@return element|nil
     function this:normalEvent(event)
-        if self.mode == 3 and event.name == "mouse_scroll" then
+        if (self.scrollWithoutSelection or not self.selectable or self.mode == 3) and event.name == "mouse_scroll" then
             if self.element.v then
                 self:onValueChange(nil, event.param1)
+                return this
             elseif self.element.h then
                 self:onValueChange(nil, event.param1)
+                return this
             end
         end
     end
@@ -217,7 +221,7 @@ function ui.scrollView.new(parent, label, mode, style, x, y, w, h, key)
         if eventName == "selection_lose_focus" then
             local currentElement, newElement = ...
             this:changeMode(1)
-        elseif eventName == "selection_get_focus" then
+        elseif this.selectable and eventName == "selection_get_focus" then
             local currentElement, newElement = ...
             if newElement == this or newElement == this.element.v or newElement == this.element.h then
                 newElement = self.current or this:getContainer().element[1]

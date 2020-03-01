@@ -6,6 +6,12 @@ local _x, _y, _w, _h = 1, 1, term.getSize()
 
 local text_fuel, text_facing, text_distance, text_moved, text_detected = "Fuel:            ", "Facing:          ", "Distance Moved:  ", "Total    Moved:  ", "Detected Blocks: "
 
+local function deleteFiles()
+    fs.delete("os/programs/stripMiner/data/move.set")
+    fs.delete("os/programs/stripMiner/data/data.set")
+    fs.delete("os/startup/50-stripMiner.lua")
+end
+
 local manager = ui.uiManager.new(_x, _y, _w, _h)
 for i = 1, _w * _h do
     if i <= _w or i > _w * (_h - 1) then
@@ -28,7 +34,7 @@ local label_posZ = ui.label.new(manager, "Z: 0", theme.label2, _x + 28, _y + 1, 
 local label_fuel = ui.label.new(manager, text_fuel .. turtle.getFuelLevel() .. " / 0", theme.label2, _x, _y + 3, _w, 1)
 
 local label_facing = ui.label.new(manager, text_facing .. "Forward", theme.label2, _x, _y + 4, _w, 1)
-local label_distance = ui.label.new(manager, text_distance .. "0", theme.label2, _x, _y + 5, _w, 1)
+local label_distance = ui.label.new(manager, text_distance .. "0 / 0", theme.label2, _x, _y + 5, _w, 1)
 local label_moved = ui.label.new(manager, text_moved .. "0", theme.label2, _x, _y + 6, _w, 1)
 local label_detected = ui.label.new(manager, text_detected .. "0", theme.label2, _x, _y + 7, _w, 1)
 
@@ -125,6 +131,7 @@ local function loadSlots()
             table.insert(slots.empty, i)
         end
     end
+    data.slots = slots
 end
 local function loadData()
     local success
@@ -162,7 +169,7 @@ local function loadData()
     if data.pathTrashList then
         trashList = dofile(data.pathTrashList)
     end
-    if not data.slot then
+    if not data.slots or not data.slots.all then
         loadSlots()
         table.save(data, "os/programs/stripMiner/data/data.set")
     else
@@ -330,6 +337,23 @@ local function mine()
         end
     end
 
+    local function fillFuel(slot)
+        local ret = false
+        local name = slots.data[slot].name
+        for i = 1, #slots.empty do
+            local s = slots.empty[i]
+            local data = turtle.getItemDetail(s)
+            if data and data.name == name then
+                turtle.select(s)
+                turtle.transferTo(slot)
+                ret = true
+            end
+            if turtle.getItemSpace(slot) == 0 then
+                return true
+            end
+        end
+        return ret
+    end
     local function getNeededFuelLevel(v1, v2)
         local v = v1 - v2
         return math.abs(v.x) + math.abs(v.y) + math.abs(v.z)
@@ -350,6 +374,7 @@ local function mine()
                 return true
             end
             local slot = slots.fuel[i]
+            fillFuel(slot)
             local name, increase = slots.data[slot].name, slots.data[slot].increase
             local detail = turtle.getItemDetail(slot)
             if detail and name == detail.name then
@@ -463,11 +488,13 @@ local function mine()
             success, data = turtle.inspectDown()
         end
         if success then
+            local ret = (data.searchWhiteList == "White List")
             for _, v in ipairs(mineList) do
-                if v == data.name then
-                    return true
+                if (v[1] == data.name and IF(v[2], v[2] == data.metadata, true)) then
+                    return ret
                 end
             end
+            return not ret
         end
         return false
     end
@@ -478,9 +505,9 @@ local function mine()
                 turtle.move.turnRight(update)
                 turtle.move.turnRight(update)
             elseif move.facing.y > 0 then
-                turtle.move.turnRight(update)
-            elseif move.facing.y < 0 then
                 turtle.move.turnLeft(update)
+            elseif move.facing.y < 0 then
+                turtle.move.turnRight(update)
             end
         elseif dir == 2 then
             if move.facing.y < 0 then
@@ -496,9 +523,9 @@ local function mine()
                 turtle.move.turnRight(update)
                 turtle.move.turnRight(update)
             elseif move.facing.y > 0 then
-                turtle.move.turnLeft(update)
-            elseif move.facing.y < 0 then
                 turtle.move.turnRight(update)
+            elseif move.facing.y < 0 then
+                turtle.move.turnLeft(update)
             end
         elseif dir == 4 then
             if move.facing.y > 0 then
@@ -530,6 +557,34 @@ local function mine()
         end
     end
 
+    local function makeSpace()
+        local free = false
+        if trashList then
+            local space = 0
+            for i = 1, #slots.empty do
+                local slot = slots.empty[i]
+                local ret = (data.trashWhiteList == "Black List")
+                local data = turtle.getItemDetail(slot)
+                if data then
+                    for k, v in pairs(trashList) do
+                        if v[1] == data.name and IF(v[2], v[2] == data.damage, true) then
+                            ret = not ret
+                            break
+                        end
+                    end
+                    if ret then
+                        turtle.select(slot)
+                        turtle.drop()
+                        space = space + 1
+                    end
+                    if space > 2 then
+                        free = true
+                    end
+                end
+            end
+        end
+        return free
+    end
     local function checkSpace()
         local free = false
         for i = 1, #slots.empty do
@@ -538,27 +593,21 @@ local function mine()
                 break
             end
         end
+        for i = 1, #slots.build do
+            fillBuild(slots.build[i])
+        end
+        for i = 1, #slots.fuel do
+            fillFuel(slots.fuel[i])
+        end
+        for i = 1, #slots.empty do
+            if turtle.getItemCount(slots.empty[i]) == 0 then
+                free = true
+                break
+            end
+        end
 
         if not free and trashList then
-            local space = 0
-            for i = 1, #slots.empty do
-                local slot = slots.empty[i]
-                local data = turtle.getItemDetail(slot)
-                if data then
-                    for j = 1, #trashList do
-                        if (data.name == trashList[i]) == (data.trashWhiteList == "White List") then --TODO Whitelist
-                            turtle.select(slot)
-                            turtle.drop()
-                            space = space + 1
-                            break
-                        end
-                    end
-                end
-                if space > 2 then
-                    free = true
-                    break
-                end
-            end
+            free = makeSpace()
         end
 
         return free
@@ -698,14 +747,14 @@ local function mine()
                 label_detected:repaint("this")
             end
             turtle.digUp()
-            turtle.select(slot.enderChest)
+            turtle.select(slots.enderChest)
             turtle.placeUp()
             for i = 1, #slots.empty do
                 local slot = slots.empty[i]
                 turtle.select(slot)
-                turtle.droptUp()
+                turtle.dropUp()
             end
-            turtle.select(slot.enderChest)
+            turtle.select(slots.enderChest)
             turtle.digUp()
         elseif mode == "clear" then
             label_mode.text = "Inventory gets cleared."
@@ -849,7 +898,7 @@ local function mine()
     if #move.undone > 0 then
         iteration()
     end
-    while move.base.x <= data.length or data.length == 0 do
+    while move.distance <= data.length or data.length == 0 do
         if #slots.build > 0 then
             iteration()
 
@@ -877,7 +926,7 @@ local function mine()
             local v = vector.new(move.base.x + 1, move.base.y, move.base.z)
             while #move.undone == 0 do
                 addToUndone(v)
-                addToUndone(v + vector.down)
+                addToUndone(v + vector.up)
                 v:set(v.x + 1)
             end
             move.base:set(v.x - 1, v.y, v.z)
@@ -890,8 +939,9 @@ local function mine()
     goToDestination(way)
     goToDestination(start)
     turn(1)
-    fs.delete("os/programs/stripMiner/data/move.set")
-    fs.delete("os/programs/stripMiner/data/data.set")
+    makeSpace()
+    startMode("clear", move.pos)
+    deleteFiles()
 end
 
 local checkPause = true
@@ -924,6 +974,7 @@ function button_stop:onClick(event)
     button_exit:changeMode(2, true)
 end
 function button_exit:onClick(event)
+    deleteFiles()
     manager:exit()
 end
 

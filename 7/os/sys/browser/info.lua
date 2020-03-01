@@ -27,7 +27,12 @@ if data.color then
     table.insert(types, "Color", 1)
 end
 
-local tBox_info = ui.textBox.new(manager, "", ("%s\n\nCategory:\n%s\n\nType:\n%s\n\nVersion:\n%s\n\nSource:\n%s"):format(IF(data.description and data.description ~= "", data.description, "No Description."), IF(data.category and data.category ~= "", data.category, "Non."), table.concat(types, ", "), table.concat(data.version or {"No Version"}, "."), data.url), theme.tBox2, _x, _y, _w, _h)
+local versionText = table.concat(data.version or {"No Version"}, ".")
+if data.versionOld then
+    versionText = versionText .. " (" .. table.concat(data.versionOld, ".") .. ")"
+end
+
+local tBox_info = ui.textBox.new(manager, "", ("%s\n\nCategory:\n%s\n\nType:\n%s\n\nVersion:\n%s\n\nSource:\n%s"):format(IF(data.description and data.description ~= "", data.description, "No Description."), IF(data.category and data.category ~= "", data.category, "Non."), table.concat(types, ", "), versionText, data.url), theme.tBox2, _x, _y, _w, _h)
 
 local label_title = ui.label.new(tBox_info, data.name, theme.label1, 1, 1, _w - 3, 1)
 local button_exit = ui.button.new(tBox_info, "<", theme.button2, _w - 2, 1, 3, 1)
@@ -87,15 +92,16 @@ end
 function button_remove:onClick(event)
     manager:callFunction(
         function()
-            if type(data.delete) == "table" then
-                for i, v in ipairs(data.delete) do
+            local delete = data.deleteOld or data.delete
+            if type(delete) == "table" then
+                for i, v in ipairs(delete) do
                     if fs.exists(v) then
                         fs.delete(v)
                     end
                 end
             else
-                if fs.exists(data.delete) then
-                    fs.delete(data.delete)
+                if fs.exists(delete) then
+                    fs.delete(delete)
                 end
             end
             callfile("os/sys/browser/install.lua", 2, data)
@@ -109,15 +115,24 @@ function button_do:onClick(event)
     manager:callFunction(
         function()
             local success, content, text
+            local needsReboot = false
             downloadScreen(
                 function()
                     if data.path == "run" then
+                        local reboot = os.reboot
+                        os.reboot = function()
+                            needsReboot = true
+                        end
                         if data.url:len() == 8 then
                             success, content = www.pasteBinRun(data.url)
                         else
                             success, content = www.run(data.url)
                         end
                         text = ("%s has now run.\n"):format(data.name)
+                        if needsReboot then
+                            text = text .. "System needs a reboot."
+                        end
+                        os.reboot = reboot
                     else
                         if data.url:len() == 8 then
                             success, content = www.pasteBinSave(data.url, data.path, true)
@@ -131,6 +146,9 @@ function button_do:onClick(event)
             if success then
                 callfile("os/sys/browser/install.lua", 1, data)
                 callfile("os/sys/infoBox.lua", {label = "Information", text = text, x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, button1 = "Ok", select = event.name ~= "mouse_up"})
+                if needsReboot then
+                    os.reboot()
+                end
             else
                 callfile("os/sys/infoBox.lua", {label = "Information", text = data.name .. " failed to download.\n\nReason:\n" .. content, x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, button1 = "Ok", select = event.name ~= "mouse_up"})
             end

@@ -39,10 +39,11 @@ local function applyData(list, removable)
             for i = 1, math.min(#v.version or 0, #version) do
                 if v.version[i] > version[i] then
                     v.status = 1
+                    v.versionOld = version
                     break
                 end
             end
-            v.delete = delete
+            v.deleteOld = delete
         else
             if (v.type == "all" or (pocket and v.type:find("p")) or (turtle and v.type:find("t")) or v.type:find("d")) and (term.isColor() or not v.color) then
                 v.status = 3

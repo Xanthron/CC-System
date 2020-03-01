@@ -1,1 +1,6 @@
-dofile("os/init.lua")dofile("os/main.lua")
+dofile("os/init.lua")
+local list = fs.listAll("os/startup")
+for k, v in pairs(list) do
+    callfile("os/sys/execute.lua",{file = v, select = true,args = {}})
+end
+dofile("os/main.lua")
