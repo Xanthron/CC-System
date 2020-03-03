@@ -21,7 +21,7 @@ function ui.buffer.new(x, y, w, h, t, tC, tBG)
     ---@param w integer|optional
     ---@param h integer|optional
     ---@return nil
-    function this:draw(x, y, w, h)
+    function this:draw(term, x, y, w, h)
         local thisX, thisY, thisW, thisH = self.rect:getUnpacked()
         local maskX, maskY, maskW, maskH = thisX, thisY, thisW, thisH
         local possible = true

@@ -1,15 +1,7 @@
 local set = ...
 local x, y, w, h
-if set.x then
-    x = set.x
-    y = set.y
-    w = set.w
-    h = set.h
-else
-    x, y = 1, 1
-    w, h = term.getSize()
-end
-
+set.term = set.term or term
+table.checkType(set, "term", "table", false)
 table.checkType(set, "x", "number", false)
 table.checkType(set, "y", "number", false)
 table.checkType(set, "w", "number", false)
@@ -21,8 +13,18 @@ table.checkType(set, "tBoxT", "table", true, theme.tBox1)
 table.checkType(set, "buttonT", "table", true, theme.button1)
 table.checkType(set, "button1", "string", true)
 table.checkType(set, "button2", "string", false)
+if set.x then
+    x = set.x
+    y = set.y
+    w = set.w
+    h = set.h
+else
+    x, y = 1, 1
+    w, h = set.term.getSize()
+end
 
 local manager = ui.uiManager.new(x, y, w, h)
+manager.term = set.term
 local textBox = ui.textBox.new(manager, set.label, set.text, set.tBoxT, x, y, w, h)
 local left = #textBox.style.nTheme.b[4]
 local top = #textBox.style.nTheme.b[2]

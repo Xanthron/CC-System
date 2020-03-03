@@ -1,5 +1,6 @@
 local args = {...}
-local var1 = args[1]
+local term = args[1]
+local var1 = args[2]
 if type(var1) == "string" then
     local function func()
         local x, y = term.getSize()
@@ -33,6 +34,6 @@ if type(var1) == "string" then
             sleep(0.2)
         end
     end
-    args[1] = func
+    args[2] = func
 end
-return parallel.waitForAny(table.unpack(args))
+return parallel.waitForAny(table.unpack(args, 2, #args))

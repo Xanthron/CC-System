@@ -1,8 +1,13 @@
 local args = {...}
 local official, unofficial
 
+if type(args[1]) == "table" then
+    term = args[1]
+    table.remove(args, 1)
+end
+
 local function downloadScreen(...)
-    callfile("os/sys/wait.lua", "Downloading", ...)
+    callfile("os/sys/wait.lua", term, "Downloading", ...)
 end
 
 local function doData(data)
@@ -49,3 +54,7 @@ downloadScreen(
         end
     end
 )
+term.setCursorPos(1, 1)
+term.setTextColor(colors.white)
+term.setBackgroundColor(colors.black)
+term.clear()

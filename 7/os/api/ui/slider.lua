@@ -247,7 +247,7 @@ function ui.slider.new(parent, orientation, startValue, endValue, size, style, x
         local rectX, rectY, rectW, rectH = self:getGlobalRect()
         x, y, w, h = ui.rect.overlaps(x, y, w, h, rectX, rectY, rectW, rectH)
         if self.orientation == 1 then
-            if event.name == "mouse_click" then
+            if event.name == "mouse_click" or event.name == "monitor_touch" then
                 if event.param2 >= x and event.param2 < x + w then
                     if y == rectY and event.param3 == y then
                         self.mode = 4
@@ -304,7 +304,7 @@ function ui.slider.new(parent, orientation, startValue, endValue, size, style, x
                 end
             end
         else
-            if event.name == "mouse_click" then
+            if event.name == "mouse_click" or event.name == "monitor_touch" then
                 if event.param3 >= y and event.param3 < y + h then
                     if x == rectX and event.param2 == x then
                         self.mode = 4

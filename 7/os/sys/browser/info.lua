@@ -1,11 +1,14 @@
-local data = ...
-local _x, _y, _w, _h = 1, 1, term.getSize()
+local args = ...
+local data = args.data
+args.term = args.term or term
+local _x, _y, _w, _h = 1, 1, args.term.getSize()
 
 local function downloadScreen(...)
-    callfile("os/sys/wait.lua", "Downloading", ...)
+    callfile("os/sys/wait.lua", args.term "Downloading", ...)
 end
 
 local manager = ui.uiManager.new(_x, _y, _w, _h)
+manager.term = args.term
 ui.buffer.fill(manager.buffer, " ", colors.white, colors.white)
 
 local types = {}
@@ -83,7 +86,7 @@ function button_delete:onClick(event)
                 end
             end
             table.save(list, path)
-            callfile("os/sys/infoBox.lua", {label = "Information", text = data.name .. " is now deleted from the unofficial download list", x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, button1 = "Ok", select = event.name ~= "mouse_up"})
+            callfile("os/sys/infoBox.lua", {term = args.term, label = "Information", text = data.name .. " is now deleted from the unofficial download list", x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, button1 = "Ok", select = event.name ~= "mouse_up"})
             manager:exit()
         end
     )
@@ -105,7 +108,7 @@ function button_remove:onClick(event)
                 end
             end
             callfile("os/sys/browser/install.lua", 2, data)
-            callfile("os/sys/infoBox.lua", {label = "Information", text = data.name .. " is now deleted from the system.", x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, button1 = "Ok", select = event.name ~= "mouse_up"})
+            callfile("os/sys/infoBox.lua", {term = args.term, label = "Information", text = data.name .. " is now deleted from the system.", x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, button1 = "Ok", select = event.name ~= "mouse_up"})
             manager:exit()
         end
     )
@@ -145,12 +148,12 @@ function button_do:onClick(event)
             )
             if success then
                 callfile("os/sys/browser/install.lua", 1, data)
-                callfile("os/sys/infoBox.lua", {label = "Information", text = text, x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, button1 = "Ok", select = event.name ~= "mouse_up"})
+                callfile("os/sys/infoBox.lua", {term = args.term, label = "Information", text = text, x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, button1 = "Ok", select = event.name ~= "mouse_up"})
                 if needsReboot then
                     os.reboot()
                 end
             else
-                callfile("os/sys/infoBox.lua", {label = "Information", text = data.name .. " failed to download.\n\nReason:\n" .. content, x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, button1 = "Ok", select = event.name ~= "mouse_up"})
+                callfile("os/sys/infoBox.lua", {term = args.term, label = "Information", text = data.name .. " failed to download.\n\nReason:\n" .. content, x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, button1 = "Ok", select = event.name ~= "mouse_up"})
             end
             manager:exit()
         end

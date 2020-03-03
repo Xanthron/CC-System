@@ -466,7 +466,7 @@ function ui.inputField.new(parent, label, text, multiLine, style, x, y, w, h, ke
     ---@return element|nil
     function this:pointerEvent(event, x, y, w, h)
         x, y, w, h = ui.rect.overlaps(x, y, w, h, self.buffer.rect:getUnpacked())
-        if event.name == "mouse_click" then
+        if event.name == "mouse_click" or event.name == "monitor_touch" then
             if event.param2 >= x and event.param2 < x + w and event.param3 >= y and event.param3 < y + h then
                 self.mode = 3
                 self:recalculate()

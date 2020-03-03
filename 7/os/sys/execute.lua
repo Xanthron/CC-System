@@ -1,5 +1,7 @@
 local set = ...
 
+set.term = set.term or term
+table.checkType(set, "term", "table", true)
 table.checkType(set, "file", "string", true)
 table.checkType(set, "args", "table", false)
 table.checkType(set, "select", "boolean", true)
@@ -50,7 +52,7 @@ local function getFallBackInfo()
 end
 local _file, _line, errorLevel = getFallBackInfo()
 local function errorHandler(text)
-    local w, h = term.getSize()
+    local w, h = set.term.getSize()
     local possibleFiles = {}
     local message, file, line = getErrorText(text)
     if file ~= "" and file == "execute.lua" then
@@ -70,15 +72,15 @@ local function errorHandler(text)
         end
         message = message .. "\n\n\n[tc=gray]" .. debug.traceback()
     end
-    callfile("os/sys/infoBox.lua", {label = "Error", text = message, x = 3, y = 3, w = w - 4, h = h - 4, button1 = "Ok", select = set.select})
+    callfile("os/sys/infoBox.lua", {term = set.term, label = "Error", text = message, x = 3, y = 3, w = w - 4, h = h - 4, button1 = "Ok", select = set.select})
 end
 local function executionHandler()
-    term.setCursorPos(1, 1)
-    if term.isColor() then
-        term.setBackgroundColor(colors.black)
-        term.setTextColor(colors.white)
+    set.term.setCursorPos(1, 1)
+    if set.term.isColor() then
+        set.term.setBackgroundColor(colors.black)
+        set.term.setTextColor(colors.white)
     end
-    term.clear()
+    set.term.clear()
     local button, select = callfile(set.file, table.unpack(set.args))
     return select
 end

@@ -162,7 +162,7 @@ function listBox.selectionGroup:listener(name, source, ...)
         end
     elseif name == "mouse" then
         local event = ...
-        if event.name == "mouse_click" then
+        if event.name == "mouse_click" or event.name == "monitor_touch" then
             local x, y, w, h = listBox:getGlobalRect()
             if event.param2 < x or event.param2 > x + w or event.param3 < y or event.param3 > y + h then
                 select = false

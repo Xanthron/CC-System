@@ -47,7 +47,7 @@ function ui.button.new(parent, text, style, x, y, w, h, key)
     ---@return element|nil
     function this:pointerEvent(event, x, y, w, h)
         x, y, w, h = ui.rect.overlaps(x, y, w, h, self.buffer.rect:getUnpacked())
-        if event.name == "mouse_click" then
+        if event.name == "mouse_click" or event.name == "monitor_touch" then
             if event.param2 >= x and event.param2 < x + w and event.param3 >= y and event.param3 < y + h then
                 self.mode = 4
                 if self._inAnimation == false then
@@ -56,6 +56,10 @@ function ui.button.new(parent, text, style, x, y, w, h, key)
                     self:repaint("this", x, y, w, h)
                     self.animation.data[1] = os.clock()
                     self:getManager().parallelManager:addFunction(self.animation)
+                end
+                if event.name == "monitor_touch" and self.onClick then
+                    self.mode = 1
+                    self:onClick(event)
                 end
                 return self
             end

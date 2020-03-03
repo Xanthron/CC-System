@@ -22,12 +22,18 @@ function ui.uiManager.new(x, y, w, h)
     ---@type boolean
     this._exit = false
 
+    ---@type term
+    this.term = nil
+
+    function this:getTerm()
+        return self.term or term
+    end
     ---Draws the containing elements to the screen
     ---@return nil
     function this:draw()
         local x, y, w, h = self:getSimpleMaskRect()
         self:doDraw(self.buffer, x, y, w, h)
-        self.buffer:draw(x, y, w, h)
+        self.buffer:draw(self:getTerm(), x, y, w, h)
     end
     ---Intern function for execute to pass down the event to all elements
     ---@return nil
@@ -48,10 +54,8 @@ function ui.uiManager.new(x, y, w, h)
             this._event:pull()
             term.setCursorBlink(false)
             local eventName = this._event.name
-            if
-                eventName == "mouse_click" or eventName == "mouse_up" or eventName == "mouse_drag" or
-                    eventName == "monitor_touch"
-             then
+            if eventName == "mouse_click" or eventName == "mouse_up" or eventName == "mouse_drag" or eventName == "monitor_touch" then
+                --error("what")
                 local element = this:doPointerEvent(this._event, this:getSimpleMaskRect())
                 if #this.selectionManager.groups > 0 then
                     this.selectionManager:mouseEvent(this._event, element)

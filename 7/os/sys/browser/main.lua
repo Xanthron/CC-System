@@ -9,6 +9,8 @@
     Variables
     ####################################################################################################################
 ]]
+local args = ...
+args.term = args.term or term
 local defaultPasteBin = "ZbWvc7x9"
 ---@type integer
 local _x, _y, _w, _h = 1, 1, term.getSize()
@@ -75,6 +77,7 @@ end
 local function updateFiles(mode)
     callfile(
         "os/sys/wait.lua",
+        args.term,
         "Downloading",
         function()
             local l1, l2, l3 = callfile("os/sys/browser/getList.lua", mode)
@@ -118,7 +121,7 @@ local function createSViewButton(manager, sView, official, data, elements, x, y,
         manager.parallelManager:removeFunction(self.animation)
         manager:callFunction(
             function()
-                callfile("os/sys/browser/info.lua", data)
+                callfile("os/sys/browser/info.lua", {term = args.term, data = data})
                 updateFiles(false)
                 updateSView(manager, sView)
                 manager:draw()
@@ -171,6 +174,7 @@ end
     ####################################################################################################################
 ]]
 local manager = ui.uiManager.new(_x, _y, _w, _h)
+manager.term = args.term
 local index
 for i = 1, _w * _h do
     if i <= _w then
@@ -226,7 +230,7 @@ end
 function button_download:onClick(event)
     manager:callFunction(
         function()
-            callfile("os/sys/browser/loader.lua", {mode = 2})
+            callfile("os/sys/browser/loader.lua", {term = args.term, mode = 2})
             updateFiles(false)
             updateSView(manager, sView_list)
             manager:draw()
@@ -236,7 +240,7 @@ end
 function button_upload:onClick(event)
     manager:callFunction(
         function()
-            callfile("os/sys/browser/loader.lua", {mode = 1})
+            callfile("os/sys/browser/loader.lua", {term = args.term, mode = 1})
             updateFiles(false)
             updateSView(manager, sView_list)
             manager:draw()

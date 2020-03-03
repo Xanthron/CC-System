@@ -40,7 +40,7 @@ local function checkType(name, kind)
         error(("'%s' is not set. (expected '%s' got 'nil')"):format(name, kind), 3)
     end
 end
-
+args.term = args.term or term
 checkType("icons", "boolean")
 checkType("hidden", "boolean")
 checkType("extensions", "boolean")
@@ -76,7 +76,7 @@ local _x, _y, _w, _h
 if set.manager then
     _x, _y, _w, _h = set.manager:getGlobalRect()
 else
-    _x, _y, _w, _h = 1, 1, term.getSize()
+    _x, _y, _w, _h = 1, 1, args.term.getSize()
 end
 
 local isSelected
@@ -576,11 +576,11 @@ create = function(manager, listView, name, path, isDir)
         if text ~= "" then
             if fs.exists(newPath) then
                 if isDir then
-                    callfile("os/sys/infoBox.lua", {x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, text = "Directory already exist.\nA new Directory is not created.", label = "Directory already exist", select = true, button1 = "Ok"})
+                    callfile("os/sys/infoBox.lua", {term = args.term, x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, text = "Directory already exist.\nA new Directory is not created.", label = "Directory already exist", select = true, button1 = "Ok"})
                     manager:draw()
                     return
                 else
-                    if callfile("os/sys/infoBox.lua", {x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, text = "File already exist.\nShould the file still be created?", label = "File already exist", select = true, button1 = "Cancel", button2 = "Create"}) == 1 then
+                    if callfile("os/sys/infoBox.lua", {term = args.term, x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, text = "File already exist.\nShould the file still be created?", label = "File already exist", select = true, button1 = "Cancel", button2 = "Create"}) == 1 then
                         manager:draw()
                         return
                     end
@@ -606,9 +606,9 @@ create = function(manager, listView, name, path, isDir)
 end
 delete = function(manager, listView, path, select)
     if fs.isReadOnly(path) then
-        callfile("os/sys/infoBox.lua", {x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, text = "Directory is read only.", label = "Directory is read only", select = true, button1 = "Ok"})
+        callfile("os/sys/infoBox.lua", {term = args.term, x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, text = "Directory is read only.", label = "Directory is read only", select = true, button1 = "Ok"})
     else
-        if callfile("os/sys/infoBox.lua", {x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, text = ("Do you realy want to delete %q?\nA recovery is not possible"):format(fs.getName(path)), label = "Delete", select = select, button1 = "Cancel", button2 = "Delete"}) == 1 then
+        if callfile("os/sys/infoBox.lua", {term = args.term, x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, text = ("Do you realy want to delete %q?\nA recovery is not possible"):format(fs.getName(path)), label = "Delete", select = select, button1 = "Cancel", button2 = "Delete"}) == 1 then
         else
             fs.delete(path)
             updateListView(manager, listView)
@@ -627,7 +627,7 @@ move = function(manager, listView, path, select)
     local isDir = fs.isDir(path)
     local name = fs.getName(path)
     local path = path:sub(1, path:len() - name:len())
-    local save = callfile("os/sys/explorer/main.lua", {select = select, mode = "move", files = false, path = path, move = name, edit = false})
+    local save = callfile("os/sys/explorer/main.lua", {term = set.term, select = select, mode = "move", files = false, path = path, move = name, edit = false})
     if save then
         local newPath = fs.combine(save, name)
         local startPath = path .. name
@@ -641,16 +641,16 @@ move = function(manager, listView, path, select)
             manager:draw()
             updateListView(manager, listView)
         else
-            callfile("os/sys/infoBox.lua", {x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, text = "Access denied.\nFile could not be moved.", label = "Move file failed", select = select, button1 = "Ok"})
+            callfile("os/sys/infoBox.lua", {term = args.term, x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, text = "Access denied.\nFile could not be moved.", label = "Move file failed", select = select, button1 = "Ok"})
         end
     end
 end
 copy = function(manager, listView, path, select)
     local dirPath, name = fs.getDir(path), fs.getName(path)
-    local save = callfile("os/sys/explorer/main.lua", {select = select, mode = "move", files = false, path = dirPath, move = name, edit = false})
+    local save = callfile("os/sys/explorer/main.lua", {term = set.term, select = select, mode = "move", files = false, path = dirPath, move = name, edit = false})
     if save then
         if fs.isReadOnly(save) then
-            callfile("os/sys/infoBox.lua", {x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, text = "Access denied.\nFolder is read only.", label = "Copy file failed", select = select, button1 = "Ok"})
+            callfile("os/sys/infoBox.lua", {term = args.term, x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, text = "Access denied.\nFolder is read only.", label = "Copy file failed", select = select, button1 = "Ok"})
         else
             if save == dirPath then
                 local dir = fs.getDir(path)
@@ -678,7 +678,7 @@ copy = function(manager, listView, path, select)
                 end
                 local newPath = fs.combine(save, name)
                 if fs.exists(newPath) then
-                    if callfile("os/sys/infoBox.lua", {x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, text = ("%s already exist.\nShould the %s still be created?"):format(T, t), label = ("%s already exist"):format(T), select = true, button1 = "Cancel", button2 = "Copy"}) == 2 then
+                    if callfile("os/sys/infoBox.lua", {term = args.term, x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, text = ("%s already exist.\nShould the %s still be created?"):format(T, t), label = ("%s already exist"):format(T), select = true, button1 = "Cancel", button2 = "Copy"}) == 2 then
                         fs.delete(newPath)
                         fs.copy(path, newPath)
                     end
@@ -693,6 +693,7 @@ end
 
 addPath(set.path)
 local manager = ui.uiManager.new(1, 1, _w, _h)
+manager.term = args.term
 local index
 for i = 1, _w * _h do
     if i <= _w then
@@ -853,12 +854,12 @@ function forwardButton:onClick(event)
     manager:draw()
 end
 function exitButton:onClick(event)
-    term.setCursorPos(1, 1)
-    if term.isColor() then
-        term.setBackgroundColor(colors.black)
-        term.setTextColor(colors.white)
+    args.term.setCursorPos(1, 1)
+    if args.term.isColor() then
+        args.term.setBackgroundColor(colors.black)
+        args.term.setTextColor(colors.white)
     end
-    term.clear()
+    args.term.clear()
     manager:exit()
 end
 

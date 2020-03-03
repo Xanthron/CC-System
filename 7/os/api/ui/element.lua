@@ -274,7 +274,7 @@ function ui.element.new(parent, name, x, y, w, h, key)
             x, y, w, h = self:getCompleteMaskRect(x, y, w, h)
             local manager = self:getManager()
             self:doDraw(manager.buffer, x, y, w, h)
-            manager.buffer:draw(x, y, w, h)
+            manager.buffer:draw(manager:getTerm(), x, y, w, h)
         elseif mode == "parent" then
             if self._parent then
                 self._parent:repaint("this", x, y, w, h)

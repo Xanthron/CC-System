@@ -1,4 +1,6 @@
-local _x, _y, _w, _h = 1, 1, term.getSize()
+local currentTerm = peripheral.wrap("top")
+currentTerm.setTextScale(0.5)
+local _x, _y, _w, _h = 1, 1, currentTerm.getSize()
 
 local files
 
@@ -96,6 +98,7 @@ local function updateSView(manager, sView)
                         callfile(
                         "os/sys/execute.lua",
                         {
+                            term = currentTerm, --TODO remove
                             file = file.path,
                             select = event.name ~= "mouse_up",
                             edit = file.data.enter,
@@ -149,6 +152,9 @@ for i = 1, _w * _h do
         manager.buffer.textBackgroundColor[i] = colors.white
     end
 end
+
+manager.term = currentTerm
+
 local button_browser = ui.button.new(manager, "Browser", theme.button1, 1, 1, 9, 1)
 local button_explorer = ui.button.new(manager, "Explorer", theme.button1, 10, 1, 10, 1)
 local button_options = ui.button.new(manager, "\164", theme.button1, _w - 5, 1, 3, 1)
@@ -158,7 +164,8 @@ local sView_list = ui.scrollView.new(manager, "", 3, theme.sView1, 1, 2, _w, _h 
 function button_browser:onClick(event)
     manager:callFunction(
         function()
-            local success, select = callfile("os/sys/execute.lua", {file = "os/sys/browser/main.lua", select = event ~= "mouse_up", args = {{select = event ~= "mouse_up"}}})
+            --TODO change current term
+            local success, select = callfile("os/sys/execute.lua", {term = currentTerm, file = "os/sys/browser/main.lua", select = event ~= "mouse_up", args = {{term = currentTerm, select = event ~= "mouse_up"}}})
             loadFiles()
             updateSView(manager, sView_list)
             manager:draw()
@@ -173,6 +180,7 @@ function button_explorer:onClick(event)
                 callfile(
                 "os/sys/execute.lua",
                 {
+                    term = currentTerm, --TODO change
                     file = "os/sys/explorer/main.lua",
                     select = event ~= "mouse_up",
                     args = {{select = event ~= "mouse_up"}}

@@ -162,6 +162,7 @@ function ui.selectionManager.new()
     ---@param element element
     ---@return nil
     function this:mouseEvent(event, element)
+        --TODO check if it is the right term
         if not self.current or not self.current:callListener("mouse", "mouse", event) or event.name ~= "mouse_click" then
             return
         end
