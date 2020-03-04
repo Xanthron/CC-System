@@ -1,16 +1,7 @@
-local function func1()
-    local event, p1 = os.pullEvent()
-    if event == "char" then
-        print(p1)
-    end
-end
-local function func2()
-    local event, p1 = os.pullEvent()
-    if event == "mouse_click" then
-        print("what")
-    end
-end
+local tab1 = {}
+local tab2 = {}
 
-while true do
-    parallel.waitForAny(func1, func2)
-end
+local tab = {}
+tab[tab1] = "lol"
+tab[tab2] = "was"
+print(tab[tab1])

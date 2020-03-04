@@ -176,3 +176,12 @@ function table.reverse(list)
         table.swap(list, i, #list - i + 1)
     end
 end
+
+function table.contains(list, value)
+    for k, v in pairs(list) do
+        if v == value then
+            return true
+        end
+    end
+    return false
+end
