@@ -156,6 +156,9 @@ function ui.inputField.new(parent, label, text, multiLine, style, x, y, w, h, ke
         if self.mode > 2 then
             self:getAutoComplete()
         end
+        if self.onTextEdit then
+            self:onTextEdit("change", text)
+        end
     end
 
     function this:combinedText(text)
@@ -210,7 +213,7 @@ function ui.inputField.new(parent, label, text, multiLine, style, x, y, w, h, ke
             end
             ui.buffer.labelBox(self.buffer, text, theme.tC, theme.tBG, 1, theme.b[5][1], left, top, right, bottom)
         else
-            self:getManager().getCursorPos = self.getCursorPos
+            self:getDrawer().getCursorPos = self.getCursorPos
 
             local completeText
             if #self.autoComplete > 0 then
@@ -305,6 +308,9 @@ function ui.inputField.new(parent, label, text, multiLine, style, x, y, w, h, ke
                 self.text = self:combinedText(char)
                 self.cursorOffset = self.cursorOffset + char:len()
                 self:getAutoComplete()
+                if self.onTextEdit then
+                    self:onTextEdit("change", self.text)
+                end
                 self:recalculateText()
                 self:repaint("this")
                 return self
@@ -319,6 +325,9 @@ function ui.inputField.new(parent, label, text, multiLine, style, x, y, w, h, ke
                 self.text = self.text:sub(1, self.cursorOffset) .. paste .. self.text:sub(self.cursorOffset + 1)
                 self.cursorOffset = self.cursorOffset + paste:len()
                 self:getAutoComplete()
+                if self.onTextEdit then
+                    self:onTextEdit("change", self.text)
+                end
                 self:recalculateText()
                 self:repaint("this")
                 return self
@@ -329,6 +338,9 @@ function ui.inputField.new(parent, label, text, multiLine, style, x, y, w, h, ke
                         self.text = self.text:sub(1, self.cursorOffset - 1) .. self.text:sub(self.cursorOffset + 1)
                         self.cursorOffset = self.cursorOffset - 1
                         self:getAutoComplete()
+                        if self.onTextEdit then
+                            self:onTextEdit("change", self.text)
+                        end
                         self:recalculateText()
                         self:repaint("this")
                     end
@@ -337,6 +349,9 @@ function ui.inputField.new(parent, label, text, multiLine, style, x, y, w, h, ke
                         if not self.onTextEdit or not (self:onTextEdit("delete", self.cursorOffset) == false) then
                             self.text = self.text:sub(1, self.cursorOffset) .. self.text:sub(self.cursorOffset + 2)
                             self:getAutoComplete()
+                            if self.onTextEdit then
+                                self:onTextEdit("change", self.text)
+                            end
                             self:recalculateText()
                             self:repaint("this")
                         end
@@ -345,6 +360,9 @@ function ui.inputField.new(parent, label, text, multiLine, style, x, y, w, h, ke
                     if self.repeatItem:call() and self.cursorOffset > 0 then
                         self.cursorOffset = 0
                         self:getAutoComplete()
+                        if self.onTextEdit then
+                            self:onTextEdit("change", self.text)
+                        end
                         self:recalculateText()
                         self:repaint("this")
                     end
@@ -352,6 +370,9 @@ function ui.inputField.new(parent, label, text, multiLine, style, x, y, w, h, ke
                     if self.repeatItem:call() and self.cursorOffset < self.text:len() then
                         self.cursorOffset = self.text:len()
                         self:getAutoComplete()
+                        if self.onTextEdit then
+                            self:onTextEdit("change", self.text)
+                        end
                         self:recalculateText()
                         self:repaint("this")
                     end
@@ -359,6 +380,9 @@ function ui.inputField.new(parent, label, text, multiLine, style, x, y, w, h, ke
                     if self.repeatItem:call() and self.cursorOffset > 0 then
                         self.cursorOffset = self.cursorOffset - 1
                         self:getAutoComplete()
+                        if self.onTextEdit then
+                            self:onTextEdit("change", self.text)
+                        end
                         self:recalculateText()
                         self:repaint("this")
                     end
@@ -377,6 +401,9 @@ function ui.inputField.new(parent, label, text, multiLine, style, x, y, w, h, ke
                             self.cursorOffset = math.min(self.text:len(), self.cursorOffset + 1)
                         end
                         self:getAutoComplete()
+                        if self.onTextEdit then
+                            self:onTextEdit("change", self.text)
+                        end
                         self:recalculateText()
                         self:repaint("this")
                     end
@@ -429,6 +456,9 @@ function ui.inputField.new(parent, label, text, multiLine, style, x, y, w, h, ke
                     self.text = self:combinedText(char)
                     self.cursorOffset = self.cursorOffset + char:len()
                     self:getAutoComplete()
+                    if self.onTextEdit then
+                        self:onTextEdit("change", self.text)
+                    end
                     self:recalculateText()
                     self:repaint("this")
                     return self

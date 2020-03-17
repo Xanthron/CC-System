@@ -1,22 +1,22 @@
-ui.toggleButton = {}
+ui.toggle = {}
 ---@param parent element
----@param text string
+---@param text string|string[]
 ---@param checked boolean
----@param style style.toggleButton
+---@param style style.toggle
 ---@param x integer
 ---@param y integer
 ---@param w integer
 ---@param h integer
 ---@param key string|optional
 ---@return toggle
-function ui.toggleButton.new(parent, text, checked, style, x, y, w, h, key)
+function ui.toggle.new(parent, text, checked, style, x, y, w, h, key)
     ---@class toggle:element
     local this = ui.element.new(parent, "toggle", x, y, w, h, key)
 
-    ---@type style.toggleButton
+    ---@type style.toggle
     this.style = style
     ---@type string
-    this.text = text
+    this.text = IF(type(text) == "string", {text}, text)
     ---@type boolean
     this._checked = checked
     ---@type boolean
@@ -62,7 +62,7 @@ function ui.toggleButton.new(parent, text, checked, style, x, y, w, h, key)
                     self:recalculate()
                     self:repaint("this", x, y, w, h)
                     self.animation.data[1] = os.clock()
-                    self:getManager().parallelManager:addFunction(self.animation)
+                    self:getDrawer():getParallelManager():addFunction(self.animation)
                 end
                 return self
             end
@@ -113,7 +113,7 @@ function ui.toggleButton.new(parent, text, checked, style, x, y, w, h, key)
                 self:recalculate()
                 self:repaint("this", self:getCompleteMaskRect())
                 self.animation.data[1] = os.clock()
-                self:getManager().parallelManager:addFunction(self.animation)
+                self:getDrawer():getParallelManager():addFunction(self.animation)
             end
             return true
         elseif event.name == "key_up" and self.mode == 4 and (event.param1 == 57 or event.param1 == 28) then
@@ -155,7 +155,7 @@ function ui.toggleButton.new(parent, text, checked, style, x, y, w, h, key)
         end
         local buffer = self.buffer
         local align = self.style.align
-        ui.buffer.labelBox(buffer, self.text, theme.tC, theme.tBG, align, " ", #checkbox, 0, 0, 0)
+        ui.buffer.labelBox(buffer, self.text[IF(self._checked or #self.text < 2, 1, 2)], theme.tC, theme.tBG, align, " ", #checkbox, 0, 0, 0)
         local topPadding = 0
         if align == 1 or align == 2 or align == 3 then
             topPadding = 1

@@ -98,11 +98,11 @@ local function newStyle()
     button.pTheme = button_pressed
     this.button = button
 
-    ---@class style.toggleButton
-    local toggleButton = {}
-    toggleButton.align = 1
-    ---@class style.toggleButton.theme
-    local toggleButton_normal = {
+    ---@class style.toggle
+    local toggle = {}
+    toggle.align = 1
+    ---@class style.toggle.theme
+    local toggle_normal = {
         tC = colors.black,
         tBG = colors.white,
         uncheckedL = {" ", "O", " "},
@@ -112,8 +112,8 @@ local function newStyle()
         checkedLC = {colors.white, colors.orange, colors.white},
         checkedLBG = {colors.white, colors.red, colors.white}
     }
-    ---@type style.toggleButton.theme
-    local toggleButton_disabled = {
+    ---@type style.toggle.theme
+    local toggle_disabled = {
         tC = colors.gray,
         tBG = colors.white,
         uncheckedL = {"*", "O", "*"},
@@ -123,8 +123,8 @@ local function newStyle()
         checkedLC = {colors.white, colors.gray, colors.white},
         checkedLBG = {colors.gray, colors.lightGray, colors.gray}
     }
-    ---@type style.toggleButton.theme
-    local toggleButton_selected = {
+    ---@type style.toggle.theme
+    local toggle_selected = {
         tC = colors.orange,
         tBG = colors.white,
         uncheckedL = {">", "O", "< "},
@@ -134,8 +134,8 @@ local function newStyle()
         checkedLC = {colors.orange, colors.white, colors.orange},
         checkedLBG = {colors.white, colors.red, colors.white}
     }
-    ---@type style.toggleButton.theme
-    local toggleButton_pressed = {
+    ---@type style.toggle.theme
+    local toggle_pressed = {
         tC = colors.orange,
         tBG = colors.white,
         uncheckedL = {">", "X", "<"},
@@ -145,11 +145,11 @@ local function newStyle()
         checkedLC = {colors.orange, colors.white, colors.orange},
         checkedLBG = {colors.white, colors.lightBlue, colors.white}
     }
-    toggleButton.nTheme = toggleButton_normal
-    toggleButton.dTheme = toggleButton_disabled
-    toggleButton.sTheme = toggleButton_selected
-    toggleButton.pTheme = toggleButton_pressed
-    this.toggleButton = toggleButton
+    toggle.nTheme = toggle_normal
+    toggle.dTheme = toggle_disabled
+    toggle.sTheme = toggle_selected
+    toggle.pTheme = toggle_pressed
+    this.toggle = toggle
 
     ---@class style.slider
     local slider = {}
@@ -756,8 +756,8 @@ activatedButton.dTheme.tC = colors.lightGray
 activatedButton.dTheme.tBG = colors.gray
 activatedButton.dTheme.bC = colors.lightGray
 activatedButton.dTheme.bBG = colors.gray
----@type style.toggleButton
-local toggle1 = style("toggleButton")
+---@type style.toggle
+local toggle1 = style("toggle")
 if term.isColor() then
     toggle1.dTheme.checkedL = {" ", "X", " "}
     toggle1.dTheme.checkedLC = {colors.white, colors.white, colors.white}

@@ -24,30 +24,30 @@ local modeName = IF(mode == 1, "Upload", "Download")
     SetUp
     ####################################################################################################################
 ]]
-local manager, index = ui.uiManager.new(_x, _y, _w, _h), nil
-manager.term = args.term
+local drawer, index = ui.drawer.new(_x, _y, _w, _h), nil
+drawer.term = args.term
 for i = 1, _w * _h do
     if i <= _w or i > (_h - 1) * _w then
-        manager.buffer.text[i] = " "
-        manager.buffer.textColor[i] = colors.green
-        manager.buffer.textBackgroundColor[i] = colors.green
+        drawer.buffer.text[i] = " "
+        drawer.buffer.textColor[i] = colors.green
+        drawer.buffer.textBackgroundColor[i] = colors.green
     else
-        manager.buffer.text[i] = " "
-        manager.buffer.textColor[i] = colors.white
-        manager.buffer.textBackgroundColor[i] = colors.white
+        drawer.buffer.text[i] = " "
+        drawer.buffer.textColor[i] = colors.white
+        drawer.buffer.textBackgroundColor[i] = colors.white
     end
 end
 
-local label_title = ui.label.new(manager, modeName .. " File", theme.label1, 1, 1, _w - 3, 1)
-local button_exit = ui.button.new(manager, "<", theme.button2, _w - 2, 1, 3, 1)
-local sView_item = ui.scrollView.new(manager, "", 3, theme.sView1, 1, 2, _w, _h - 2)
+local label_title = ui.label.new(drawer, modeName .. " File", theme.label1, 1, 1, _w - 3, 1)
+local button_exit = ui.button.new(drawer, "<", theme.button2, _w - 2, 1, 3, 1)
+local sView_item = ui.scrollView.new(drawer, "", 3, theme.sView1, 1, 2, _w, _h - 2)
 local container_item = sView_item:getContainer()
 
 local y = 2
 
 local iField_code, label_code
 if mode == 1 then
-    label_code = ui.label.new(manager, "", theme.label1, 1, _h, _w - 8, 1)
+    label_code = ui.label.new(drawer, "", theme.label1, 1, _h, _w - 8, 1)
 else
     label_code = ui.label.new(container_item, "Code:", theme.label2, 1, y, 6)
     iField_code = ui.inputField.new(container_item, nil, "", false, theme.iField2, 7, y, _w - 8, 1)
@@ -65,17 +65,17 @@ if args.file then
     label_path:recalculate()
 end
 y = y + 2
-local toggle_toList = ui.toggleButton.new(container_item, "Add to list", true, theme.toggle1, 1, y, _w - 1, 1)
+local toggle_toList = ui.toggle.new(container_item, "Add to list", true, theme.toggle1, 1, y, _w - 1, 1)
 y = y + 1
 local label_types = ui.label.new(container_item, "Types:", theme.label2, 3, y, _w - 3, 1)
 y = y + 1
-local toggle_desktop = ui.toggleButton.new(container_item, "Desktop", true, theme.toggle1, 3, y, _w - 3, 1)
+local toggle_desktop = ui.toggle.new(container_item, "Desktop", true, theme.toggle1, 3, y, _w - 3, 1)
 y = y + 1
-local toggle_turtle = ui.toggleButton.new(container_item, "Turtle", true, theme.toggle1, 3, y, _w - 3, 1)
+local toggle_turtle = ui.toggle.new(container_item, "Turtle", true, theme.toggle1, 3, y, _w - 3, 1)
 y = y + 1
-local toggle_pocket = ui.toggleButton.new(container_item, "Pocket", true, theme.toggle1, 3, y, _w - 3, 1)
+local toggle_pocket = ui.toggle.new(container_item, "Pocket", true, theme.toggle1, 3, y, _w - 3, 1)
 y = y + 2
-local toggle_color = ui.toggleButton.new(container_item, "Need Color", false, theme.toggle1, 2, y, _w - 2, 1)
+local toggle_color = ui.toggle.new(container_item, "Need Color", false, theme.toggle1, 2, y, _w - 2, 1)
 y = y + 2
 local iField_name = ui.inputField.new(container_item, "Name", args.name or "", false, theme.iField1, 3, y, _w - 4, 3)
 y = y + 4
@@ -85,19 +85,19 @@ local iField_category = ui.inputField.new(container_item, "Category", args.versi
 y = y + 4
 local iField_description = ui.inputField.new(container_item, "Description", "", true, theme.iField1, 3, y, _w - 4, 7)
 
-local button_load = ui.button.new(manager, modeName, theme.button1, _w - 9, _h, 10, 1)
+local button_load = ui.button.new(drawer, modeName, theme.button1, _w - 9, _h, 10, 1)
 button_load.mode = 2
 button_load:recalculate()
 
---local label_code = ui.label.new(manager, "", theme.label1, 1, _h, _w - 8, 1)
+--local label_code = ui.label.new(drawer, "", theme.label1, 1, _h, _w - 8, 1)
 
 sView_item:resetLayout()
 sView_item:recalculate()
 
-local group_menu = manager.selectionManager:addNewGroup()
-manager.selectionManager:addGroup(sView_item.selectionGroup)
+local group_menu = drawer.selectionManager:addNewGroup()
+drawer.selectionManager:addGroup(sView_item.selectionGroup)
 local group_list = sView_item.selectionGroup
-local group_download = manager.selectionManager:addNewGroup()
+local group_download = drawer.selectionManager:addNewGroup()
 if mode == 1 then
     group_menu:addElement(button_exit, nil, nil, nil, button_path)
     group_list:addElement(button_path, nil, button_exit, nil, toggle_toList)
@@ -129,7 +129,7 @@ local function checkDownloadButton(codeText, nameText, versionText)
 end
 
 function button_exit:onClick(event)
-    manager:exit()
+    drawer:exit()
 end
 
 if mode == 2 then
@@ -156,7 +156,7 @@ if mode == 2 then
 end
 
 function button_path:onClick(event)
-    manager:callFunction(
+    drawer:callFunction(
         function()
             local changeName = textutils.getNeatName(args.path or "") == iField_name.text or iField_name.text:len() == 0
             local path = ""
@@ -175,7 +175,7 @@ function button_path:onClick(event)
                 end
             end
             checkDownloadButton()
-            manager:draw()
+            drawer:draw()
         end
     )
 end
@@ -195,7 +195,7 @@ function toggle_toList:onToggle(event, checked)
     iField_category:changeMode(m, true)
     iField_description:changeMode(m, true)
     checkDownloadButton()
-    manager:draw()
+    drawer:draw()
 end
 
 function toggle_desktop:onToggle(event, checked)
@@ -235,7 +235,7 @@ function iField_version:onTextEdit(event, ...)
 end
 
 function button_load:onClick(event)
-    manager:callFunction(
+    drawer:callFunction(
         function()
             local success, content, text, code
 
@@ -321,15 +321,15 @@ function button_load:onClick(event)
             else
                 callfile("os/sys/infoBox.lua", {term = args.term, x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, text = ("%sFailed\n\n%s"):format(text, content), label = modeName, select = true, button1 = "Ok"})
             end
-            manager:draw()
+            drawer:draw()
         end
     )
 end
 
 if mode == 1 then
-    manager.selectionManager:select(button_path, "code", 3)
+    drawer.selectionManager:select(button_path, "code", 3)
 else
-    manager.selectionManager:select(iField_code, "code", 3)
+    drawer.selectionManager:select(iField_code, "code", 3)
 end
-manager:draw()
-manager:execute()
+drawer:draw()
+drawer:execute()

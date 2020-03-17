@@ -186,7 +186,7 @@ function ui.scrollView.new(parent, label, mode, style, x, y, w, h, key)
         if (event.name == "mouse_click" or event.name == "monitor_touch") and self.mode ~= 3 then
             x, y, w, h = ui.rect.overlaps(x, y, w, h, self.buffer.rect:getUnpacked())
             if event.param2 >= x and event.param2 < x + w and event.param3 >= y and event.param3 < y + h then
-                self:getManager().selectionManager:select(self.selectionGroup, "mouse", 3)
+                self:getDrawer().selectionManager:select(self.selectionGroup, "mouse", 3)
                 return self
             end
         end
@@ -230,7 +230,7 @@ function ui.scrollView.new(parent, label, mode, style, x, y, w, h, key)
                     mode = 1
                 end
                 if newElement then
-                    --this:getManager().selectionManager:select(newElement, source, mode)
+                    --this:getDrawer().selectionManager:select(newElement, source, mode)
                 elseif currentElement then
                     currentElement:changeMode(1)
                 end

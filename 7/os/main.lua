@@ -1,6 +1,5 @@
-local currentTerm = peripheral.wrap("top")
-currentTerm.setTextScale(0.5)
-local _x, _y, _w, _h = 1, 1, currentTerm.getSize()
+ui.input.term = term
+local _x, _y, _w, _h = 1, 1, term.getSize()
 
 local files
 
@@ -85,14 +84,14 @@ local function createEntry(sView, file, func1, func2, x, y, w, h)
     button_item.onClick = func1
     button_info.onClick = func2
 end
----@param manager uiManager
+---@param drawer drawer
 ---@param sView scrollView
-local function updateSView(manager, sView)
+local function updateSView(drawer, sView)
     sView:clear()
     local x, y, w, h = 1, 2, _w - 1, 1
     for i, file in ipairs(files) do
         local function start(self, event)
-            manager:callFunction(
+            drawer:getInput():callFunction(
                 function()
                     local success, select =
                         callfile(
@@ -105,7 +104,7 @@ local function updateSView(manager, sView)
                             args = {load(file.data.argument or "")()}
                         }
                     )
-                    manager:draw()
+                    drawer:draw()
                 end
             )
         end
@@ -119,7 +118,7 @@ local function updateSView(manager, sView)
         sView.selectionGroup:addElement(elements[i + 1], elements[i], elements[i - 2], nil, elements[i + 4])
     end
     sView.selectionGroup.current = elements[1]
-    local group_menu = manager.selectionManager.groups[1]
+    local group_menu = drawer.selectionManager.groups[1]
     if #elements > 0 then
         for i = 1, #group_menu.elements do
             group_menu.elements[i].select.down = sView.selectionGroup
@@ -139,42 +138,40 @@ local function updateSView(manager, sView)
     sView:resizeContainer()
     sView:recalculate()
 end
-
-local manager = ui.uiManager.new(_x, _y, _w, _h)
+local input = ui.input.new()
+local drawer = ui.drawer.new(input, _x, _y, _w, _h)
 for i = 1, _w * _h do
     if i <= _w then
-        manager.buffer.text[i] = " "
-        manager.buffer.textColor[i] = colors.green
-        manager.buffer.textBackgroundColor[i] = colors.green
+        drawer.buffer.text[i] = " "
+        drawer.buffer.textColor[i] = colors.green
+        drawer.buffer.textBackgroundColor[i] = colors.green
     else
-        manager.buffer.text[i] = " "
-        manager.buffer.textColor[i] = colors.white
-        manager.buffer.textBackgroundColor[i] = colors.white
+        drawer.buffer.text[i] = " "
+        drawer.buffer.textColor[i] = colors.white
+        drawer.buffer.textBackgroundColor[i] = colors.white
     end
 end
 
-manager.term = currentTerm
-
-local button_browser = ui.button.new(manager, "Browser", theme.button1, 1, 1, 9, 1)
-local button_explorer = ui.button.new(manager, "Explorer", theme.button1, 10, 1, 10, 1)
-local button_options = ui.button.new(manager, "\164", theme.button1, _w - 5, 1, 3, 1)
-local button_exit = ui.button.new(manager, "x", theme.button2, _w - 2, 1, 3, 1)
-local sView_list = ui.scrollView.new(manager, "", 3, theme.sView1, 1, 2, _w, _h - 1)
+local button_browser = ui.button.new(drawer, "Browser", theme.button1, 1, 1, 9, 1)
+local button_explorer = ui.button.new(drawer, "Explorer", theme.button1, 10, 1, 10, 1)
+local button_options = ui.button.new(drawer, "\164", theme.button1, _w - 5, 1, 3, 1)
+local button_exit = ui.button.new(drawer, "x", theme.button2, _w - 2, 1, 3, 1)
+local sView_list = ui.scrollView.new(drawer, "", 3, theme.sView1, 1, 2, _w, _h - 1)
 
 function button_browser:onClick(event)
-    manager:callFunction(
+    input:callFunction(
         function()
             --TODO change current term
             local success, select = callfile("os/sys/execute.lua", {term = currentTerm, file = "os/sys/browser/main.lua", select = event ~= "mouse_up", args = {{term = currentTerm, select = event ~= "mouse_up"}}})
             loadFiles()
-            updateSView(manager, sView_list)
-            manager:draw()
+            updateSView(drawer, sView_list)
+            drawer:draw()
         end
     )
 end
 
 function button_explorer:onClick(event)
-    manager:callFunction(
+    input:callFunction(
         function()
             local success, select =
                 callfile(
@@ -186,7 +183,7 @@ function button_explorer:onClick(event)
                     args = {{select = event ~= "mouse_up"}}
                 }
             )
-            manager:draw()
+            drawer:draw()
         end
     )
 end
@@ -195,16 +192,16 @@ function button_options:onClick(event)
 end
 
 function button_exit:onClick(event)
-    manager:exit()
+    input:exit()
     term.setCursorPos(1, 1)
     term.setTextColor(colors.white)
     term.setBackgroundColor(colors.black)
     term.clear()
 end
 
-local group_menu = manager.selectionManager:addNewGroup()
+local group_menu = drawer.selectionManager:addNewGroup()
 local group_list = sView_list.selectionGroup
-manager.selectionManager:addGroup(group_list)
+drawer.selectionManager:addGroup(group_list)
 group_list.previous = group_menu
 group_list.next = group_menu
 
@@ -216,17 +213,17 @@ group_menu.current = button_browser
 
 files = {}
 loadFiles()
-updateSView(manager, sView_list)
+updateSView(drawer, sView_list)
 
 local mode = 3
 if term.isColor() then
     mode = 1
 end
 if #sView_list:getContainer().element > 0 then
-    manager.selectionManager:select(group_list, "code", mode)
+    drawer.selectionManager:select(group_list, "code", mode)
 else
-    manager.selectionManager:select(group_menu, "code", mode)
+    drawer.selectionManager:select(group_menu, "code", mode)
 end
 
-manager:draw()
-manager:execute()
+drawer:draw()
+input:eventLoop({[term] = drawer.event})

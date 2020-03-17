@@ -126,6 +126,8 @@ local function _tableToString(list, contains)
             else
                 table.insert(items, ("[%s]=%s"):format(k, value))
             end
+        elseif type(k) == "table" then
+            table.insert(items, ("[%s]=%s"):format(table.toString(k), value))
         else
             table.insert(items, ("%s=%s"):format(k, value))
         end

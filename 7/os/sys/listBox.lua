@@ -1,5 +1,6 @@
 local args = ...
-local _x, _y, _w, _h = args.manager:getGlobalRect()
+local _x, _y, _w, _h = args.drawer:getGlobalRect()
+local term = ui.input.term
 args.anchor = args.anchor or 1
 args.listBoxStyle = args.listBoxStyle or theme.sView2
 args.listButtonStyle = args.listButtonStyle or theme.button3
@@ -42,7 +43,7 @@ local function getVertical(buttons, posY, border, anchor)
     end
     return y, h
 end
-local function setListBox(manager, listBox, buttons, indexes, x, y, w, h)
+local function setListBox(drawer, listBox, buttons, indexes, x, y, w, h)
     listBox:setGlobalRect(x, y, w, h)
     local currentButtons = buttons
     for i = 1, #indexes do
@@ -58,9 +59,9 @@ local function setListBox(manager, listBox, buttons, indexes, x, y, w, h)
             if event.name == "mouse_up" then
                 select = false
             end
-            manager:callFunction(
+            drawer:getInput():callFunction(
                 function()
-                    manager.parallelManager:removeFunction(element.animation)
+                    drawer:getParallelManager():removeFunction(element.animation)
                     table.remove(indexes, #indexes)
                     local button = buttons
                     for i = 1, #indexes do
@@ -69,12 +70,12 @@ local function setListBox(manager, listBox, buttons, indexes, x, y, w, h)
                     local x, y, w, h = listBox:getGlobalRect()
                     x, w = getHorizontal(button, x, borderW, args.anchor)
                     y, h = getVertical(button, y, borderH + math.min(#indexes, 1), args.anchor)
-                    setListBox(manager, listBox, buttons, indexes, x, y, w, h)
+                    setListBox(drawer, listBox, buttons, indexes, x, y, w, h)
                     if select then
-                        manager.selectionManager:select(listBox.selectionGroup.current, "code", 3)
+                        drawer.selectionManager:select(listBox.selectionGroup.current, "code", 3)
                     end
-                    manager:recalculate()
-                    manager:draw()
+                    drawer:recalculate()
+                    drawer:draw()
                 end
             )
         end
@@ -90,19 +91,19 @@ local function setListBox(manager, listBox, buttons, indexes, x, y, w, h)
                 if event.name == "mouse_up" then
                     select = false
                 end
-                manager:callFunction(
+                drawer:getInput():callFunction(
                     function()
-                        manager.parallelManager:removeFunction(element.animation)
+                        drawer:getParallelManager():removeFunction(element.animation)
                         table.insert(indexes, i)
                         local x, y, w, h = listBox:getGlobalRect()
                         x, w = getHorizontal(button, x, borderW, args.anchor)
                         y, h = getVertical(button, y, borderH + 1, args.anchor)
-                        setListBox(manager, listBox, buttons, indexes, x, y, w, h)
+                        setListBox(drawer, listBox, buttons, indexes, x, y, w, h)
                         if select then
-                            manager.selectionManager:select(listBox.selectionGroup.current)
+                            drawer.selectionManager:select(listBox.selectionGroup.current)
                         end
-                        manager:recalculate()
-                        manager:draw()
+                        drawer:recalculate()
+                        drawer:draw()
                     end
                 )
             end
@@ -122,7 +123,7 @@ local function setListBox(manager, listBox, buttons, indexes, x, y, w, h)
                 function element:onClick(event)
                     table.insert(indexes, i)
                     select = (event.name ~= "mouse_up")
-                    manager:exit()
+                    drawer:getInput():exit()
                 end
                 table.insert(elements, element)
                 if button:sub(1, 1) == "*" then
@@ -146,19 +147,20 @@ end
 if not args.h then
     args.y, args.h = getVertical(args.buttons, args.y, borderH, args.anchor)
 end
-local manager = ui.uiManager.new(_x, _y, _w, _h)
-manager.recalculate = function()
-    manager.buffer:contract(args.manager.buffer)
+local input = ui.input.new()
+local drawer = ui.drawer.new(input, _x, _y, _w, _h)
+drawer.recalculate = function()
+    drawer.buffer:contract(args.drawer.buffer)
 end
-manager:recalculate()
-local listBox = ui.scrollView.new(manager, args.label, 3, args.listBoxStyle, args.x, args.y, args.w, args.h)
-setListBox(manager, listBox, args.buttons, indexes, args.x, args.y, args.w, args.h)
+drawer:recalculate()
+local listBox = ui.scrollView.new(drawer, args.label, 3, args.listBoxStyle, args.x, args.y, args.w, args.h)
+setListBox(drawer, listBox, args.buttons, indexes, args.x, args.y, args.w, args.h)
 function listBox.selectionGroup:listener(name, source, ...)
     if name == "key_up" then
         local key = keys.getName(...)
         if key == "tab" or key == "e" or key == "q" then
             select = true
-            manager:exit()
+            input:exit()
         end
     elseif name == "mouse" then
         local event = ...
@@ -166,19 +168,19 @@ function listBox.selectionGroup:listener(name, source, ...)
             local x, y, w, h = listBox:getGlobalRect()
             if event.param2 < x or event.param2 > x + w or event.param3 < y or event.param3 > y + h then
                 select = false
-                manager:exit()
+                input:exit()
             end
         end
     end
 end
-manager.selectionManager:addGroup(listBox.selectionGroup)
+drawer.selectionManager:addGroup(listBox.selectionGroup)
 local mode = 3
 if select == false then
     mode = 1
 end
-manager.selectionManager:select(listBox.selectionGroup, "code", mode)
-manager:draw()
-manager:execute()
+drawer.selectionManager:select(listBox.selectionGroup, "code", mode)
+drawer:draw()
+input:eventLoop({[term] = drawer.event})
 local name = args.buttons[indexes[1]]
 for i = 2, #indexes do
     name = name[indexes[i]]

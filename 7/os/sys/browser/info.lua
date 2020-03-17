@@ -1,15 +1,15 @@
 local args = ...
 local data = args.data
-args.term = args.term or term
-local _x, _y, _w, _h = 1, 1, args.term.getSize()
+local term = ui.input.term
+local _x, _y, _w, _h = 1, 1, term.getSize()
 
 local function downloadScreen(...)
-    callfile("os/sys/wait.lua", args.term "Downloading", ...)
+    callfile("os/sys/wait.lua", "Downloading", ...)
 end
 
-local manager = ui.uiManager.new(_x, _y, _w, _h)
-manager.term = args.term
-ui.buffer.fill(manager.buffer, " ", colors.white, colors.white)
+local input = ui.input.new()
+local drawer = ui.drawer.new(input, _x, _y, _w, _h)
+ui.buffer.fill(drawer.buffer, " ", colors.white, colors.white)
 
 local types = {}
 if data.type:find("d") then
@@ -35,7 +35,7 @@ if data.versionOld then
     versionText = versionText .. " (" .. table.concat(data.versionOld, ".") .. ")"
 end
 
-local tBox_info = ui.textBox.new(manager, "", ("%s\n\nCategory:\n%s\n\nType:\n%s\n\nVersion:\n%s\n\nSource:\n%s"):format(IF(data.description and data.description ~= "", data.description, "No Description."), IF(data.category and data.category ~= "", data.category, "Non."), table.concat(types, ", "), versionText, data.url), theme.tBox2, _x, _y, _w, _h)
+local tBox_info = ui.textBox.new(drawer, "", ("%s\n\nCategory:\n%s\n\nType:\n%s\n\nVersion:\n%s\n\nSource:\n%s"):format(IF(data.description and data.description ~= "", data.description, "No Description."), IF(data.category and data.category ~= "", data.category, "Non."), table.concat(types, ", "), versionText, data.url), theme.tBox2, _x, _y, _w, _h)
 
 local label_title = ui.label.new(tBox_info, data.name, theme.label1, 1, 1, _w - 3, 1)
 local button_exit = ui.button.new(tBox_info, "<", theme.button2, _w - 2, 1, 3, 1)
@@ -58,9 +58,9 @@ else
 end
 local button_do = ui.button.new(tBox_info, type_do, theme.button1, _w - type_do:len() - 1, _h, type_do:len() + 2, 1)
 
-local group_menu = manager.selectionManager:addNewGroup()
+local group_menu = drawer.selectionManager:addNewGroup()
 local group_tBox = tBox_info.selectionGroup
-manager.selectionManager:addGroup(group_tBox)
+drawer.selectionManager:addGroup(group_tBox)
 
 group_menu:addElement(button_delete, nil, nil, button_exit, group_tBox)
 group_menu:addElement(button_exit, button_delete, nil, nil, group_tBox)
@@ -68,14 +68,14 @@ group_tBox:addElement(button_delete, nil, group_menu, button_do, nil)
 group_tBox:addElement(button_do, button_delete, group_menu, nil, nil)
 
 group_menu.current = button_exit
-manager.selectionManager:select(button_do, "code", 3)
+drawer.selectionManager:select(button_do, "code", 3)
 
 function button_exit:onClick(event)
-    manager:exit()
+    input:exit()
 end
 
 function button_delete:onClick(event)
-    manager:callFunction(
+    input:callFunction(
         function()
             local path = "os/sys/browser/data/unofficial"
             local list = dofile(path)
@@ -86,14 +86,14 @@ function button_delete:onClick(event)
                 end
             end
             table.save(list, path)
-            callfile("os/sys/infoBox.lua", {term = args.term, label = "Information", text = data.name .. " is now deleted from the unofficial download list", x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, button1 = "Ok", select = event.name ~= "mouse_up"})
-            manager:exit()
+            callfile("os/sys/infoBox.lua", {label = "Information", text = data.name .. " is now deleted from the unofficial download list", x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, button1 = "Ok", select = event.name ~= "mouse_up"})
+            input:exit()
         end
     )
 end
 
 function button_remove:onClick(event)
-    manager:callFunction(
+    input:callFunction(
         function()
             local delete = data.deleteOld or data.delete
             if type(delete) == "table" then
@@ -108,14 +108,14 @@ function button_remove:onClick(event)
                 end
             end
             callfile("os/sys/browser/install.lua", 2, data)
-            callfile("os/sys/infoBox.lua", {term = args.term, label = "Information", text = data.name .. " is now deleted from the system.", x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, button1 = "Ok", select = event.name ~= "mouse_up"})
-            manager:exit()
+            callfile("os/sys/infoBox.lua", {label = "Information", text = data.name .. " is now deleted from the system.", x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, button1 = "Ok", select = event.name ~= "mouse_up"})
+            input:exit()
         end
     )
 end
 
 function button_do:onClick(event)
-    manager:callFunction(
+    input:callFunction(
         function()
             local success, content, text
             local needsReboot = false
@@ -148,17 +148,17 @@ function button_do:onClick(event)
             )
             if success then
                 callfile("os/sys/browser/install.lua", 1, data)
-                callfile("os/sys/infoBox.lua", {term = args.term, label = "Information", text = text, x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, button1 = "Ok", select = event.name ~= "mouse_up"})
+                callfile("os/sys/infoBox.lua", {label = "Information", text = text, x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, button1 = "Ok", select = event.name ~= "mouse_up"})
                 if needsReboot then
                     os.reboot()
                 end
             else
-                callfile("os/sys/infoBox.lua", {term = args.term, label = "Information", text = data.name .. " failed to download.\n\nReason:\n" .. content, x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, button1 = "Ok", select = event.name ~= "mouse_up"})
+                callfile("os/sys/infoBox.lua", {label = "Information", text = data.name .. " failed to download.\n\nReason:\n" .. content, x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, button1 = "Ok", select = event.name ~= "mouse_up"})
             end
-            manager:exit()
+            input:exit()
         end
     )
 end
 
-manager:draw()
-manager:execute()
+drawer:draw()
+input:eventLoop({[term] = drawer.event})

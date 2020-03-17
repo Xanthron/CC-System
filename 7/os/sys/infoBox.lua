@@ -1,7 +1,6 @@
 local set = ...
+local term = ui.input.term
 local x, y, w, h
-set.term = set.term or term
-table.checkType(set, "term", "table", false)
 table.checkType(set, "x", "number", false)
 table.checkType(set, "y", "number", false)
 table.checkType(set, "w", "number", false)
@@ -20,12 +19,12 @@ if set.x then
     h = set.h
 else
     x, y = 1, 1
-    w, h = set.term.getSize()
+    w, h = term.getSize()
 end
 
-local manager = ui.uiManager.new(x, y, w, h)
-manager.term = set.term
-local textBox = ui.textBox.new(manager, set.label, set.text, set.tBoxT, x, y, w, h)
+local input = ui.input.new()
+local drawer = ui.drawer.new(input, x, y, w, h)
+local textBox = ui.textBox.new(drawer, set.label, set.text, set.tBoxT, x, y, w, h)
 local left = #textBox.style.nTheme.b[4]
 local top = #textBox.style.nTheme.b[2]
 local right = #textBox.style.nTheme.b[6]
@@ -46,7 +45,7 @@ if set.button1 then
     function button1:onClick(event)
         ret = 1
         select = event.name ~= "mouse_up"
-        manager:exit()
+        input:exit()
     end
     textBox.selectionGroup:addElement(button1)
 end
@@ -56,17 +55,17 @@ if set.button2 then
     function button2:onClick(event)
         ret = 2
         select = event.name ~= "mouse_up"
-        manager:exit()
+        input:exit()
     end
     textBox.selectionGroup:addElement(button2, nil, nil, button1, nil, true)
 end
-manager.selectionManager:addGroup(textBox.selectionGroup)
+drawer.selectionManager:addGroup(textBox.selectionGroup)
 local mode = 3
 if set.select == false then
     mode = 1
 end
-manager.selectionManager:select(button1, "code", mode)
-manager:draw()
-manager:execute()
+drawer.selectionManager:select(button1, "code", mode)
+drawer:draw()
+input:eventLoop({[term] = drawer.event})
 
 return ret, select

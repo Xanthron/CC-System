@@ -1,69 +1,120 @@
 if turtle then
+    local bedrock = "minecraft:bedrock"
     turtle.move = {}
+
+    function turtle.move.dir(v, f)
+        return vector.new(v.x * f.x + v.y * f.y, -v.x * f.y + v.y * f.x, v.z)
+    end
 
     ---@param update function
     function turtle.move.forward(update)
-        update(nil, nil, true)
+        if update then
+            update(nil, nil, true)
+        end
+        local is, data = turtle.inspect()
+        if is and data.name == bedrock then
+            if update then
+                update(nil, nil, false)
+            end
+            return false
+        end
         while not turtle.forward() do
             turtle.dig()
+            turtle.attack()
         end
         if update then
             update(nil, vector.forward, false)
         end
+        return true
     end
 
     ---@param update function
     function turtle.move.up(update)
-        update(nil, nil, true)
+        if update then
+            update(nil, nil, true)
+        end
+        local is, data = turtle.inspectUp()
+        if is and data.name == bedrock then
+            if update then
+                update(nil, nil, false)
+            end
+            return false
+        end
         while not turtle.up() do
             turtle.digUp()
+            turtle.attackUp()
         end
         if update then
             update(nil, vector.up, false)
         end
+        return true
     end
 
     ---@param update function
     function turtle.move.down(update)
-        update(nil, nil, true)
+        if update then
+            update(nil, nil, true)
+        end
+        local is, data = turtle.inspectDown()
+        if is and data.name == bedrock then
+            if update then
+                update(nil, nil, false)
+            end
+            return false
+        end
         while not turtle.down() do
             turtle.digDown()
+            turtle.attackDown()
         end
         if update then
             update(nil, vector.down, false)
         end
+        return true
     end
 
     ---@param update function
     function turtle.move.turnLeft(update)
-        update(nil, nil, true)
+        if update then
+            update(nil, nil, true)
+        end
         turtle.turnLeft()
         if update then
             update(vector.new(1, -1, 0), nil, false)
         end
+        return true
     end
 
     ---@param update function
     function turtle.move.turnRight(update)
-        update(nil, nil, true)
+        if update then
+            update(nil, nil, true)
+        end
         turtle.turnRight()
         if update then
             update(vector.new(-1, 1, 0), nil, false)
         end
+        return true
     end
 
     ---@param update function
     function turtle.move.back(update)
-        update(nil, nil, true)
-        while not turtle.back() do
+        local ret = true
+        if update then
+            update(nil, nil, true)
+        end
+        if not turtle.back() then
             turtle.turnLeft(update)
             turtle.turnLeft(update)
-            turtle.dig()
+            ret = turtle.move.forward(update)
             turtle.turnLeft(update)
             turtle.turnLeft(update)
         end
         if update then
-            update(nil, vector.backward, false)
+            if ret then
+                update(nil, vector.backward, false)
+            else
+                update(nil, nil, false)
+            end
         end
     end
 
@@ -74,33 +125,46 @@ if turtle then
 
         if v.z > 0 then
             for i = 1, v.z do
-                turtle.move.up(update)
+                if not turtle.move.up(update) then
+                    if turtle.move.back(update) then
+                        return turtle.move.go(vector.new(v.x, v.y, v.z - i + 1))
+                    else
+                        return false
+                    end
+                end
             end
         elseif v.z < 0 then
             for i = 1, -v.z do
-                turtle.move.down(update)
+                if not turtle.move.down(update) then
+                    return false
+                end
             end
         end
 
         if v.x > 0 then
             for i = 1, v.x do
-                turtle.move.forward(update)
+                if not turtle.move.forward(update) then
+                    return false
+                end
             end
         end
         if v.y > 0 then
             turns = 1
             turtle.move.turnRight(update)
             for i = 1, v.y do
-                turtle.move.forward(update)
+                if not turtle.move.forward(update) then
+                    return false
+                end
             end
         elseif v.y < 0 then
             turns = 2
             turtle.move.turnLeft(update)
             for i = 1, -v.y do
-                turtle.move.forward(update)
+                if not turtle.move.forward(update) then
+                    return false
+                end
             end
         end
-
         if v.x < 0 then
             if turns == 0 then
                 turtle.move.turnRight(update)
@@ -111,8 +175,11 @@ if turtle then
                 turtle.move.turnLeft(update)
             end
             for i = 1, -v.x do
-                turtle.move.forward(update)
+                if not turtle.move.forward(update) then
+                    return false
+                end
             end
         end
+        return true
     end
 end

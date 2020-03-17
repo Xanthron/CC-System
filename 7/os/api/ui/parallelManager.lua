@@ -85,6 +85,10 @@ function ui.parallelManager.new()
     function this:stop()
         self._stop = true
     end
+
+    function this:clear()
+        table.clear(self._parallelElements)
+    end
     ---Get the running state
     ---@return boolean
     function this:isRunning()

@@ -29,7 +29,6 @@ function ui.label.new(parent, text, style, x, y, w, h, key)
             theme = self.style.nTheme
         end
         ui.buffer.labelBox(self.buffer, self.text, theme.tC, theme.tBG, self.style.align, " ", 0, 0, 0, 0)
-        --ui.buffer.text(self.buffer, self.text, theme.tC, theme.tBG, self.style.align, this.scaleW, this.scaleH, self.richText)
     end
 
     this:recalculate()

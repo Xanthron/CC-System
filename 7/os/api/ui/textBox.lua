@@ -102,7 +102,7 @@ function ui.textBox.new(parent, label, text, style, x, y, w, h, key)
         if self.selectable and (event.name == "mouse_click" or event.name == "monitor_touch") and self.mode ~= 3 then
             x, y, w, h = ui.rect.overlaps(x, y, w, h, self.buffer.rect:getUnpacked())
             if event.param2 >= x and event.param2 < x + w and event.param3 >= y and event.param3 < y + h then
-                self:getManager().selectionManager:select(self.selectionGroup, "mouse", 1)
+                self:getDrawer().selectionManager:select(self.selectionGroup, "mouse", 1)
                 return self
             end
         end

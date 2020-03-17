@@ -1,3 +1,4 @@
+local term = ui.input.term
 local _x, _y, _w, _h = 1, 1, term.getSize()
 local selected = {}
 local savePath = "/"
@@ -74,13 +75,14 @@ local function uploadText(text)
     callfile("os/sys/browser/loader.lua", {mode = 1, file = text, run = true, delete = selected})
 end
 
-local manager = ui.uiManager.new(_x, _y, _w, _h)
-ui.buffer.fill(manager.buffer, " ", colors.black, colors.white)
+local input = ui.input.new()
+local drawer = ui.drawer.new(input, _x, _y, _w, _h)
+ui.buffer.fill(drawer.buffer, " ", colors.black, colors.white)
 
-local label_title = ui.label.new(manager, "Achivrar", theme.label1, 1, 1, _w - 3, 1)
-local button_exit = ui.button.new(manager, "<", theme.button2, _w - 2, 1, 3, 1)
+local label_title = ui.label.new(drawer, "Achivrar", theme.label1, 1, 1, _w - 3, 1)
+local button_exit = ui.button.new(drawer, "<", theme.button2, _w - 2, 1, 3, 1)
 
-local sView_main = ui.scrollView.new(manager, "", 3, theme.sView1, 1, 2, _w, _h - 2)
+local sView_main = ui.scrollView.new(drawer, "", 3, theme.sView1, 1, 2, _w, _h - 2)
 local container_main = sView_main:getContainer()
 
 local tBox_files = ui.textBox.new(container_main, "Files", "", theme.tBox2, 1, 2, _w - 1, 7)
@@ -89,9 +91,9 @@ tBox_files.scrollWithoutSelection = false
 
 local button_files = ui.button.new(tBox_files, "Edit", theme.button1, 10, 2, 6, 1)
 
-local toggle_compress = ui.toggleButton.new(container_main, "Compress", true, theme.toggle1, 1, 10, _w, 1)
+local toggle_compress = ui.toggle.new(container_main, "Compress", true, theme.toggle1, 1, 10, _w, 1)
 
-local toggle_upload = ui.toggleButton.new(container_main, "Upload to PasteBin", false, theme.toggle1, 1, 12, _w, 1)
+local toggle_upload = ui.toggle.new(container_main, "Upload to PasteBin", false, theme.toggle1, 1, 12, _w, 1)
 
 local button_savePath = ui.button.new(container_main, "Path", theme.button1, 1, 13, 6, 1)
 local label_savePath = ui.label.new(container_main, "no selection", theme.label2, 8, 13, _w - 8, 1)
@@ -99,17 +101,17 @@ local label_savePath = ui.label.new(container_main, "no selection", theme.label2
 --local label_arguments = ui.label.new(container_main, "Additional arguments:", theme.label2, 1, 15, _w - 1, 1)
 local iField_arguments = ui.inputField.new(container_main, "Additional arguments", "", true, theme.iField1, 1, 15, _w - 1, 6)
 
-local label_info = ui.label.new(manager, "", theme.label1, 1, _h, _w - 6, 1)
-local button_start = ui.button.new(manager, "Save", theme.button1, _w - 5, _h, 6, 1)
+local label_info = ui.label.new(drawer, "", theme.label1, 1, _h, _w - 6, 1)
+local button_start = ui.button.new(drawer, "Save", theme.button1, _w - 5, _h, 6, 1)
 
 sView_main:resizeContainer()
 
-local group_menu = manager.selectionManager:addNewGroup()
+local group_menu = drawer.selectionManager:addNewGroup()
 local group_main = sView_main.selectionGroup
-manager.selectionManager:addGroup(group_main)
-local group_save = manager.selectionManager:addNewGroup()
+drawer.selectionManager:addGroup(group_main)
+local group_save = drawer.selectionManager:addNewGroup()
 local group_tBox = tBox_files.selectionGroup
-manager.selectionManager:addGroup(group_tBox)
+drawer.selectionManager:addGroup(group_tBox)
 group_tBox.current = tBox_files.element.v
 
 group_menu:addElement(button_exit, nil, nil, nil, button_files)
@@ -130,8 +132,8 @@ group_main.next = group_menu
 group_save.previous = group_main
 group_save.next = group_menu
 
-manager.selectionManager:addGroup(tBox_files.selectionGroup)
-manager.selectionManager:select(button_files, "code", 3)
+drawer.selectionManager:addGroup(tBox_files.selectionGroup)
+drawer.selectionManager:select(button_files, "code", 3)
 
 local function updateSaveButton()
     if #selected > 0 and (toggle_upload._checked == true or fs.exists(fs.getDir(savePath))) then
@@ -149,10 +151,10 @@ end
 updateSaveButton()
 
 function button_exit:onClick(event)
-    manager:exit()
+    input:exit()
 end
 function button_files:onClick(event)
-    manager:callFunction(
+    input:callFunction(
         function()
             local select = true
             if event.name == "mouse_up" then
@@ -165,12 +167,12 @@ function button_files:onClick(event)
             tBox_files:setText(table.concat(selected, "\n"))
             tBox_files:resizeSlider()
             updateSaveButton()
-            manager:draw()
+            drawer:draw()
         end
     )
 end
 function button_savePath:onClick(event)
-    manager:callFunction(
+    input:callFunction(
         function()
             local select = true
             if event.name == "mouse_up" then
@@ -191,7 +193,7 @@ function button_savePath:onClick(event)
                 label_savePath:recalculate()
             end
             updateSaveButton()
-            manager:draw()
+            drawer:draw()
         end
     )
 end
@@ -204,10 +206,10 @@ function toggle_upload:onToggle(event, toggle)
         label_savePath:changeMode(1, true)
     end
     updateSaveButton()
-    manager:draw()
+    drawer:draw()
 end
 function button_start:onClick(event)
-    manager:callFunction(
+    input:callFunction(
         function()
             if toggle_upload._checked then
                 uploadText(pathsToText(selected, toggle_compress._checked) .. "\n" .. iField_arguments.text)
@@ -219,10 +221,10 @@ function button_start:onClick(event)
                 end
                 label_info:recalculate()
             end
-            manager:draw()
+            drawer:draw()
         end
     )
 end
 
-manager:draw()
-manager:execute()
+drawer:draw()
+input:eventLoop({[term] = drawer.event})

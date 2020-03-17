@@ -1,5 +1,6 @@
 local args = {...}
 local official, unofficial
+local term = ui.input.term
 
 if type(args[1]) == "table" then
     term = args[1]
@@ -7,7 +8,7 @@ if type(args[1]) == "table" then
 end
 
 local function downloadScreen(...)
-    callfile("os/sys/wait.lua", term, "Downloading", ...)
+    callfile("os/sys/wait.lua", "Downloading", ...)
 end
 
 local function doData(data)

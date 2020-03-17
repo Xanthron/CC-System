@@ -2,6 +2,7 @@ local inMove = false
 local start = vector.zero:copy()
 local way = vector.up:copy()
 local move, slots, mineList, trashList, data
+ui.input.term = term
 local _x, _y, _w, _h = 1, 1, term.getSize()
 
 local text_fuel, text_facing, text_distance, text_moved, text_detected = "Fuel:            ", "Facing:          ", "Distance Moved:  ", "Total    Moved:  ", "Detected Blocks: "
@@ -12,53 +13,54 @@ local function deleteFiles()
     fs.delete("os/startup/50-stripMiner.lua")
 end
 
-local manager = ui.uiManager.new(_x, _y, _w, _h)
+local input = ui.input.new()
+local drawer = ui.drawer.new(input, _x, _y, _w, _h)
 for i = 1, _w * _h do
     if i <= _w or i > _w * (_h - 1) then
-        manager.buffer.text[i] = " "
-        manager.buffer.textColor[i] = colors.green
-        manager.buffer.textBackgroundColor[i] = colors.green
+        drawer.buffer.text[i] = " "
+        drawer.buffer.textColor[i] = colors.green
+        drawer.buffer.textBackgroundColor[i] = colors.green
     else
-        manager.buffer.text[i] = " "
-        manager.buffer.textColor[i] = colors.white
-        manager.buffer.textBackgroundColor[i] = colors.white
+        drawer.buffer.text[i] = " "
+        drawer.buffer.textColor[i] = colors.white
+        drawer.buffer.textBackgroundColor[i] = colors.white
     end
 end
-local label_title = ui.label.new(manager, "Strip Miner", theme.label1, _x, _y, _w, 1)
+local label_title = ui.label.new(drawer, "Strip Miner", theme.label1, _x, _y, _w, 1)
 
-local label_pos = ui.label.new(manager, "Position: ", theme.label2, _x, _y + 1, 10, 1)
-local label_posX = ui.label.new(manager, "X: 0", theme.label2, _x + 10, _y + 1, 8, 1)
-local label_posY = ui.label.new(manager, "Y: 0", theme.label2, _x + 19, _y + 1, 8, 1)
-local label_posZ = ui.label.new(manager, "Z: 0", theme.label2, _x + 28, _y + 1, 8, 1)
+local label_pos = ui.label.new(drawer, "Position: ", theme.label2, _x, _y + 1, 10, 1)
+local label_posX = ui.label.new(drawer, "X: 0", theme.label2, _x + 10, _y + 1, 8, 1)
+local label_posY = ui.label.new(drawer, "Y: 0", theme.label2, _x + 19, _y + 1, 8, 1)
+local label_posZ = ui.label.new(drawer, "Z: 0", theme.label2, _x + 28, _y + 1, 8, 1)
 
-local label_fuel = ui.label.new(manager, text_fuel .. turtle.getFuelLevel() .. " / 0", theme.label2, _x, _y + 3, _w, 1)
+local label_fuel = ui.label.new(drawer, text_fuel .. turtle.getFuelLevel() .. " / 0", theme.label2, _x, _y + 3, _w, 1)
 
-local label_facing = ui.label.new(manager, text_facing .. "Forward", theme.label2, _x, _y + 4, _w, 1)
-local label_distance = ui.label.new(manager, text_distance .. "0 / 0", theme.label2, _x, _y + 5, _w, 1)
-local label_moved = ui.label.new(manager, text_moved .. "0", theme.label2, _x, _y + 6, _w, 1)
-local label_detected = ui.label.new(manager, text_detected .. "0", theme.label2, _x, _y + 7, _w, 1)
+local label_facing = ui.label.new(drawer, text_facing .. "Forward", theme.label2, _x, _y + 4, _w, 1)
+local label_distance = ui.label.new(drawer, text_distance .. "0 / 0", theme.label2, _x, _y + 5, _w, 1)
+local label_moved = ui.label.new(drawer, text_moved .. "0", theme.label2, _x, _y + 6, _w, 1)
+local label_detected = ui.label.new(drawer, text_detected .. "0", theme.label2, _x, _y + 7, _w, 1)
 
-local label_mode = ui.label.new(manager, "Mine", theme.label2, _x, _y + 9, _w, 3)
+local label_mode = ui.label.new(drawer, "Mine", theme.label2, _x, _y + 9, _w, 3)
 label_mode:setGlobalRect(nil, nil, _w, 3)
 label_mode.scaleH = false
 label_mode.scaleW = false
 
-local button_pause = ui.button.new(manager, "Pause", theme.button1, _x, _h, 8, 1)
+local button_pause = ui.button.new(drawer, "Pause", theme.button1, _x, _h, 8, 1)
 if move and move.pause then
     button_pause.text = "Resume"
     button_pause:recalculate()
     button_pause:repaint("this")
 end
-local button_stop = ui.button.new(manager, "Stop", theme.button1, _x + _w - 12, _h, 6, 1)
-local button_exit = ui.button.new(manager, "Exit", theme.button1, _x + _w - 6, _h, 6, 1)
+local button_stop = ui.button.new(drawer, "Stop", theme.button1, _x + _w - 12, _h, 6, 1)
+local button_exit = ui.button.new(drawer, "Exit", theme.button1, _x + _w - 6, _h, 6, 1)
 
-local group_mainMenu = manager.selectionManager:addNewGroup()
+local group_mainMenu = drawer.selectionManager:addNewGroup()
 group_mainMenu.current = button_pause
 group_mainMenu:addElement(button_pause, nil, nil, button_stop, nil)
 group_mainMenu:addElement(button_stop, button_pause, nil, button_exit, nil)
 group_mainMenu:addElement(button_exit, button_stop, nil, nil, nil)
 
-manager:draw()
+drawer:draw()
 
 local function loadSlots()
     slots = {}
@@ -216,7 +218,7 @@ local function update(f, p, m)
         label_posY.text = "Y: " .. move.pos.y
         label_posZ.text = "Z: " .. move.pos.z
         label_moved.text = text_moved .. move.moved
-        label_distance.text = text_distance .. move.distance
+        label_distance.text = text_distance .. move.distance .. " / " .. data.length
 
         label_posX:recalculate()
         label_posY:recalculate()
@@ -230,7 +232,7 @@ local function update(f, p, m)
         label_moved:repaint("this")
         label_distance:repaint("this")
 
-        manager:draw()
+        drawer:draw()
     end
     inMove = m
 end
@@ -898,7 +900,7 @@ local function mine()
     if #move.undone > 0 then
         iteration()
     end
-    while move.distance <= data.length or data.length == 0 do
+    while move.distance < data.length or data.length == 0 do
         if #slots.build > 0 then
             iteration()
 
@@ -912,7 +914,7 @@ local function mine()
 
             startMode("wall", move.pos)
 
-            if #slots.torch and (placeTorch or (move.base.x - 1) % 12 == 0) then
+            if #slots.torch > 0 and (placeTorch or (move.base.x - 1) % 12 == 0) then
                 startMode("light", move.pos)
             end
 
@@ -975,19 +977,23 @@ function button_stop:onClick(event)
 end
 function button_exit:onClick(event)
     deleteFiles()
-    manager:exit()
+    input:exit()
 end
 
-while manager._exit == false do
+local function execute()
+    input:eventLoop({[term] = drawer.event})
+end
+
+while input._exit == false do
     if move.pause then
-        local exit = parallel.waitForAny(waitForPause, manager.execute)
+        parallel.waitForAny(waitForPause, execute)
     else
-        local exit = parallel.waitForAny(mine, waitForPause, manager.execute)
+        local exit = parallel.waitForAny(mine, waitForPause, execute)
         if exit == 1 then
             button_pause:changeMode(2, true)
             button_stop:changeMode(2, true)
             button_exit:changeMode(1, true)
-            manager.execute()
+            execute()
         end
     end
 end

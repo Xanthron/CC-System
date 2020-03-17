@@ -412,7 +412,7 @@ function ui.buffer.text(buffer, t, tC, tBG, align, scaleW, scaleH, richText, lef
                         char = char - math.max(0, (wordLen - width))
                         lineCount = 0
                         table.insert(words, i, "\n")
-                        char = char - wordLen
+                        char = char - wordLen - 1
                     end
                 end
             end

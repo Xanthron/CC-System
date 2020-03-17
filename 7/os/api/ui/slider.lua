@@ -254,14 +254,14 @@ function ui.slider.new(parent, orientation, startValue, endValue, size, style, x
                         self._pressedButton = 1
                         self:recalculate()
                         self:repaint("this", x, y, w, h)
-                        self:getManager().parallelManager:addFunction(self._repeatButtonPressElement)
+                        self:getDrawer():getParallelManager():addFunction(self._repeatButtonPressElement)
                         return self
                     elseif y + h == rectY + rectH and event.param3 == y + h - 1 then
                         self.mode = 4
                         self._pressedButton = 2
                         self:recalculate()
                         self:repaint("this", x, y, w, h)
-                        self:getManager().parallelManager:addFunction(self._repeatButtonPressElement)
+                        self:getDrawer():getParallelManager():addFunction(self._repeatButtonPressElement)
                         return self
                     elseif event.param3 > y and event.param3 < y + h - 1 then
                         self.mode = 4
@@ -298,7 +298,7 @@ function ui.slider.new(parent, orientation, startValue, endValue, size, style, x
                     self:recalculate()
                     self:repaint("this", x, y, w, h)
                     self.repeatItem:reset()
-                    self:getManager().parallelManager:removeFunction(self._repeatButtonPressElement)
+                    self:getDrawer():getParallelManager():removeFunction(self._repeatButtonPressElement)
                     self._pressedButton = 0
                     return self
                 end
@@ -311,14 +311,14 @@ function ui.slider.new(parent, orientation, startValue, endValue, size, style, x
                         self._pressedButton = 1
                         self:recalculate()
                         self:repaint("this", x, y, w, h)
-                        self:getManager().parallelManager:addFunction(self._repeatButtonPressElement)
+                        self:getDrawer():getParallelManager():addFunction(self._repeatButtonPressElement)
                         return self
                     elseif x + w == rectX + rectW and event.param2 == x + w - 1 then
                         self.mode = 4
                         self._pressedButton = 2
                         self:recalculate()
                         self:repaint("this", x, y, w, h)
-                        self:getManager().parallelManager:addFunction(self._repeatButtonPressElement)
+                        self:getDrawer():getParallelManager():addFunction(self._repeatButtonPressElement)
                         return self
                     elseif event.param2 > x and event.param2 < x + w - 1 then
                         self.mode = 4
@@ -355,7 +355,7 @@ function ui.slider.new(parent, orientation, startValue, endValue, size, style, x
                     self:recalculate()
                     self:repaint("this", x, y, w, h)
                     self.repeatItem:reset()
-                    self:getManager().parallelManager:removeFunction(self._repeatButtonPressElement)
+                    self:getDrawer():getParallelManager():removeFunction(self._repeatButtonPressElement)
                     self._pressedButton = 0
                     return self
                 end

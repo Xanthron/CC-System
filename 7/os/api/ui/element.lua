@@ -101,11 +101,11 @@ function ui.element.new(parent, name, x, y, w, h, key)
         end
         return false
     end
-    ---Get the uiManager of this element
-    ---@return uiManager
-    function this:getManager()
+    ---Get the drawer of this element
+    ---@return drawer
+    function this:getDrawer()
         if self._parent then
-            return self._parent:getManager()
+            return self._parent:getDrawer()
         else
             return self
         end
@@ -272,15 +272,15 @@ function ui.element.new(parent, name, x, y, w, h, key)
                 h = h - 2
             end
             x, y, w, h = self:getCompleteMaskRect(x, y, w, h)
-            local manager = self:getManager()
-            self:doDraw(manager.buffer, x, y, w, h)
-            manager.buffer:draw(manager:getTerm(), x, y, w, h)
+            local drawer = self:getDrawer()
+            self:doDraw(drawer.buffer, x, y, w, h)
+            drawer.buffer:draw(drawer:getTerm(), x, y, w, h)
         elseif mode == "parent" then
             if self._parent then
                 self._parent:repaint("this", x, y, w, h)
             end
         elseif mode == "all" then
-            self:getManager():repaint("this", x, y, w, h)
+            self:getDrawer():repaint("this", x, y, w, h)
         else
             error("given mode (" .. mode .. ") is not supported", 2)
         end

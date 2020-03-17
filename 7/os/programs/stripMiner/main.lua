@@ -1,3 +1,4 @@
+ui.input.term = term
 local _x, _y, _w, _h = 1, 1, term.getSize()
 
 local success, set = fs.doFile("os/programs/stripMiner/data/settings.set")
@@ -19,65 +20,65 @@ set.slots[4] = set.slots[4] or 4
 for i = 5, 16 do
     set.slots[i] = set.slots[i] or 0
 end
-set.savePath = set.savePath or false
 
-local manager = ui.uiManager.new(_x, _y, _w, _h)
+local input = ui.input.new()
+local drawer = ui.drawer.new(input, _x, _y, _w, _h)
 for i = 1, _w * _h do
     if i <= _w or i > _w * (_h - 1) then
-        manager.buffer.text[i] = " "
-        manager.buffer.textColor[i] = colors.green
-        manager.buffer.textBackgroundColor[i] = colors.green
+        drawer.buffer.text[i] = " "
+        drawer.buffer.textColor[i] = colors.green
+        drawer.buffer.textBackgroundColor[i] = colors.green
     else
-        manager.buffer.text[i] = " "
-        manager.buffer.textColor[i] = colors.white
-        manager.buffer.textBackgroundColor[i] = colors.white
+        drawer.buffer.text[i] = " "
+        drawer.buffer.textColor[i] = colors.white
+        drawer.buffer.textBackgroundColor[i] = colors.white
     end
 end
---ui.buffer.fill(manager.buffer, " ", colors.white, colors.white)
-local label_title = ui.label.new(manager, "Strip Miner", theme.label1, _x, _y, _w - 3, 2)
-local button_exit = ui.button.new(manager, "<", theme.button2, _x + _w - 3, _y, 3, 1)
+--ui.buffer.fill(drawer.buffer, " ", colors.white, colors.white)
+local label_title = ui.label.new(drawer, "Strip Miner", theme.label1, _x, _y, _w - 3, 2)
+local button_exit = ui.button.new(drawer, "<", theme.button2, _x + _w - 3, _y, 3, 1)
 
-local label_length = ui.label.new(manager, "Length: ", theme.label2, _x, _y + 1, 8, 1)
-local iField_length = ui.inputField.new(manager, nil, tostring(set.length), false, theme.iField2, _x + 8, _y + 1, _w - 8, 1)
+local label_length = ui.label.new(drawer, "Length: ", theme.label2, _x, _y + 1, 8, 1)
+local iField_length = ui.inputField.new(drawer, nil, tostring(set.length), false, theme.iField2, _x + 8, _y + 1, _w - 8, 1)
 
-local label_searchList = ui.label.new(manager, "Search List", theme.label2, _x, _y + 3, 12, 1)
-local button_searchList = ui.button.new(manager, set.searchWhiteList, theme.button1, 13, _y + 3, math.floor(_w / 2), 1)
+local label_searchList = ui.label.new(drawer, "Search List", theme.label2, _x, _y + 3, 12, 1)
+local button_searchList = ui.button.new(drawer, set.searchWhiteList, theme.button1, 13, _y + 3, math.floor(_w / 2), 1)
 
-local button_pathSearchList = ui.button.new(manager, "Path", theme.button1, _x, _y + 4, 6, 1)
-local label_pathSearchList = ui.label.new(manager, set.pathSearchList or "No Selection", theme.label2, _x + 7, _y + 4, _w - 7, 1)
+local button_pathSearchList = ui.button.new(drawer, "Path", theme.button1, _x, _y + 4, 6, 1)
+local label_pathSearchList = ui.label.new(drawer, set.pathSearchList or "No Selection", theme.label2, _x + 7, _y + 4, _w - 7, 1)
 if not set.pathSearchList then
     label_pathSearchList:changeMode(2, true)
 end
 
-local label_trashList = ui.label.new(manager, "Trash List", theme.label2, _x, _y + 5, 12, 1)
-local button_trashList = ui.button.new(manager, set.trashWhiteList, theme.button1, 13, _y + 5, math.floor(_w / 2), 1)
+local label_trashList = ui.label.new(drawer, "Trash List", theme.label2, _x, _y + 5, 12, 1)
+local button_trashList = ui.button.new(drawer, set.trashWhiteList, theme.button1, 13, _y + 5, math.floor(_w / 2), 1)
 
-local button_pathTrashList = ui.button.new(manager, "Path", theme.button1, _x, _y + 6, 6, 1)
-local label_pathTrashList = ui.label.new(manager, set.pathTrashList or "No Selection", theme.label2, _x + 7, _y + 6, _w - 7, 1)
+local button_pathTrashList = ui.button.new(drawer, "Path", theme.button1, _x, _y + 6, 6, 1)
+local label_pathTrashList = ui.label.new(drawer, set.pathTrashList or "No Selection", theme.label2, _x + 7, _y + 6, _w - 7, 1)
 if not set.pathTrashList then
     label_pathTrashList:changeMode(2, true)
 end
 
-local text_slot = ui.text.new(manager, "Slots:\n1: Chest    2: Fuel\n3: Build    4: Torch\n5: Ender Chest", theme.label2, _x, _y + 8, 26, 4)
+local text_slot = ui.text.new(drawer, "Slots:\n1: Chest    2: Fuel\n3: Build    4: Torch\n5: Ender Chest", theme.label2, _x, _y + 8, 26, 4)
 local list_slots = {}
 for i = 1, 16 do
     local x = _x + 26 + ((i - 1) % 4) * 3
     local y = _y + 8 + math.floor((i - 1) / 4)
-    local button_slot = ui.button.new(manager, tostring(set.slots[i]), theme.button1, x, y, 3, 1)
+    local button_slot = ui.button.new(drawer, tostring(set.slots[i]), theme.button1, x, y, 3, 1)
     table.insert(list_slots, button_slot)
 end
 
-local button_start = ui.button.new(manager, "Start", theme.button1, _x + _w - 7, _h, 7, 1)
-local button_saveSettings = ui.button.new(manager, "Save Settings", theme.button1, _x, _h, 15, 1)
+local button_start = ui.button.new(drawer, "Start", theme.button1, _x + _w - 7, _h, 7, 1)
+local button_saveSettings = ui.button.new(drawer, "Save Settings", theme.button1, _x, _h, 15, 1)
 
 --Connect
-local group_mainMenu = manager.selectionManager:addNewGroup()
+local group_mainMenu = drawer.selectionManager:addNewGroup()
 group_mainMenu.current = button_exit
-local group_mainUp = manager.selectionManager:addNewGroup()
+local group_mainUp = drawer.selectionManager:addNewGroup()
 group_mainUp.current = iField_length
-local group_slot = manager.selectionManager:addNewGroup()
+local group_slot = drawer.selectionManager:addNewGroup()
 group_slot.current = list_slots[1]
-local group_mainDown = manager.selectionManager:addNewGroup()
+local group_mainDown = drawer.selectionManager:addNewGroup()
 group_mainDown.current = button_start
 
 group_mainMenu.previous = group_slot
@@ -140,7 +141,7 @@ end
 updateStart()
 
 function button_exit:onClick(event)
-    manager:exit()
+    input:exit()
 end
 
 function iField_length:onTextEdit(event, ...)
@@ -166,7 +167,7 @@ function button_searchList:onClick(event)
 end
 
 function button_pathSearchList:onClick(event)
-    manager:callFunction(
+    input:callFunction(
         function()
             local file = callfile("os/sys/explorer/main.lua", {select = event.name ~= "mouse_up", mode = "select_one", edit = false, type = "list"})
             if file then
@@ -175,7 +176,7 @@ function button_pathSearchList:onClick(event)
                 label_pathSearchList:recalculate()
                 updateStart()
             end
-            manager:draw()
+            drawer:draw()
         end
     )
 end
@@ -194,7 +195,7 @@ function button_trashList:onClick(event)
 end
 
 function button_pathTrashList:onClick(event)
-    manager:callFunction(
+    input:callFunction(
         function()
             local file = callfile("os/sys/explorer/main.lua", {select = event.name ~= "mouse_up", mode = "select_one", edit = false, type = "list"})
             if file then
@@ -202,7 +203,7 @@ function button_pathTrashList:onClick(event)
                 label_pathTrashList.text = set.pathTrashList
                 label_pathTrashList:recalculate()
             end
-            manager:draw()
+            drawer:draw()
         end
     )
 end
@@ -244,7 +245,7 @@ function button_saveSettings:onClick(event)
 end
 
 function button_start:onClick(event)
-    manager:callFunction(
+    input:callFunction(
         function()
             term.clear()
             fs.delete("os/programs/stripMiner/data/move.set")
@@ -254,11 +255,11 @@ function button_start:onClick(event)
             file.write('dofile("os/programs/stripMiner/mine.lua")')
             file.close()
             dofile("os/programs/stripMiner/mine.lua")
-            manager:draw()
+            drawer:draw()
         end
     )
 end
 
-manager.selectionManager:select(group_mainUp, "code", 1)
-manager:draw()
-manager:execute()
+drawer.selectionManager:select(group_mainUp, "code", 1)
+drawer:draw()
+input:eventLoop({[term] = drawer.event})

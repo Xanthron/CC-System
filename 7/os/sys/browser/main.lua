@@ -10,7 +10,7 @@
     ####################################################################################################################
 ]]
 local args = ...
-args.term = args.term or term
+local term = ui.input.term
 local defaultPasteBin = "ZbWvc7x9"
 ---@type integer
 local _x, _y, _w, _h = 1, 1, term.getSize()
@@ -77,7 +77,6 @@ end
 local function updateFiles(mode)
     callfile(
         "os/sys/wait.lua",
-        args.term,
         "Downloading",
         function()
             local l1, l2, l3 = callfile("os/sys/browser/getList.lua", mode)
@@ -93,10 +92,10 @@ local function updateFiles(mode)
     )
 end
 
----@param manager uiManager
+---@param drawer drawer
 ---@param sView scrollView
 ---@param elements element[]
-local function createSViewButton(manager, sView, official, data, elements, x, y, w, h)
+local function createSViewButton(drawer, sView, official, data, elements, x, y, w, h)
     local container = sView:getContainer()
     local name = data.name
     local image = ui.element.new(container, "image", x, y, 1, h)
@@ -118,13 +117,13 @@ local function createSViewButton(manager, sView, official, data, elements, x, y,
 
     ---@type event
     function button_item:onClick(event)
-        manager.parallelManager:removeFunction(self.animation)
-        manager:callFunction(
+        drawer:getParallelManager():removeFunction(self.animation)
+        drawer:getInput():callFunction(
             function()
-                callfile("os/sys/browser/info.lua", {term = args.term, data = data})
+                callfile("os/sys/browser/info.lua", {data = data})
                 updateFiles(false)
-                updateSView(manager, sView)
-                manager:draw()
+                updateSView(drawer, sView)
+                drawer:draw()
             end
         )
     end
@@ -132,19 +131,19 @@ local function createSViewButton(manager, sView, official, data, elements, x, y,
     table.insert(elements, button_item)
 end
 
----@param manager uiManager
+---@param drawer drawer
 ---@param sView scrollView
-function updateSView(manager, sView)
+function updateSView(drawer, sView)
     sView:clear()
     local container = sView:getContainer()
     ---@type element[]
     local elements = {}
     local x, y, w, h = 1, 2, _w - 1, 1
     for _, data in ipairs(list) do
-        createSViewButton(manager, sView, true, data, elements, x, y, w, h)
+        createSViewButton(drawer, sView, true, data, elements, x, y, w, h)
         y = y + 1
     end
-    local group_menu = manager.selectionManager.groups[1]
+    local group_menu = drawer.selectionManager.groups[1]
     if #elements > 0 then
         for i = 1, #elements do
             sView.selectionGroup:addElement(elements[i], nil, elements[i - 1], nil, elements[i + 1])
@@ -173,100 +172,100 @@ end
     SetUp
     ####################################################################################################################
 ]]
-local manager = ui.uiManager.new(_x, _y, _w, _h)
-manager.term = args.term
+local input = ui.input.new()
+local drawer = ui.drawer.new(input, _x, _y, _w, _h)
 local index
 for i = 1, _w * _h do
     if i <= _w then
-        manager.buffer.text[i] = " "
-        manager.buffer.textColor[i] = colors.green
-        manager.buffer.textBackgroundColor[i] = colors.green
+        drawer.buffer.text[i] = " "
+        drawer.buffer.textColor[i] = colors.green
+        drawer.buffer.textBackgroundColor[i] = colors.green
     elseif i <= 2 * _w then
-        manager.buffer.text[i] = " "
-        manager.buffer.textColor[i] = colors.lime
-        manager.buffer.textBackgroundColor[i] = colors.lime
+        drawer.buffer.text[i] = " "
+        drawer.buffer.textColor[i] = colors.lime
+        drawer.buffer.textBackgroundColor[i] = colors.lime
     else
-        manager.buffer.text[i] = " "
-        manager.buffer.textColor[i] = colors.white
-        manager.buffer.textBackgroundColor[i] = colors.white
+        drawer.buffer.text[i] = " "
+        drawer.buffer.textColor[i] = colors.white
+        drawer.buffer.textBackgroundColor[i] = colors.white
     end
 end
 
-local button_update = ui.button.new(manager, "\21", theme.button1, 1, 1, 3, 1)
-local button_upload = ui.button.new(manager, "\24", theme.button1, 5, 1, 3, 1)
-local button_download = ui.button.new(manager, "\25", theme.button1, 9, 1, 3, 1)
-local button_sort = ui.button.new(manager, "Sort", theme.button1, _w - 11, 1, 6, 1)
-local button_option = ui.button.new(manager, "\164", theme.button1, _w - 5, 1, 3, 1)
-local button_exit = ui.button.new(manager, "<", theme.button2, _w - 2, 1, 3, 1)
-local sView_list = ui.scrollView.new(manager, "", 3, theme.sView1, 1, 2, _w, _h - 1)
+local button_update = ui.button.new(drawer, "\21", theme.button1, 1, 1, 3, 1)
+local button_upload = ui.button.new(drawer, "\24", theme.button1, 5, 1, 3, 1)
+local button_download = ui.button.new(drawer, "\25", theme.button1, 9, 1, 3, 1)
+local button_sort = ui.button.new(drawer, "Sort", theme.button1, _w - 11, 1, 6, 1)
+local button_option = ui.button.new(drawer, "\164", theme.button1, _w - 5, 1, 3, 1)
+local button_exit = ui.button.new(drawer, "<", theme.button2, _w - 2, 1, 3, 1)
+local sView_list = ui.scrollView.new(drawer, "", 3, theme.sView1, 1, 2, _w, _h - 1)
 
-local group_menu = manager.selectionManager:addNewGroup()
+local group_menu = drawer.selectionManager:addNewGroup()
 group_menu:addElement(button_update, nil, nil, button_upload, sView_list.selectionGroup)
 group_menu:addElement(button_upload, button_update, nil, button_download, sView_list.selectionGroup)
 group_menu:addElement(button_download, button_upload, nil, button_option, sView_list.selectionGroup)
 group_menu:addElement(button_option, button_download, nil, button_exit, sView_list.selectionGroup)
 group_menu:addElement(button_exit, button_option, nil, nil, sView_list.selectionGroup)
 group_menu.current = button_update
-manager.selectionManager:addGroup(sView_list.selectionGroup)
+drawer.selectionManager:addGroup(sView_list.selectionGroup)
 
 sView_list.selectionGroup.previous = group_menu
 sView_list.selectionGroup.next = group_menu
 
 updateFiles(true)
-updateSView(manager, sView_list)
+updateSView(drawer, sView_list)
 
 function button_exit:onClick(event)
-    manager:exit()
+    input:exit()
 end
 function button_update:onClick(event)
-    manager:callFunction(
+    input:callFunction(
         function()
             updateFiles(true)
-            updateSView(manager, sView_list)
-            manager:draw()
+            updateSView(drawer, sView_list)
+            drawer:draw()
         end
     )
 end
 function button_download:onClick(event)
-    manager:callFunction(
+    input:callFunction(
         function()
-            callfile("os/sys/browser/loader.lua", {term = args.term, mode = 2})
+            callfile("os/sys/browser/loader.lua", {mode = 2})
             updateFiles(false)
-            updateSView(manager, sView_list)
-            manager:draw()
+            updateSView(drawer, sView_list)
+            drawer:draw()
         end
     )
 end
 function button_upload:onClick(event)
-    manager:callFunction(
+    input:callFunction(
         function()
-            callfile("os/sys/browser/loader.lua", {term = args.term, mode = 1})
+            callfile("os/sys/browser/loader.lua", {mode = 1})
             updateFiles(false)
-            updateSView(manager, sView_list)
-            manager:draw()
+            updateSView(drawer, sView_list)
+            drawer:draw()
         end
     )
 end
 function button_sort:onClick(event)
-    manager:callFunction(
+    input:callFunction(
         function()
             local buttons = {"Normal", "Name", "Status", "Version", "Type"}
             buttons[sortType] = "*" .. buttons[sortType]
-            local name = callfile("os/sys/listBox.lua", {x = _w - 11, y = 1, w = 10, h = 6, label = "Sort", buttons = buttons, manager = manager})
+            local name = callfile("os/sys/listBox.lua", {x = _w - 11, y = 1, w = 10, h = 6, label = "Sort", buttons = buttons, drawer = drawer})
             for i, v in ipairs(buttons) do
                 if v == name then
                     sortType = i
                     sortFiles()
-                    updateSView(manager, sView_list)
+                    updateSView(drawer, sView_list)
                     break
                 end
             end
-            manager:draw()
+            drawer:draw()
         end
     )
 end
 
-manager.selectionManager:select(sView_list.selectionGroup, "code", 3)
+drawer.selectionManager:select(sView_list.selectionGroup, "code", 3)
 
-manager:draw()
-manager:execute()
+drawer:draw()
+input:eventLoop({[term] = drawer.event})

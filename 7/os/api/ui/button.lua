@@ -55,7 +55,7 @@ function ui.button.new(parent, text, style, x, y, w, h, key)
                     self:recalculate()
                     self:repaint("this", x, y, w, h)
                     self.animation.data[1] = os.clock()
-                    self:getManager().parallelManager:addFunction(self.animation)
+                    self:getDrawer():getParallelManager():addFunction(self.animation)
                 end
                 if event.name == "monitor_touch" and self.onClick then
                     self.mode = 1
@@ -109,7 +109,7 @@ function ui.button.new(parent, text, style, x, y, w, h, key)
                 self:repaint("this", self:getCompleteMaskRect())
                 self._inAnimation = true
                 self.animation.data[1] = os.clock()
-                self:getManager().parallelManager:addFunction(self.animation)
+                self:getDrawer():getParallelManager():addFunction(self.animation)
             end
             return self
         elseif event.name == "key_up" and self.mode == 4 and (event.param1 == 57 or event.param1 == 28 or event.param1 == 29) then
