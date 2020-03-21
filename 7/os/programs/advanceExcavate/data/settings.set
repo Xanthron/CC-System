@@ -1,1 +1,1 @@
-return{length=16,enderChest=true,trashWhiteList=true}
+return{enderChest=true,trashWhiteList=true,length=3,mineMode=true,size=16}

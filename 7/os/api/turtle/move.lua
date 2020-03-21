@@ -6,6 +6,46 @@ if turtle then
         return vector.new(v.x * f.x + v.y * f.y, -v.x * f.y + v.y * f.x, v.z)
     end
 
+    function turtle.move.look(dir, f, update)
+        if dir == "forward" then
+            if f.x < 0 then
+                turtle.move.turnLeft(update)
+                turtle.move.turnLeft(update)
+            elseif f.y > 0 then
+                turtle.move.turnLeft(update)
+            elseif f.y < 0 then
+                turtle.move.turnRight(update)
+            end
+        elseif dir == "back" then
+            if f.x > 0 then
+                turtle.move.turnLeft(update)
+                turtle.move.turnLeft(update)
+            elseif f.y > 0 then
+                turtle.move.turnRight(update)
+            elseif f.y < 0 then
+                turtle.move.turnLeft(update)
+            end
+        elseif dir == "left" then
+            if f.y > 0 then
+                turtle.move.turnLeft(update)
+                turtle.move.turnLeft(update)
+            elseif f.x > 0 then
+                turtle.move.turnLeft(update)
+            elseif f.x < 0 then
+                turtle.move.turnRight(update)
+            end
+        elseif dir == "right" then
+            if f.y < 0 then
+                turtle.move.turnLeft(update)
+                turtle.move.turnLeft(update)
+            elseif f.x > 0 then
+                turtle.move.turnRight(update)
+            elseif f.x < 0 then
+                turtle.move.turnLeft(update)
+            end
+        end
+    end
+
     ---@param update function
     function turtle.move.forward(update)
         if update then
@@ -120,7 +160,10 @@ if turtle then
 
     ---@param v vector
     ---@param update function
-    function turtle.move.go(v, update)
+    function turtle.move.go(v, update, f)
+        if f then
+            v = turtle.move.dir(v, f)
+        end
         local turns = 0
 
         if v.z > 0 then

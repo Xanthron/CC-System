@@ -46,7 +46,7 @@ end
 ---@return vector
 function _v_m.__sub(v1, v2)
     if type(v2) ~= "table" then
-        error("lol", 4)
+        error("No vector", 3)
     end
     return vector.new(v1.x - v2.x, v1.y - v2.y, v1.z - v2.z)
 end

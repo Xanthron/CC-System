@@ -7,8 +7,9 @@ if type(args[1]) == "table" then
     table.remove(args, 1)
 end
 
+--TODO Check if necessary in code
 local function downloadScreen(...)
-    callfile("os/sys/wait.lua", "Downloading", ...)
+    --callfile("os/sys/wait.lua", "Downloading", ...)
 end
 
 local function doData(data)

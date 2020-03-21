@@ -161,7 +161,7 @@ function ui.textBox.new(parent, label, text, style, x, y, w, h, key)
             this:changeMode(3)
             if newElement == this then
                 if source ~= "mouse" then
-                    self.current:changeMode(3)
+                    this.selectionGroup.current:changeMode(3)
                 end
                 return false
             end

@@ -1,122 +1,169 @@
+--Advance Excavate            [<]
+--Size: [                      ]
+--Trash List  WhiteList
+--path:
+--Chest Mode   Ender Chest
+--Insert the [tc=red]chest[tc=clear] in [tc=red]slot 1[tc=clear] and [tc=red]fuel[tc=clear] in [tc=red]slot 1[tc=clear].
+--options size, chest, trash
+
 ui.input.term = term
+local _x, _y, _w, _h = 1, 1, term.getSize()
 
-local savePath = "os/programs/advanceExcavate/data/move.set"
-local set = {}
---dofile("os/programs/advanceExcavate/data/data.set")
-set.size = 3
-local move = {}
-local inMove = false
+local success, set = fs.doFile("os/programs/advanceExcavate/data/settings.set")
+set = set or {}
+set.trashWhiteList = not (set.trashWhiteList == false)
+if set.pathTrashList and not fs.exists(set.pathTrashList) then
+    set.pathTrashList = nil
+end
+set.enderChest = set.enderChest or false
+set.mineMode = not (set.mineMode == false)
+set.size = set.size or 0
 
-local function getData()
-    if false and fs.exists(savePath) then
-        move = dofile(savePath)
-        vector.convert(move.pos)
-        vector.convert(move.facing)
+local input = ui.input.new()
+local drawer = ui.drawer.new(input, _x, _y, _w, _h)
+ui.buffer.fill(drawer.buffer, " ", colors.white, colors.white)
+
+local label_title = ui.label.new(drawer, "Advance Excavate", theme.label1, _x, _y, _w - 3, 2)
+local button_exit = ui.button.new(drawer, "<", theme.button2, _x + _w - 3, _y, 3, 1)
+
+local label_size = ui.label.new(drawer, "Length: ", theme.label2, _x, _y + 1, 8, 1)
+local iField_size = ui.inputField.new(drawer, nil, tostring(set.size), false, theme.iField2, _x + 8, _y + 1, _w - 8, 1)
+
+local label_trashList = ui.label.new(drawer, "Trash List", theme.label2, _x, _y + 3, 12, 1)
+local toggle_trashList = ui.toggle.new(drawer, {"White List", "Black List"}, set.trashWhiteList, theme.toggle1, 13, _y + 3, math.floor(_w / 2), 1)
+
+local button_pathTrashList = ui.button.new(drawer, "Path", theme.button1, _x, _y + 4, 6, 1)
+local label_pathTrashList = ui.label.new(drawer, set.pathTrashList or "No Selection", theme.label2, _x + 7, _y + 4, _w - 7, 1)
+if not set.pathTrashList then
+    label_pathTrashList:changeMode(2, true)
+end
+
+local label_chest = ui.label.new(drawer, "Chest Mode", theme.label2, _x, _y + 6, 12, 1)
+local toggle_chest = ui.toggle.new(drawer, {"Ender Chest", "Normal"}, set.enderChest, theme.toggle1, 13, _y + 6, math.floor(_w / 2), 1)
+
+local label_mine = ui.label.new(drawer, "Mine Mode", theme.label2, _x, _y + 8, 12, 1)
+local toggle_mine = ui.toggle.new(drawer, {"Efficient", "Radical"}, set.mineMode, theme.toggle1, 13, _y + 8, math.floor(_w / 2), 1)
+
+local text_info = ui.text.new(drawer, " \n ", theme.label2, 1, _y + 10, _w, _h - 9)
+text_info.scaleH = false
+
+ui.label.new(drawer, "", theme.label1, 1, _h, _w, 1)
+
+local button_start = ui.button.new(drawer, "Start", theme.button1, _x + _w - 7, _h, 7, 1)
+local button_saveSettings = ui.button.new(drawer, "Save Settings", theme.button1, _x, _h, 15, 1)
+
+local group_menu = drawer.selectionManager:addNewGroup()
+group_menu.current = button_exit
+local group_main = drawer.selectionManager:addNewGroup()
+group_main.current = iField_size
+local group_save = drawer.selectionManager:addNewGroup()
+group_save.current = button_start
+
+group_menu.previous = group_save
+group_main.previous = group_menu
+group_save.previous = group_main
+group_menu.next = group_main
+group_main.next = group_save
+group_save.next = group_menu
+
+group_menu:addElement(button_exit, nil, nil, nil, iField_size)
+group_main:addElement(iField_size, nil, group_menu, nil, toggle_trashList)
+group_main:addElement(toggle_trashList, nil, iField_size, nil, button_pathTrashList)
+group_main:addElement(button_pathTrashList, nil, toggle_trashList, nil, toggle_chest)
+group_main:addElement(toggle_chest, nil, button_pathTrashList, nil, group_save)
+group_save:addElement(button_saveSettings, nil, toggle_chest, button_start, nil)
+group_save:addElement(button_start, button_saveSettings, toggle_chest, nil, nil)
+
+drawer.selectionManager:select(iField_size, "code", not term.isColor())
+
+local function updateTrashList()
+    if set.pathTrashList then
+        toggle_trashList:changeMode(1, true)
     else
-        move.pos = vector.zero:copy()
-        move.facing = vector.forward:copy()
+        toggle_trashList:changeMode(2, true)
     end
 end
-getData()
+updateTrashList()
 
-local function save()
-    table.save(move, savePath)
+local function updateInfoText()
+    local text = "Insert [tc=red]fuel[tc=clear] in [tc=red]slot 1[tc=clear]"
+    if toggle_chest._checked then
+        text = text .. " and an [tc=red]Ender Chest[tc=clear] in [tc=red]slot 2[tc=clear]"
+    end
+    text_info.text = text .. "."
+    text_info:recalculate()
+    text_info:repaint("this")
 end
+updateInfoText()
 
-local function update(f, p, m)
-    if m then
-        inMove = true
-    end
-    if f then
-        move.facing:set(move.facing.y * f.x, move.facing.x * f.y)
-        save()
-    end
-    if p then
-        move.pos:set(move.pos.x + (p.x * move.facing.x + p.y * move.facing.y), move.pos.y + (p.x * move.facing.y + p.y * move.facing.x), move.pos.z + p.z)
-        save()
-    end
-    inMove = m
-end
+local function updateStart()
+    local canStart = false
 
-local function fillFuel()
-    local data = turtle.getItemDetail(1)
-    for i = 2, 16 do
-        if data then
-            if turtle.getItemSpace(1) == 0 then
-                return
-            end
-            local new = turtle.getItemDetail(i)
-            if new and new.name == data.name and new.damage == data.damage then
-                turtle.select(i)
-                turtle.transferTo(1)
-            end
-        else
-            turtle.select(i)
-            if turtle.refuel(1) then
-                turtle.transferTo(1)
-                data = turtle.getItemDetail(1)
-            end
-        end
-    end
-end
-
-local function refuel(amount)
-    local limit = turtle.getFuelLimit()
-    if limit == 0 then
-        return true
-    end
-
-    turtle.select(1)
-    while true do
-        if turtle.getItemCount(1) <= 1 then
-            fillFuel()
-        end
-        if turtle.getItemCount(1) == 0 then
-            return false
-        elseif amount < turtle.getFuelLevel() then
-            return true
-        end
-        turtle.refuel(1)
-    end
-end
-
-local function getMoveDistance(from, to)
-    local v = to - from
-    return math.abs(v.x) + math.abs(v.y) + math.abs(v.z)
-end
-
-local function getNextPos(offset, current, size)
-    local v = current - offset
-    local elevation = math.min((v.z) % 6, 1) * 2 - 1
-    local direction = (v.y % 2 * 2 - 1) * -elevation
-
-    local x, y, z = 0, 0, 0
-    if (direction < 0 and v.x < size) or (direction > 0 and v.x > 0) then
-        x = -direction
-    elseif (elevation < 0 and v.y < size) or (elevation > 0 and v.y > 0) then
-        y = -elevation
+    if (tonumber(iField_size.text) or 0) >= 1 then
+        button_start:changeMode(1, true)
+        group_save.current = button_start
     else
-        z = -3
+        button_start:changeMode(2, true)
+        group_save.current = button_saveSettings
     end
-    return vector.new(current.x + x, current.y + y, current.z + z)
+end
+updateStart()
+
+function button_exit:onClick()
+    input:exit()
 end
 
-local function mine()
-    local offset = vector.new(1, 0, -1)
-    turtle.move.go(offset, update)
-    turtle.digUp()
-    turtle.digDown()
-
-    repeat
-        turtle.digUp()
-        turtle.digDown()
-        local next = getNextPos(offset, move.pos, set.size - 1) - move.pos
-        next:set(next.x * move.facing.x + next.y * move.facing.y, -next.x * move.facing.y + next.y * move.facing.x, next.z)
-    until not turtle.move.go(next, update)
-    turtle.move.go(vector.new(0, 0, -move.pos.z), update)
-    turtle.move.go(turtle.move.dir(offset - move.pos, move.facing), update)
-    turtle.move.go(vector.zero, update)
+function button_pathTrashList:onClick(event)
+    input:callFunction(
+        function()
+            local path = callfile("os/sys/explorer/main.lua", {mode = "select_one", edit = false, select = event.name == "key_up", type = "list"})
+            if path then
+                set.pathTrashList = path
+                label_pathTrashList.mode = 1
+                label_pathTrashList.text = path
+                label_pathTrashList:recalculate()
+            end
+            drawer:draw()
+            updateTrashList()
+        end
+    )
 end
-mine()
 
-print("end")
+function toggle_chest:onToggle(event, bool)
+    updateInfoText()
+    set.enderChest = bool
+end
+
+function toggle_trashList:onToggle(event, bool)
+    set.trashWhiteList = bool
+end
+
+function iField_size:onTextEdit(event, text)
+    if event == "change" then
+        updateStart()
+        set.size = tonumber(text) or 0
+    end
+end
+
+function button_saveSettings:onClick(event)
+    table.save(set, "os/programs/advanceExcavate/data/settings.set")
+end
+
+function button_start:onClick(event)
+    input:callFunction(
+        function()
+            term.clear()
+            fs.delete("os/programs/advanceExcavate/data/move.set")
+            fs.delete("os/programs/advanceExcavate/data/data.set")
+            table.save(set, "os/programs/advanceExcavate/data/data.set")
+            local file = fs.open("os/startup/50-advanceExcavate.lua", "w")
+            file.write('dofile("os/programs/advanceExcavate/excavate.lua")')
+            file.close()
+            dofile("os/programs/advanceExcavate/excavate.lua")
+            input:exit()
+        end
+    )
+end
+
+drawer:draw()
+input:eventLoop({[term] = drawer.event})

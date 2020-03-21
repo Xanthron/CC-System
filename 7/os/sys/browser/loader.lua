@@ -1,12 +1,13 @@
+local term = ui.input.term
 --[[
     ####################################################################################################################
     Variables
     ####################################################################################################################
 ]]
 local args = ...
-args.term = args.term or term
+
 ---@type integer
-local _x, _y, _w, _h = 1, 1, args.term.getSize()
+local _x, _y, _w, _h = 1, 1, term.getSize()
 local mode = args.mode
 --[[
     ####################################################################################################################
@@ -14,7 +15,7 @@ local mode = args.mode
     ####################################################################################################################
 ]]
 local function loadScreen(label, ...)
-    callfile("os/sys/wait.lua", args.term, label, ...)
+    callfile("os/sys/wait.lua", label, ...)
 end
 
 local modeName = IF(mode == 1, "Upload", "Download")
@@ -24,8 +25,8 @@ local modeName = IF(mode == 1, "Upload", "Download")
     SetUp
     ####################################################################################################################
 ]]
-local drawer, index = ui.drawer.new(_x, _y, _w, _h), nil
-drawer.term = args.term
+local input = ui.input.new()
+local drawer, index = ui.drawer.new(input, _x, _y, _w, _h), nil
 for i = 1, _w * _h do
     if i <= _w or i > (_h - 1) * _w then
         drawer.buffer.text[i] = " "
@@ -129,7 +130,7 @@ local function checkDownloadButton(codeText, nameText, versionText)
 end
 
 function button_exit:onClick(event)
-    drawer:exit()
+    input:exit()
 end
 
 if mode == 2 then
@@ -156,14 +157,14 @@ if mode == 2 then
 end
 
 function button_path:onClick(event)
-    drawer:callFunction(
+    input:callFunction(
         function()
             local changeName = textutils.getNeatName(args.path or "") == iField_name.text or iField_name.text:len() == 0
             local path = ""
             if args.path then
                 path = fs.getDir(args.path)
             end
-            path = callfile("os/sys/explorer/main.lua", IF(mode == 1, {term = args.term, mode = "select_one", path = path, edit = false, select = event.name ~= "mouse_up"}, {term = args.term, mode = "save", save = iField_name.text, override = true, path = path, edit = false, select = event.name ~= "mouse_up"}))
+            path = callfile("os/sys/explorer/main.lua", IF(mode == 1, {mode = "select_one", path = path, edit = false, select = event.name ~= "mouse_up"}, {mode = "save", save = iField_name.text, override = true, path = path, edit = false, select = event.name ~= "mouse_up"}))
             if path then
                 args.path = path
                 label_path.text = path
@@ -235,7 +236,7 @@ function iField_version:onTextEdit(event, ...)
 end
 
 function button_load:onClick(event)
-    drawer:callFunction(
+    input:callFunction(
         function()
             local success, content, text, code
 
@@ -317,9 +318,9 @@ function button_load:onClick(event)
                     callfile("os/sys/browser/install.lua", 1, data)
                 end
                 --error("lol")
-                callfile("os/sys/infoBox.lua", {term = args.term, x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, text = ("%sSucceeded"):format(text), label = modeName, select = true, button1 = "Ok"})
+                callfile("os/sys/infoBox.lua", {x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, text = ("%sSucceeded"):format(text), label = modeName, select = true, button1 = "Ok"})
             else
-                callfile("os/sys/infoBox.lua", {term = args.term, x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, text = ("%sFailed\n\n%s"):format(text, content), label = modeName, select = true, button1 = "Ok"})
+                callfile("os/sys/infoBox.lua", {x = _x + 2, y = _y + 2, w = _w - 4, h = _h - 4, text = ("%sFailed\n\n%s"):format(text, content), label = modeName, select = true, button1 = "Ok"})
             end
             drawer:draw()
         end
@@ -332,4 +333,5 @@ else
     drawer.selectionManager:select(iField_code, "code", 3)
 end
 drawer:draw()
-drawer:execute()
+input:eventLoop({[term] = drawer.event})
+--sleep(10)
