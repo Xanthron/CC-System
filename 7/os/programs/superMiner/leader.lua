@@ -125,9 +125,10 @@ local function placeTurtle(i, dir)
     placeFuel(dir)
     turtle.select(2)
     turtle["drop" .. Dir](1)
-    --peripheral.wrap(dir).turnOn()
+    peripheral.wrap(dir).turnOn()
+    sleep(0.2)
     redstone.setAnalogOutput(dir, 1)
-    sleep(0.4)
+    sleep(0.2)
     redstone.setAnalogOutput(dir, 0)
 end
 

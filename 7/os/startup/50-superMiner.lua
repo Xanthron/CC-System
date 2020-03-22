@@ -1,1 +1,0 @@
-dofile("os/programs/superMiner/minion.lua")

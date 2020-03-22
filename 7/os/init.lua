@@ -13,6 +13,8 @@ end
 
 loadAPIs("os/api")
 
+dofile("os/functions.lua")
+
 local _
 _, _G.theme = ui.theme.load("main.lua")
 _G.shell = shell

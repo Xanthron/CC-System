@@ -15,7 +15,7 @@ local mode = args.mode
     ####################################################################################################################
 ]]
 local function loadScreen(label, ...)
-    callfile("os/sys/wait.lua", label, ...)
+    ui.wait(label, ...)
 end
 
 local modeName = IF(mode == 1, "Upload", "Download")

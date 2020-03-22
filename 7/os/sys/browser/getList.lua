@@ -1,7 +1,7 @@
 local p1, p2, p3 = "os/sys/browser/data/official", "os/sys/browser/data/unofficial", "os/sys/browser/data/installed"
 local l1 = {}
 if ... ~= false then
-    local success, content = www.pasteBinRun(dofile("os/sys/browser/data/settings.set").official, p1, true)
+    local success, content = www.pasteBinRun(dofile("os/sys/browser/data/settings.set").official)
     if success then
         l1 = content
         if not fs.exists(p3) then

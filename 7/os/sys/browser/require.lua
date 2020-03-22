@@ -1,15 +1,10 @@
 local args = {...}
-local official, unofficial
+local official, unofficial, installed
 local term = ui.input.term
-
-if type(args[1]) == "table" then
-    term = args[1]
-    table.remove(args, 1)
-end
 
 --TODO Check if necessary in code
 local function downloadScreen(...)
-    --callfile("os/sys/wait.lua", "Downloading", ...)
+    ui.wait("Downloading\nRequirements", ...)
 end
 
 local function doData(data)
@@ -33,7 +28,45 @@ local function doData(data)
     return s
 end
 
+local function compareVersion(required, installed)
+    if not installed then
+        return false
+    end
+    for i = 1, min(#required, #installed) do
+        if required[i] > installed[i] then --TODO Version
+            return false
+        elseif required[i] < installed[i] then
+            return true
+        end
+    end
+    return true
+end
+
+---@param name string
 local function doItem(name)
+    for i = 1, #installed do
+        if installed[i].name == name then
+            local s, e = name:find("^%[[0-9]-%.[0-9]%.[0-9]%]%s*") --TODO Überprüfen ob das klappt
+            if s then
+                local version = {}
+                local versionText = name:sub(s + 1, e - 1)
+                name = name:sub(e + 1)
+                for n in versionText:gmatch("[0-9]+") do
+                    table.insert(version, tonumber(n))
+                end
+                if not compareVersion(version, installed[i].version) then
+                    break
+                end
+            end
+            s, e = name:find("^%[force%]%s*")
+            if s then
+                name = name:sub(e + 1)
+                break
+            end
+
+            return
+        end
+    end
     for i = 1, #official do
         if official[i].name == name then
             doData(official[i])
@@ -50,7 +83,7 @@ end
 
 downloadScreen(
     function()
-        official, unofficial = dofile("os/sys/browser/getList.lua")
+        official, unofficial, installed = dofile("os/sys/browser/getList.lua")
         for i = 1, #args do
             doItem(args[i])
         end

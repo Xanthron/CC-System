@@ -4,7 +4,7 @@ local term = ui.input.term
 local _x, _y, _w, _h = 1, 1, term.getSize()
 
 local function downloadScreen(...)
-    callfile("os/sys/wait.lua", "Downloading", ...)
+    ui.wait("Downloading", ...)
 end
 
 local input = ui.input.new()

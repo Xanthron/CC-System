@@ -75,9 +75,8 @@ local function sortFiles()
     end
 end
 local function updateFiles(mode)
-    callfile(
-        "os/sys/wait.lua",
-        "Downloading",
+    ui.wait(
+        "Download\nProgram List",
         function()
             local l1, l2, l3 = callfile("os/sys/browser/getList.lua", mode)
             installed = l3

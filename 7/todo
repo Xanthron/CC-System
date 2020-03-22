@@ -7,6 +7,8 @@
 --TODO Make select variable needs focus, so when selected et gets focused (specially for input field)
 --TODO Overlapping wait animation
 
+--TODO Error when tabbing in Archivrar
+
 Strip Miner:
 --TODO multiple building blocks
 --TODO option ignore path building when build slot empty

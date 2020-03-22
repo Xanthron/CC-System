@@ -32,7 +32,7 @@ function www._run(content, name, ...)
     if not ok then
         return false, err
     end
-    return true
+    return true, err
 end
 
 function www.run(url, ...)

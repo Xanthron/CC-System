@@ -678,10 +678,10 @@ if term.isColor() then
     button4.sTheme.b = {{}, {}, {}, {">"}, {" "}, {}, {}, {}, {}}
     button4.dTheme.b = {{}, {}, {}, {" "}, {" "}, {}, {}, {}, {}}
 else
-    button4.nTheme.b = {{}, {}, {}, {"x"}, {" "}, {}, {}, {}, {}}
-    button4.pTheme.b = {{}, {}, {}, {"\16"}, {" "}, {}, {}, {}, {}}
-    button4.sTheme.b = {{}, {}, {}, {">"}, {" "}, {}, {}, {}, {}}
-    button4.dTheme.b = {{}, {}, {}, {"*"}, {" "}, {}, {}, {}, {}}
+    button4.nTheme.b = {{}, {}, {}, {" ", "\7"}, {" "}, {}, {}, {}, {}}
+    button4.pTheme.b = {{}, {}, {}, {"\16", "\7"}, {" "}, {}, {}, {}, {}}
+    button4.sTheme.b = {{}, {}, {}, {">", "\7"}, {" "}, {}, {}, {}, {}}
+    button4.dTheme.b = {{}, {}, {}, {"*", "\7"}, {" "}, {}, {}, {}, {}}
 end
 button4.align = 1
 button4.nTheme.tC = colors.blue
