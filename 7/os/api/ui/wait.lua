@@ -1,12 +1,14 @@
-local isInWait = false
+if _isInWait == nil then
+    _isInWait = false
+end
 ui.wait = {}
 function ui.wait(text, ...)
     local args = {...}
     local isStarter = false
     local func
 
-    if not isInWait and text then
-        isInWait = true
+    if not _isInWait and text then
+        _isInWait = true
         isStarter = true
         function func()
             local lines = {}
@@ -17,7 +19,7 @@ function ui.wait(text, ...)
             local x, y = term.getSize()
 
             x = math.floor(x / 2)
-            y = math.floor(y / 2) + 2 + math.floor(#lines / 2)
+            y = math.floor(y / 2) + 2 + math.ceil(#lines / 2)
 
             local pos = {x - 1, y - 1, x, y - 1, x + 1, y - 1, x + 1, y, x + 1, y + 1, x, y + 1, x - 1, y + 1, x - 1, y}
             local char = {"o", "O", "o"}
@@ -59,7 +61,7 @@ function ui.wait(text, ...)
         waitForAll()
     end
 
-    if isStarter and isInWait then
-        isInWait = false
+    if isStarter and _isInWait then
+        _isInWait = false
     end
 end

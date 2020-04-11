@@ -4,7 +4,7 @@ local term = ui.input.term
 
 --TODO Check if necessary in code
 local function downloadScreen(...)
-    ui.wait("Downloading\nRequirements", ...)
+    ui.wait("Download\nRequirements", ...)
 end
 
 local function doData(data)
@@ -32,8 +32,8 @@ local function compareVersion(required, installed)
     if not installed then
         return false
     end
-    for i = 1, min(#required, #installed) do
-        if required[i] > installed[i] then --TODO Version
+    for i = 1, math.min(#required, #installed) do
+        if required[i] > installed[i] then
             return false
         elseif required[i] < installed[i] then
             return true
@@ -44,26 +44,26 @@ end
 
 ---@param name string
 local function doItem(name)
+    local version
+    local s, e = name:find("^%[[0-9]-%.[0-9]-%.[0-9]-%]%s*")
+    if s then
+        version = {}
+        local versionText = name:sub(s + 1, e - 1)
+        name = name:sub(e + 1)
+        for n in versionText:gmatch("[0-9]+") do
+            table.insert(version, tonumber(n))
+        end
+    end
+    s, e = name:find("^%[force%]%s*")
+    if s then
+        version = true
+        name = name:sub(e + 1)
+    end
     for i = 1, #installed do
         if installed[i].name == name then
-            local s, e = name:find("^%[[0-9]-%.[0-9]%.[0-9]%]%s*") --TODO Überprüfen ob das klappt
-            if s then
-                local version = {}
-                local versionText = name:sub(s + 1, e - 1)
-                name = name:sub(e + 1)
-                for n in versionText:gmatch("[0-9]+") do
-                    table.insert(version, tonumber(n))
-                end
-                if not compareVersion(version, installed[i].version) then
-                    break
-                end
-            end
-            s, e = name:find("^%[force%]%s*")
-            if s then
-                name = name:sub(e + 1)
+            if version == true or (version and not compareVersion(version, installed[i].version)) then
                 break
             end
-
             return
         end
     end

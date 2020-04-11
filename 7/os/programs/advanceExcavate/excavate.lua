@@ -24,8 +24,8 @@ local function getData()
         move.facing = vector.forward:copy()
         move.excavated = 0
     end
-    if set.trashList then
-        trashList = dofile(set.trashList)
+    if set.pathTrashList then
+        trashList = dofile(set.pathTrashList)
     end
 end
 getData()
@@ -80,7 +80,7 @@ local group_main = drawer.selectionManager:addNewGroup()
 group_main:addElement(button_pause, nil, nil, button_stop, nil)
 group_main:addElement(button_stop, button_pause, nil, button_exit, nil)
 group_main:addElement(button_exit, button_stop, nil, nil, nil)
-drawer.selectionManager:select(button_exit, "code", term.isColor())
+drawer.selectionManager:select(button_pause, "code", not term.isColor())
 
 local function save()
     table.save(move, savePath)
@@ -206,7 +206,7 @@ local function makeSpace()
     if trashList then
         local space = 0
         for i = IF(set.enderChest, 3, 2), 16 do
-            local ret = not data.trashWhiteList
+            local ret = not set.trashWhiteList
             local data = turtle.getItemDetail(i)
             if data then
                 for k, v in pairs(trashList) do
@@ -226,6 +226,7 @@ local function makeSpace()
             end
         end
     end
+    turtle.select(1)
     return free
 end
 
@@ -376,6 +377,8 @@ local function setMode(mode)
         deleteFiles()
         input:exit()
     end
+
+    turtle.select(1)
 
     move.mode = nil
 end

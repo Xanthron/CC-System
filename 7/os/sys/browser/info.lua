@@ -3,8 +3,8 @@ local data = args.data
 local term = ui.input.term
 local _x, _y, _w, _h = 1, 1, term.getSize()
 
-local function downloadScreen(...)
-    ui.wait("Downloading", ...)
+local function downloadScreen(name, ...)
+    ui.wait("Download\n" .. name, ...)
 end
 
 local input = ui.input.new()
@@ -120,6 +120,7 @@ function button_do:onClick(event)
             local success, content, text
             local needsReboot = false
             downloadScreen(
+                data.name,
                 function()
                     if data.path == "run" then
                         local reboot = os.reboot

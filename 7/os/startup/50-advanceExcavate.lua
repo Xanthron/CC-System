@@ -1,0 +1,1 @@
+dofile("os/programs/advanceExcavate/excavate.lua")
