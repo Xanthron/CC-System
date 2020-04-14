@@ -37,7 +37,7 @@ local input = ui.input.new()
 local drawer = ui.drawer.new(input, _x, _y, _w, _h)
 ui.buffer.fill(drawer.buffer, " ", colors.white, colors.white)
 
-ui.label.new(drawer, "Super Miner Leader", theme.label1, _x, _y, _w, 1)
+ui.label.new(drawer, "Super Miner Minion", theme.label1, _x, _y, _w, 1)
 local label_pos = ui.label.new(drawer, "Position: ", theme.label2, _x, _y + 1, 10, 1)
 local label_posX = ui.label.new(drawer, "X: " .. move.pos.x, theme.label2, _x + 10, _y + 1, 8, 1)
 local label_posY = ui.label.new(drawer, "Y: " .. move.pos.y, theme.label2, _x + 19, _y + 1, 8, 1)
@@ -149,7 +149,7 @@ local function loop()
                 fs.delete(movePath)
             end
             move.pos = vector.zero:copy()
-            move.mode = "start"
+            move.mode = 1
             save()
             text_mode:setText("Wait for leader")
             while true do

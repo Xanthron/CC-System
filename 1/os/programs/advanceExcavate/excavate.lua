@@ -287,7 +287,7 @@ end
 
 local function gotoNext()
     gotoDestination(offset)
-    gotoDestination(vector.new(move.next.x, move.next.y, move.pos))
+    gotoDestination(vector.new(move.next.x, move.next.y, move.pos.z))
     gotoDestination(move.next)
 end
 
