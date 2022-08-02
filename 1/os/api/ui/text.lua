@@ -7,7 +7,7 @@ ui.text = {}
 ---@param y integer
 ---@param w integer
 ---@param h integer
----@param key string|optional
+---@param key string|nil
 ---@return label
 function ui.text.new(parent, text, style, x, y, w, h, key)
     ---A simple label without function
@@ -30,8 +30,10 @@ function ui.text.new(parent, text, style, x, y, w, h, key)
         else
             theme = self.style.nTheme
         end
-        ui.buffer.text(self.buffer, self.text, theme.tC, theme.tBG, self.style.align, this.scaleW, this.scaleH, self.richText)
+        ui.buffer.text(self.buffer, self.text, theme.tC, theme.tBG, self.style.align, this.scaleW, this.scaleH,
+            self.richText)
     end
+
     ---Recalculate the buffer of this element
     ---@return nil
     this:recalculate()

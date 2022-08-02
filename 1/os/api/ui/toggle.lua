@@ -7,7 +7,7 @@ ui.toggle = {}
 ---@param y integer
 ---@param w integer
 ---@param h integer
----@param key string|optional
+---@param key string|nil
 ---@return toggle
 function ui.toggle.new(parent, text, checked, style, x, y, w, h, key)
     ---@class toggle:element
@@ -16,7 +16,7 @@ function ui.toggle.new(parent, text, checked, style, x, y, w, h, key)
     ---@type style.toggle
     this.style = style
     ---@type string
-    this.text = IF(type(text) == "string", {text}, text)
+    this.text = IF(type(text) == "string", { text }, text)
     ---@type boolean
     this._checked = checked
     ---@type boolean
@@ -24,7 +24,7 @@ function ui.toggle.new(parent, text, checked, style, x, y, w, h, key)
     ---Animation when button is pressed, so it is visible at a short click. return false when animation is finished
     ---@type function
     this.animation =
-        ui.parallelElement.new(
+    ui.parallelElement.new(
         function(data)
             local clock = data[1] - os.clock() + 0.15
             if clock > 0 then
@@ -47,10 +47,10 @@ function ui.toggle.new(parent, text, checked, style, x, y, w, h, key)
 
     ---Assigned function for every event dedicated to the mouse
     ---@param event event
-    ---@param x integer|optional
-    ---@param y integer|optional
-    ---@param w integer|optional
-    ---@param h integer|optional
+    ---@param x integer|nil
+    ---@param y integer|nil
+    ---@param w integer|nil
+    ---@param h integer|nil
     ---@return element|nil
     function this:pointerEvent(event, x, y, w, h)
         x, y, w, h = ui.rect.overlaps(x, y, w, h, self.buffer.rect:getUnpacked())
@@ -67,13 +67,15 @@ function ui.toggle.new(parent, text, checked, style, x, y, w, h, key)
                 return self
             end
         elseif event.name == "mouse_drag" then
-            if self.mode == 3 and event.param2 >= x and event.param2 < x + w and event.param3 >= y and event.param3 < y + h then
+            if self.mode == 3 and event.param2 >= x and event.param2 < x + w and event.param3 >= y and
+                event.param3 < y + h then
                 self.mode = 4
                 if self._inAnimation == false then
                     self:recalculate()
                     self:repaint("this", x, y, w, h)
                 end
-            elseif self.mode == 4 and (event.param2 < x or event.param2 >= x + w or event.param3 < y or event.param3 >= y + h) then
+            elseif self.mode == 4 and
+                (event.param2 < x or event.param2 >= x + w or event.param3 < y or event.param3 >= y + h) then
                 self.mode = 3
                 if self._inAnimation == false then
                     self:recalculate()
@@ -81,7 +83,8 @@ function ui.toggle.new(parent, text, checked, style, x, y, w, h, key)
                 end
             end
         elseif event.name == "mouse_up" then
-            if self.mode == 4 and event.param2 >= x and event.param2 < x + w and event.param3 >= y and event.param3 < y + h then
+            if self.mode == 4 and event.param2 >= x and event.param2 < x + w and event.param3 >= y and
+                event.param3 < y + h then
                 self._checked = self._checked == false
                 self.mode = 1
                 if self._inAnimation == false then
@@ -92,7 +95,8 @@ function ui.toggle.new(parent, text, checked, style, x, y, w, h, key)
                     self:onToggle(event, self._checked)
                 end
                 return self
-            elseif self.mode == 3 and (event.param2 < x or event.param2 >= x + w or event.param3 < y or event.param3 >= y + h) then
+            elseif self.mode == 3 and
+                (event.param2 < x or event.param2 >= x + w or event.param3 < y or event.param3 >= y + h) then
                 self.mode = 1
                 if self._inAnimation == false then
                     self:recalculate()
@@ -102,6 +106,7 @@ function ui.toggle.new(parent, text, checked, style, x, y, w, h, key)
             end
         end
     end
+
     ---Intern function for every event except events dedicated to the mouse
     ---@param event event
     ---@return element|nil
@@ -129,6 +134,7 @@ function ui.toggle.new(parent, text, checked, style, x, y, w, h, key)
             return true
         end
     end
+
     ---Recalculate the buffer of this element
     ---@return nil
     function this:recalculate()
@@ -155,7 +161,8 @@ function ui.toggle.new(parent, text, checked, style, x, y, w, h, key)
         end
         local buffer = self.buffer
         local align = self.style.align
-        ui.buffer.labelBox(buffer, self.text[IF(self._checked or #self.text < 2, 1, 2)], theme.tC, theme.tBG, align, " ", #checkbox, 0, 0, 0)
+        ui.buffer.labelBox(buffer, self.text[IF(self._checked or #self.text < 2, 1, 2)], theme.tC, theme.tBG, align, " "
+            , #checkbox, 0, 0, 0)
         local topPadding = 0
         if align == 1 or align == 2 or align == 3 then
             topPadding = 1

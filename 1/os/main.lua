@@ -14,13 +14,14 @@ local function loadFiles()
             if fs.exists(main) then
                 local success, data
                 fs.doFile(fs.combine(path, "start.lua"))
-                table.insert(files, {path = main, name = textutils.getNeatName(path), data = data or {}})
+                table.insert(files, { path = main, name = textutils.getNeatName(path), data = data or {} })
             end
         else
-            table.insert(files, {path = path, name = textutils.getNeatName(path), data = {}})
+            table.insert(files, { path = path, name = textutils.getNeatName(path), data = {} })
         end
     end
 end
+
 local function createEntry(sView, file, func1, func2, x, y, w, h)
     local container = sView:getContainer()
 
@@ -84,6 +85,8 @@ local function createEntry(sView, file, func1, func2, x, y, w, h)
     button_item.onClick = func1
     button_info.onClick = func2
 end
+
+-- Test
 ---@param drawer drawer
 ---@param sView scrollView
 local function updateSView(drawer, sView)
@@ -94,20 +97,21 @@ local function updateSView(drawer, sView)
             drawer:getInput():callFunction(
                 function()
                     local success, select =
-                        callfile(
+                    callfile(
                         "os/sys/execute.lua",
                         {
                             term = currentTerm, --TODO remove
                             file = file.path,
                             select = event.name ~= "mouse_up",
                             edit = file.data.enter,
-                            args = {load(file.data.argument or "")()}
+                            args = { load(file.data.argument or "")() }
                         }
                     )
                     drawer:draw()
                 end
             )
         end
+
         createEntry(sView, file, start, nil, x, y, w, h)
         y = y + 1
     end
@@ -138,6 +142,7 @@ local function updateSView(drawer, sView)
     sView:resizeContainer()
     sView:recalculate()
 end
+
 local input = ui.input.new()
 local drawer = ui.drawer.new(input, _x, _y, _w, _h)
 for i = 1, _w * _h do
@@ -162,7 +167,9 @@ function button_browser:onClick(event)
     input:callFunction(
         function()
             --TODO change current term
-            local success, select = callfile("os/sys/execute.lua", {term = currentTerm, file = "os/sys/browser/main.lua", select = event ~= "mouse_up", args = {{term = currentTerm, select = event ~= "mouse_up"}}})
+            local success, select = callfile("os/sys/execute.lua",
+                { term = currentTerm, file = "os/sys/browser/main.lua", select = event ~= "mouse_up",
+                    args = { { term = currentTerm, select = event ~= "mouse_up" } } })
             loadFiles()
             updateSView(drawer, sView_list)
             drawer:draw()
@@ -174,13 +181,13 @@ function button_explorer:onClick(event)
     input:callFunction(
         function()
             local success, select =
-                callfile(
+            callfile(
                 "os/sys/execute.lua",
                 {
                     term = currentTerm, --TODO change
                     file = "os/sys/explorer/main.lua",
                     select = event ~= "mouse_up",
-                    args = {{select = event ~= "mouse_up"}}
+                    args = { { select = event ~= "mouse_up" } }
                 }
             )
             drawer:draw()
@@ -226,4 +233,4 @@ else
 end
 
 drawer:draw()
-input:eventLoop({[term] = drawer.event})
+input:eventLoop({ [term] = drawer.event })

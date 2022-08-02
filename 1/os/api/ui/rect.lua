@@ -20,17 +20,18 @@ ui.rect = {}
 function ui.rect.new(x, y, w, h)
     ---Contains x, y, w, h and math operations
     ---@class rect
-    local this = {x = x or 0, y = y or 0, w = w or 0, h = h or 0}
+    local this = { x = x or 0, y = y or 0, w = w or 0, h = h or 0 }
     ---Unpack x, y, w, h
     ---@return integer, integer, integer, integer
     function this:getUnpacked()
         return self.x, self.y, self.w, self.h
     end
+
     ---Set x, y, w, h
-    ---@param x integer|optional
-    ---@param y integer|optional
-    ---@param w integer|optional
-    ---@param h integer|optional
+    ---@param x integer|nil
+    ---@param y integer|nil
+    ---@param w integer|nil
+    ---@param h integer|nil
     ---@return nil
     function this:set(x, y, w, h)
         self.x = x or self.x
@@ -38,6 +39,7 @@ function ui.rect.new(x, y, w, h)
         self.w = w or self.w
         self.h = h or self.h
     end
+
     ---Get the unpacked overlaps of this and a given unpacked rect
     ---@param x integer
     ---@param y integer
@@ -47,6 +49,7 @@ function ui.rect.new(x, y, w, h)
     function this:getOverlaps(x, y, w, h)
         return ui.rect.overlaps(x, y, w, h, self:getUnpacked())
     end
+
     ---Checks if the given x and y is in this rect
     ---@param x integer
     ---@param y integer
@@ -54,9 +57,11 @@ function ui.rect.new(x, y, w, h)
     function this:contains(x, y)
         return (x >= self.x and x < self.x + self.w and y >= self.y and y < self.y + self.h)
     end
+
     setmetatable(this, _rect_metatable)
     return this
 end
+
 ---Overlaps two unpacked rect
 ---@param x1 integer
 ---@param y1 integer

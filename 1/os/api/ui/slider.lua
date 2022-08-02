@@ -9,7 +9,7 @@ ui.slider = {}
 ---@param y integer
 ---@param w integer
 ---@param h integer
----@param key string|optional
+---@param key string|nil
 ---@return slider
 function ui.slider.new(parent, orientation, startValue, endValue, size, style, x, y, w, h, key)
     ---@class slider:element
@@ -33,7 +33,7 @@ function ui.slider.new(parent, orientation, startValue, endValue, size, style, x
     this.value = startValue
     ---@type parallelElement
     this._repeatButtonPressElement =
-        ui.parallelElement.new(
+    ui.parallelElement.new(
         function(data)
             while true do
                 if this.mode == 4 and this.repeatItem:call() == true then
@@ -78,7 +78,9 @@ function ui.slider.new(parent, orientation, startValue, endValue, size, style, x
                 barHeight = height - 2
                 offset = 1
             else
-                barHeight = math.max(1, math.min(math.floor(size / (totalSize + self.startValue) * (height - 2)), height - math.min(4, totalSize - size + 2)))
+                barHeight = math.max(1,
+                    math.min(math.floor(size / (totalSize + self.startValue) * (height - 2)),
+                        height - math.min(4, totalSize - size + 2)))
                 offset = math.max(0, math.floor((height - 3 - barHeight) * value)) + 1
                 if value > 0 then
                     offset = offset + 1
@@ -159,7 +161,9 @@ function ui.slider.new(parent, orientation, startValue, endValue, size, style, x
                 barWidth = width - 2
                 offset = 1
             else
-                barWidth = math.max(1, math.min(math.floor(size / (totalSize + self.startValue) * (width - 2)), width - math.min(4, totalSize - size + 2)))
+                barWidth = math.max(1,
+                    math.min(math.floor(size / (totalSize + self.startValue) * (width - 2)),
+                        width - math.min(4, totalSize - size + 2)))
                 offset = math.max(0, math.floor((width - 3 - barWidth) * value)) + 1
                 if value > 0 then
                     offset = offset + 1
@@ -236,12 +240,13 @@ function ui.slider.new(parent, orientation, startValue, endValue, size, style, x
             end
         end
     end
+
     ---Assigned function for every event dedicated to the mouse
     ---@param event event
-    ---@param x integer|optional
-    ---@param y integer|optional
-    ---@param w integer|optional
-    ---@param h integer|optional
+    ---@param x integer|nil
+    ---@param y integer|nil
+    ---@param w integer|nil
+    ---@param h integer|nil
     ---@return element|nil
     function this:pointerEvent(event, x, y, w, h)
         local rectX, rectY, rectW, rectH = self:getGlobalRect()
@@ -273,7 +278,10 @@ function ui.slider.new(parent, orientation, startValue, endValue, size, style, x
                     end
                 end
             elseif event.name == "mouse_drag" then
-                if event.param2 >= x and event.param2 < x + w and self.mode == 3 and ((self._pressedButton == 1 and event.param3 == y) or (self._pressedButton == 2 and event.param3 == y + h - 1)) then
+                if event.param2 >= x and event.param2 < x + w and self.mode == 3 and
+                    (
+                    (self._pressedButton == 1 and event.param3 == y) or
+                        (self._pressedButton == 2 and event.param3 == y + h - 1)) then
                     self.mode = 4
                     self:recalculate()
                     self:repaint("this", x, y, w, h)
@@ -330,7 +338,10 @@ function ui.slider.new(parent, orientation, startValue, endValue, size, style, x
                     end
                 end
             elseif event.name == "mouse_drag" then
-                if event.param3 >= y and event.param3 < y + h and self.mode == 3 and ((self._pressedButton == 1 and event.param2 == x) or (self._pressedButton == 2 and event.param2 == x + w - 1)) then
+                if event.param3 >= y and event.param3 < y + h and self.mode == 3 and
+                    (
+                    (self._pressedButton == 1 and event.param2 == x) or
+                        (self._pressedButton == 2 and event.param2 == x + w - 1)) then
                     self.mode = 4
                     self:recalculate()
                     self:repaint("this", x, y, w, h)

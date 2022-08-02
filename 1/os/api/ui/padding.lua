@@ -20,12 +20,13 @@ ui.padding = {}
 ---@return padding
 function ui.padding.new(left, top, right, bottom)
     ---@class padding
-    local this = {left = left or 0, top = top or 0, right = right or 0, bottom = bottom or 0}
+    local this = { left = left or 0, top = top or 0, right = right or 0, bottom = bottom or 0 }
     ---Get unpacked padding
     ---@return integer, integer, integer, integer
     function this:getUnpacked()
         return self.left, self.top, self.right, self.bottom
     end
+
     ---Get rect with applied padding
     ---@param x integer
     ---@param y integer
@@ -35,17 +36,19 @@ function ui.padding.new(left, top, right, bottom)
     function this:getPaddedRect(x, y, w, h)
         return x + self.left, y + self.top, w - self.right - self.left, h - self.bottom - self.top
     end
+
     ---Sets the padding
-    ---@param left integer|optional
-    ---@param top integer|optional
-    ---@param right integer|optional
-    ---@param bottom integer|optional
+    ---@param left integer|nil
+    ---@param top integer|nil
+    ---@param right integer|nil
+    ---@param bottom integer|nil
     function this:set(left, top, right, bottom)
         self.left = left or self.left
         self.top = top or self.top
         self.right = right or self.right
         self.bottom = bottom or self.bottom
     end
+
     setmetatable(this, _padding_metatable)
     return this
 end

@@ -7,7 +7,7 @@ ui.scrollView = {}
 ---@param y integer
 ---@param w integer
 ---@param h integer
----@param key string|optional
+---@param key string|nil
 ---@return scrollView
 function ui.scrollView.new(parent, label, mode, style, x, y, w, h, key)
     ---@class scrollView:element
@@ -23,11 +23,15 @@ function ui.scrollView.new(parent, label, mode, style, x, y, w, h, key)
     ui.element.new(this.element[1], "container", this.stylePadding:getPaddedRect(this.buffer.rect:getUnpacked()))
     if mode == 1 or mode == 3 then
         local slideWidth = #style.sliderV.nTheme.handleL
-        ui.slider.new(this, 1, 0, 0, 0, style.sliderV, x + w - math.max(math.ceil((this.stylePadding.right + slideWidth) / 2), slideWidth), y + this.stylePadding.top, slideWidth, h - this.stylePadding.top - this.stylePadding.bottom, "v")
+        ui.slider.new(this, 1, 0, 0, 0, style.sliderV,
+            x + w - math.max(math.ceil((this.stylePadding.right + slideWidth) / 2), slideWidth),
+            y + this.stylePadding.top, slideWidth, h - this.stylePadding.top - this.stylePadding.bottom, "v")
     end
     if mode == 1 or mode == 4 then
         local slideHeight = #style.sliderV.nTheme.handleL
-        ui.slider.new(this, 2, 0, 0, 0, x + this.stylePadding.left, y + h - math.max(math.ceil((this.stylePadding.bottom + slideHeight) / 2), slideHeight), w - this.stylePadding.left - this.stylePadding.right, slideHeight, "h")
+        ui.slider.new(this, 2, 0, 0, 0, x + this.stylePadding.left,
+            y + h - math.max(math.ceil((this.stylePadding.bottom + slideHeight) / 2), slideHeight),
+            w - this.stylePadding.left - this.stylePadding.right, slideHeight, "h")
     end
     ---@type selectionGroup
     this.selectionGroup = ui.selectionGroup.new()
@@ -88,7 +92,8 @@ function ui.scrollView.new(parent, label, mode, style, x, y, w, h, key)
     ---Reset controlling elements layout
     ---@return nil
     function this:resetLayout()
-        self.stylePadding:set(#self.style.nTheme.b[4], #self.style.nTheme.b[2], #self.style.nTheme.b[5], #self.style.nTheme.b[7])
+        self.stylePadding:set(#self.style.nTheme.b[4], #self.style.nTheme.b[2], #self.style.nTheme.b[5],
+            #self.style.nTheme.b[7])
         local x, y, w, h = self:getGlobalRect()
         local sX, sY, sW, sH = self.stylePadding:getPaddedRect(self.buffer.rect:getUnpacked())
         self.element[1]:setGlobalRect(sX, sY, sW, sH)
@@ -96,16 +101,19 @@ function ui.scrollView.new(parent, label, mode, style, x, y, w, h, key)
         if sliderV then
             sliderV.style = self.style.sliderV
             local slideWidth = #self.style.sliderV.nTheme.handleL
-            sliderV:setGlobalRect(x + w - math.max(math.ceil((self.stylePadding.right + slideWidth) / 2), slideWidth), sY, slideWidth, sH)
+            sliderV:setGlobalRect(x + w - math.max(math.ceil((self.stylePadding.right + slideWidth) / 2), slideWidth), sY
+                , slideWidth, sH)
         end
         local sliderH = self.element.h
         if sliderH then
             sliderH.style = self.style.sliderH
             local slideHeight = #self.style.sliderH.nTheme.handleL
-            sliderH:setGlobalRect(x + self.stylePadding.left, y + h - math.max(math.ceil((self.stylePadding.bottom + slideHeight) / 2), slideHeight), sW, slideHeight)
+            sliderH:setGlobalRect(x + self.stylePadding.left,
+                y + h - math.max(math.ceil((self.stylePadding.bottom + slideHeight) / 2), slideHeight), sW, slideHeight)
         end
         self:resizeContainer()
     end
+
     ---Change scroll by value
     ---@param valueX integer
     ---@param valueY integer
@@ -115,7 +123,10 @@ function ui.scrollView.new(parent, label, mode, style, x, y, w, h, key)
         local maxMoveX = 0
         if valueX then
             if valueX > 0 then
-                maxMoveX = math.max(0, math.min(valueX, container:getLocalPosX() + container:getWidth() - (self:getWidth() - self.stylePadding.right + 1)))
+                maxMoveX = math.max(0,
+                    math.min(valueX,
+                        container:getLocalPosX() + container:getWidth() - (self:getWidth() - self.stylePadding.right + 1
+                        )))
             elseif valueX < 0 then
                 maxMoveX = math.min(0, math.max(valueX, container:getLocalPosX() + self.stylePadding.left - 1))
             end
@@ -123,7 +134,10 @@ function ui.scrollView.new(parent, label, mode, style, x, y, w, h, key)
         local maxMoveY = 0
         if valueY then
             if valueY > 0 then
-                maxMoveY = math.max(0, math.min(valueY, container:getLocalPosY() + container:getHeight() - (self:getHeight() - self.stylePadding.bottom + 1)))
+                maxMoveY = math.max(0,
+                    math.min(valueY,
+                        container:getLocalPosY() + container:getHeight() -
+                        (self:getHeight() - self.stylePadding.bottom + 1)))
             elseif valueY < 0 then
                 maxMoveY = math.min(0, math.max(valueY, container:getLocalPosY() + self.stylePadding.top - 1))
             end
@@ -145,22 +159,25 @@ function ui.scrollView.new(parent, label, mode, style, x, y, w, h, key)
                 end
             end
             self:repaint("this")
-        --, self.buffer.rect:getUnpacked())
-        --self:resizeSlider()
+            --, self.buffer.rect:getUnpacked())
+            --self:resizeSlider()
         end
     end
+
     ---Change vertical scroll by value
     ---@param valueY integer
     ---@return nil
     function this._onValueChangeVertical(valueY)
         this:onValueChange(nil, valueY)
     end
+
     ---Change horizontal scroll by value
     ---@param valueX integer
     ---@return nil
     function this._onValueChangeHorizontal(valueX)
         this:onValueChange(valueX, nil)
     end
+
     ---Assigned function for every event except events dedicated to the mouse
     ---@param event event
     ---@return element|nil
@@ -175,12 +192,13 @@ function ui.scrollView.new(parent, label, mode, style, x, y, w, h, key)
             end
         end
     end
+
     ---Assigned function for every event dedicated to the mouse
     ---@param event event
-    ---@param x integer|optional
-    ---@param y integer|optional
-    ---@param w integer|optional
-    ---@param h integer|optional
+    ---@param x integer|nil
+    ---@param y integer|nil
+    ---@param w integer|nil
+    ---@param h integer|nil
     ---@return element|nil
     function this:pointerEvent(event, x, y, w, h)
         if (event.name == "mouse_click" or event.name == "monitor_touch") and self.mode ~= 3 then
@@ -191,6 +209,7 @@ function ui.scrollView.new(parent, label, mode, style, x, y, w, h, key)
             end
         end
     end
+
     ---Recalculate the buffer of this element
     ---@return nil
     function this:recalculate()
@@ -209,9 +228,12 @@ function ui.scrollView.new(parent, label, mode, style, x, y, w, h, key)
         ui.buffer.fill(self.buffer, theme.b[5][1], theme.spaceTextColor, theme.spaceBackgroundColor)
         ui.buffer.borderBox(self.buffer, theme.b, theme.bC, theme.bBG)
         if self.label then
-            ui.buffer.labelBox(self.buffer, labelTheme.suffix .. self.label .. labelTheme.suffix, labelTheme.tC, labelTheme.tBG, self.style.label.align, nil, self.stylePadding.left, 0, self.stylePadding.right, self.buffer.rect.h - self.stylePadding.top)
+            ui.buffer.labelBox(self.buffer, labelTheme.suffix .. self.label .. labelTheme.suffix, labelTheme.tC,
+                labelTheme.tBG, self.style.label.align, nil, self.stylePadding.left, 0, self.stylePadding.right,
+                self.buffer.rect.h - self.stylePadding.top)
         end
     end
+
     ---Listener function of the selectionGroup
     ---@param eventName string
     ---@param source string
@@ -274,6 +296,7 @@ function ui.scrollView.new(parent, label, mode, style, x, y, w, h, key)
             self.selectionGroup.elements[i] = nil
         end
     end
+
     ---Set an containing element to focus
     ---@param element element
     ---@return nil

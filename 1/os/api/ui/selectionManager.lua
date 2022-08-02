@@ -58,7 +58,9 @@ function ui.selectionManager.new()
             if self.current then
                 currentElement = self.current.current
             end
-            if (not self.current or self.current:callListener("selection_lose_focus", source, currentElement, newElement)) and var1:callListener("selection_get_focus", source, currentElement, newElement) then
+            if (
+                not self.current or self.current:callListener("selection_lose_focus", source, currentElement, newElement)
+                ) and var1:callListener("selection_get_focus", source, currentElement, newElement) then
                 if currentElement then
                     currentElement:changeMode(1)
                 end
@@ -83,7 +85,8 @@ function ui.selectionManager.new()
     ---@return nil
     function this:keyEvent(event)
         if event.name == "key" then
-            if not self.current or not self.current:callListener("key", "key", event.param1, event.param2) or self.repeatItem:call() == false then
+            if not self.current or not self.current:callListener("key", "key", event.param1, event.param2) or
+                self.repeatItem:call() == false then
                 return
             end
 
@@ -157,6 +160,7 @@ function ui.selectionManager.new()
             end
         end
     end
+
     ---Handles mouse events
     ---@param event event
     ---@param element element
@@ -179,16 +183,18 @@ function ui.selectionManager.new()
     function this:addGroup(group)
         table.insert(self.groups, group)
     end
+
     ---Create and add a new selectionGroup to this container
-    ---@param previous selectionGroup|optional
-    ---@param next selectionGroup|optional
-    ---@param listener function|optional
+    ---@param previous selectionGroup|nil
+    ---@param next selectionGroup|nil
+    ---@param listener function|nil
     ---@return selectionGroup
     function this:addNewGroup(previous, next, listener)
         local group = ui.selectionGroup.new(previous, next, listener)
         table.insert(self.groups, group)
         return group
     end
+
     ---Remove a selectionGroup
     ---@param group selectionGroup
     ---@return nil

@@ -7,7 +7,7 @@ ui.textBox = {}
 ---@param y integer
 ---@param w integer
 ---@param h integer
----@param key string|optional
+---@param key string|nil
 ---@return textBox
 function ui.textBox.new(parent, label, text, style, x, y, w, h, key)
     ---@class textBox:element
@@ -18,7 +18,9 @@ function ui.textBox.new(parent, label, text, style, x, y, w, h, key)
     ui.element.new(this, "container", this.stylePadding:getPaddedRect(this.buffer.rect:getUnpacked()))
     ui.text.new(this.element[1], text, style.text, this.element[1]:getGlobalRect())
     local slideWidth = #style.slider.nTheme.handleL
-    ui.slider.new(this, 1, 0, this.element[1].element[1]:getHeight(), this.element[1]:getHeight(), style.slider, x + w - math.max(math.ceil((this.stylePadding.right + slideWidth) / 2), slideWidth), y + this.stylePadding.top, slideWidth, h - this.stylePadding.top - this.stylePadding.bottom, "v")
+    ui.slider.new(this, 1, 0, this.element[1].element[1]:getHeight(), this.element[1]:getHeight(), style.slider,
+        x + w - math.max(math.ceil((this.stylePadding.right + slideWidth) / 2), slideWidth), y + this.stylePadding.top,
+        slideWidth, h - this.stylePadding.top - this.stylePadding.bottom, "v")
     ---@type string
     this.label = label
     this.richText = richText
@@ -36,10 +38,12 @@ function ui.textBox.new(parent, label, text, style, x, y, w, h, key)
         slider.endValue = self.element[1].element[1]:getHeight()
         slider:recalculate()
     end
+
     ---Recalculate the buffer of this element
     ---@return nil
     function this:resetLayout()
-        self.stylePadding:set(#self.style.nTheme.b[4], #self.style.nTheme.b[2], #self.style.nTheme.b[6], #self.style.nTheme.b[8])
+        self.stylePadding:set(#self.style.nTheme.b[4], #self.style.nTheme.b[2], #self.style.nTheme.b[6],
+            #self.style.nTheme.b[8])
         local x, y, w, h = self:getGlobalRect()
         local container = self.element[1]
         container:setGlobalRect(self.stylePadding:getPaddedRect(self.buffer.rect:getUnpacked()))
@@ -51,9 +55,11 @@ function ui.textBox.new(parent, label, text, style, x, y, w, h, key)
         slider.style = self.style.slider
         local slideWidth = #self.style.slider.nTheme.handleL
         local x, y, w, h = self:getGlobalRect()
-        slider:setLocalRect(x + w - math.max(math.ceil((self.stylePadding.right + slideWidth) / 2), slideWidth), y + self.stylePadding.top, slideWidth, h - self.stylePadding.top - self.stylePadding.bottom)
+        slider:setLocalRect(x + w - math.max(math.ceil((self.stylePadding.right + slideWidth) / 2), slideWidth),
+            y + self.stylePadding.top, slideWidth, h - self.stylePadding.top - self.stylePadding.bottom)
         this:resizeSlider()
     end
+
     ---Edit the text
     ---@param text string
     ---@return nil
@@ -61,6 +67,7 @@ function ui.textBox.new(parent, label, text, style, x, y, w, h, key)
         self.element[1].element[1].text = text
         self.element[1].element[1]:recalculate()
     end
+
     ---Change the scroll value
     ---@param value integer
     ---@return nil
@@ -68,7 +75,8 @@ function ui.textBox.new(parent, label, text, style, x, y, w, h, key)
         local maxMove = 0
         local label = this.element[1].element[1]
         if value > 0 then
-            maxMove = math.max(0, math.min(value, label:getLocalPosY() + label:getHeight() - (this:getHeight() - this.stylePadding.bottom)))
+            maxMove = math.max(0,
+                math.min(value, label:getLocalPosY() + label:getHeight() - (this:getHeight() - this.stylePadding.bottom)))
         elseif value < 0 then
             maxMove = math.min(0, math.max(value, label:getLocalPosY() - this.stylePadding.top))
         end
@@ -82,6 +90,7 @@ function ui.textBox.new(parent, label, text, style, x, y, w, h, key)
         end
         return false
     end
+
     ---Assigned function for every event except events dedicated to the mouse
     ---@param event event
     ---@return element|nil
@@ -91,12 +100,13 @@ function ui.textBox.new(parent, label, text, style, x, y, w, h, key)
             return this
         end
     end
+
     ---Assigned function for every event dedicated to the mouse
     ---@param event event
-    ---@param x integer|optional
-    ---@param y integer|optional
-    ---@param w integer|optional
-    ---@param h integer|optional
+    ---@param x integer|nil
+    ---@param y integer|nil
+    ---@param w integer|nil
+    ---@param h integer|nil
     ---@return element|nil
     function this:pointerEvent(event, x, y, w, h)
         if self.selectable and (event.name == "mouse_click" or event.name == "monitor_touch") and self.mode ~= 3 then
@@ -107,6 +117,7 @@ function ui.textBox.new(parent, label, text, style, x, y, w, h, key)
             end
         end
     end
+
     ---Recalculate the buffer of this element
     ---@return nil
     function this:recalculate()
@@ -125,9 +136,12 @@ function ui.textBox.new(parent, label, text, style, x, y, w, h, key)
         ui.buffer.fill(self.buffer, " ", theme.sTC, theme.sTC)
         ui.buffer.borderBox(self.buffer, theme.b, theme.bC, theme.bBG)
         if self.label then
-            ui.buffer.labelBox(self.buffer, labelTheme.prefix .. self.label .. labelTheme.suffix, labelTheme.tC, labelTheme.tBG, self.style.label.align, nil, self.stylePadding.left, 0, self.stylePadding.right, self.buffer.rect.h - self.stylePadding.top)
+            ui.buffer.labelBox(self.buffer, labelTheme.prefix .. self.label .. labelTheme.suffix, labelTheme.tC,
+                labelTheme.tBG, self.style.label.align, nil, self.stylePadding.left, 0, self.stylePadding.right,
+                self.buffer.rect.h - self.stylePadding.top)
         end
     end
+
     ---Listener function of the selectionGroup
     ---@param eventName string
     ---@param source string

@@ -7,7 +7,7 @@ ui.label = {}
 ---@param y integer
 ---@param w integer
 ---@param h integer
----@param key string|optional
+---@param key string|nil
 ---@return label
 function ui.label.new(parent, text, style, x, y, w, h, key)
     ---A simple label without function

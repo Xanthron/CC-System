@@ -9,7 +9,7 @@ ui.inputField = {}
 ---@param y integer
 ---@param w integer
 ---@param h integer
----@param key string|optional
+---@param key string|nil
 ---@return inputField
 function ui.inputField.new(parent, label, text, multiLine, style, x, y, w, h, key)
     ---Input field
@@ -104,7 +104,7 @@ function ui.inputField.new(parent, label, text, multiLine, style, x, y, w, h, ke
     end
 
     function this:moveCursorVertical(amount)
-        local i, length, total, lengths, lens = 1, 0, self.text:len(), {0}, {0}
+        local i, length, total, lengths, lens = 1, 0, self.text:len(), { 0 }, { 0 }
         for line in self.text:gmatch("[^\n\r]*.") do
             local len = line:len()
             length = length + len
@@ -119,7 +119,8 @@ function ui.inputField.new(parent, label, text, multiLine, style, x, y, w, h, ke
             end
         end
         local newLength = lengths[math.max(1, math.min(#lengths, i + amount))]
-        newLength = newLength + math.min(self.cursorOffset - lengths[i], lens[math.max(1, math.min(#lengths, i + amount + 1))] - 1)
+        newLength = newLength +
+            math.min(self.cursorOffset - lengths[i], lens[math.max(1, math.min(#lengths, i + amount + 1))] - 1)
         if newLength >= 0 and newLength <= total and i + amount < #lengths then
             self.cursorOffset = newLength
             return true
@@ -135,7 +136,7 @@ function ui.inputField.new(parent, label, text, multiLine, style, x, y, w, h, ke
 
     ---Set the text of this field and set the cursor to the index or at the end
     ---@param text string
-    ---@param index integer|optional
+    ---@param index integer|nil
     ---@return nil
     function this:setText(text, index)
         self.text = text
@@ -173,6 +174,7 @@ function ui.inputField.new(parent, label, text, multiLine, style, x, y, w, h, ke
         end
         self.autoCompleteIndex = 1
     end
+
     ---Only recalculate the text
     ---@return nil
     function this:recalculateText()
@@ -249,7 +251,8 @@ function ui.inputField.new(parent, label, text, multiLine, style, x, y, w, h, ke
             local completeLength = completeText:len()
             local offsetT = length - (width - left - right) + 1
             offsetT = math.min(offsetT, offsetX - width + left + right + 1)
-            local offsetC = math.max(0, math.min(width - left - right - 3, completeLength, length + completeLength - width - left - right + 3))
+            local offsetC = math.max(0,
+                math.min(width - left - right - 3, completeLength, length + completeLength - width - left - right + 3))
             offsetT = offsetT + offsetC
             offsetT = math.max(0, offsetT)
             self._cursorX = self.buffer.rect.x + left + offsetX - offsetT - self:getGlobalPosX()
@@ -265,10 +268,12 @@ function ui.inputField.new(parent, label, text, multiLine, style, x, y, w, h, ke
             ui.buffer.labelBox(self.buffer, text, theme.tC, theme.tBG, 1, theme.b[5][1], left, top, right, bottom)
             local newLeft = left + self.cursorOffset - offsetT
             if completeText ~= "" then
-                ui.buffer.labelBox(self.buffer, completeText, theme.complC, theme.complBG, 1, theme.b[5][1], newLeft, top, math.max(right, width - newLeft - completeLength), height - top - 1)
+                ui.buffer.labelBox(self.buffer, completeText, theme.complC, theme.complBG, 1, theme.b[5][1], newLeft, top
+                    , math.max(right, width - newLeft - completeLength), height - top - 1)
             end
         end
     end
+
     ---Recalculate the buffer of this element
     ---@return nil
     function this:recalculate()
@@ -288,10 +293,12 @@ function ui.inputField.new(parent, label, text, multiLine, style, x, y, w, h, ke
         if self.label then
             local label = labelTheme.prefix .. self.label .. labelTheme.suffix
             local yPos = math.max(0, math.floor((#theme.b[2] - 1) / 2))
-            ui.buffer.labelBox(self.buffer, label, labelTheme.tC, labelTheme.tBG, self.style.label.align, nil, #theme.b[4], yPos, #theme.b[6], self.buffer.rect.h - yPos)
+            ui.buffer.labelBox(self.buffer, label, labelTheme.tC, labelTheme.tBG, self.style.label.align, nil,
+                #theme.b[4], yPos, #theme.b[6], self.buffer.rect.h - yPos)
         end
         self:recalculateText()
     end
+
     ---Assigned function for every event except events dedicated to the mouse
     ---@param event event
     ---@return element|nil
@@ -334,7 +341,8 @@ function ui.inputField.new(parent, label, text, multiLine, style, x, y, w, h, ke
             elseif event.name == "key" then
                 local key = keys.getName(event.param1)
                 if key == "backspace" then
-                    if self.cursorOffset > 0 and self.repeatItem:call() and (not self.onTextEdit or not (self:onTextEdit("delete", self.cursorOffset) == false)) then
+                    if self.cursorOffset > 0 and self.repeatItem:call() and
+                        (not self.onTextEdit or not (self:onTextEdit("delete", self.cursorOffset) == false)) then
                         self.text = self.text:sub(1, self.cursorOffset - 1) .. self.text:sub(self.cursorOffset + 1)
                         self.cursorOffset = self.cursorOffset - 1
                         self:getAutoComplete()
@@ -391,7 +399,8 @@ function ui.inputField.new(parent, label, text, multiLine, style, x, y, w, h, ke
                         local success = false
                         if #self.autoComplete > 0 then
                             local text
-                            success, text, self.cursorOffset = self:onAutoCompletion(self.text, self.cursorOffset, self.autoComplete[self.autoCompleteIndex])
+                            success, text, self.cursorOffset = self:onAutoCompletion(self.text, self.cursorOffset,
+                                self.autoComplete[self.autoCompleteIndex])
                             if self.onTextEdit then
                                 text = self:onTextEdit("autocomplete", text)
                             end
@@ -487,12 +496,13 @@ function ui.inputField.new(parent, label, text, multiLine, style, x, y, w, h, ke
             end
         end
     end
+
     ---Assigned function for every event dedicated to the mouse
     ---@param event event
-    ---@param x integer|optional
-    ---@param y integer|optional
-    ---@param w integer|optional
-    ---@param h integer|optional
+    ---@param x integer|nil
+    ---@param y integer|nil
+    ---@param w integer|nil
+    ---@param h integer|nil
     ---@return element|nil
     function this:pointerEvent(event, x, y, w, h)
         x, y, w, h = ui.rect.overlaps(x, y, w, h, self.buffer.rect:getUnpacked())
@@ -504,19 +514,23 @@ function ui.inputField.new(parent, label, text, multiLine, style, x, y, w, h, ke
                 return self
             end
         elseif event.name == "mouse_drag" then
-            if self.mode == 4 and event.param2 >= x and event.param2 < x + w and event.param3 >= y and event.param3 < y + h then
+            if self.mode == 4 and event.param2 >= x and event.param2 < x + w and event.param3 >= y and
+                event.param3 < y + h then
                 self.mode = 3
                 self:recalculate()
                 self:repaint("this", x, y, w, h)
-            elseif self.mode == 3 and (event.param2 < x or event.param2 >= x + w or event.param3 < y or event.param3 >= y + h) then
+            elseif self.mode == 3 and
+                (event.param2 < x or event.param2 >= x + w or event.param3 < y or event.param3 >= y + h) then
                 self.mode = 4
                 self:recalculate()
                 self:repaint("this", x, y, w, h)
             end
         elseif event.name == "mouse_up" then
-            if self.mode == 3 and event.param2 >= x and event.param2 < x + w and event.param3 >= y and event.param3 < y + h then
+            if self.mode == 3 and event.param2 >= x and event.param2 < x + w and event.param3 >= y and
+                event.param3 < y + h then
                 return self
-            elseif self.mode == 4 and (event.param2 < x or event.param2 >= x + w or event.param3 < y or event.param3 >= y + h) then
+            elseif self.mode == 4 and
+                (event.param2 < x or event.param2 >= x + w or event.param3 < y or event.param3 >= y + h) then
                 self.mode = 1
                 self:recalculate()
                 self:repaint("this", x, y, w, h)

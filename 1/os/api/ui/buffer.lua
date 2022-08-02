@@ -4,22 +4,22 @@ ui.buffer = {}
 ---@param y integer
 ---@param w integer
 ---@param h integer
----@param t string|optional
----@param tC string|optional
----@param tBG string|optional
+---@param t string|nil
+---@param tC string|nil
+---@param tBG string|nil
 ---@return buffer
 function ui.buffer.new(x, y, w, h, t, tC, tBG)
     ---Buffers the screen, so it can be drawn
     ---@class buffer
-    local this = {text = t or {}, textColor = tC or {}, textBackgroundColor = tBG or {}}
+    local this = { text = t or {}, textColor = tC or {}, textBackgroundColor = tBG or {} }
 
     ---@type rect
     this.rect = ui.rect.new(x, y, w, h)
     ---Draws the buffer to the screen
-    ---@param x integer|optional
-    ---@param y integer|optional
-    ---@param w integer|optional
-    ---@param h integer|optional
+    ---@param x integer|nil
+    ---@param y integer|nil
+    ---@param w integer|nil
+    ---@param h integer|nil
     ---@return nil
     function this:draw(term, x, y, w, h)
         local thisX, thisY, thisW, thisH = self.rect:getUnpacked()
@@ -43,12 +43,13 @@ function ui.buffer.new(x, y, w, h, t, tC, tBG)
             end
         end
     end
+
     ---Combines the given given buffer over this
     ---@param buffer buffer
-    ---@param x integer|optional
-    ---@param y integer|optional
-    ---@param w integer|optional
-    ---@param h integer|optional
+    ---@param x integer|nil
+    ---@param y integer|nil
+    ---@param w integer|nil
+    ---@param h integer|nil
     ---@return buffer
     function this:contract(buffer, x, y, w, h)
         local thisX, thisY, thisW, thisH = self.rect:getUnpacked()
@@ -81,6 +82,7 @@ function ui.buffer.new(x, y, w, h, t, tC, tBG)
             end
         end
     end
+
     return this
 end
 
@@ -91,10 +93,10 @@ end
 ---@param tBG color
 ---@param align alignment
 ---@param space char
----@param left integer|optional
----@param top integer|optional
----@param right integer|optional
----@param bottom integer|optional
+---@param left integer|nil
+---@param top integer|nil
+---@param right integer|nil
+---@param bottom integer|nil
 ---@return nil
 function ui.buffer.labelBox(buffer, t, tC, tBG, align, space, left, top, right, bottom)
     left, top, right, bottom = left or 0, top or 0, right or 0, bottom or 0
@@ -196,10 +198,10 @@ end
 ---@param b border
 ---@param bC color
 ---@param bBG color
----@param left integer|optional
----@param top integer|optional
----@param right integer|optional
----@param bottom integer|optional
+---@param left integer|nil
+---@param top integer|nil
+---@param right integer|nil
+---@param bottom integer|nil
 function ui.buffer.borderBox(buffer, b, bC, bBG, left, top, right, bottom)
     local totalWidth, totalHeight = buffer.rect.w, buffer.rect.h
     left, top, right, bottom = left or 0, top or 0, right or 0, bottom or 0
@@ -278,10 +280,10 @@ end
 ---@param bC color
 ---@param bBG color
 ---@param align alignment
----@param left integer|optional
----@param top integer|optional
----@param right integer|optional
----@param bottom integer|optional
+---@param left integer|nil
+---@param top integer|nil
+---@param right integer|nil
+---@param bottom integer|nil
 ---@return nil
 function ui.buffer.borderLabelBox(buffer, t, tC, tBG, b, bC, bBG, align, left, top, right, bottom)
     local totalWidth, totalHeight = buffer.rect.w, buffer.rect.h
@@ -300,10 +302,10 @@ end
 ---@param t char
 ---@param tC color
 ---@param tBG color
----@param left integer|optional
----@param top integer|optional
----@param right integer|optional
----@param bottom integer|optional
+---@param left integer|nil
+---@param top integer|nil
+---@param right integer|nil
+---@param bottom integer|nil
 ---@return nil
 function ui.buffer.fill(buffer, t, tC, tBG, left, top, right, bottom)
     left, top, right, bottom = left or 0, top or 0, right or 0, bottom or 0
@@ -326,10 +328,10 @@ end
 ---@param scaleW boolean
 ---@param scaleH boolean
 ---@param richText boolean
----@param left integer|optional
----@param top integer|optional
----@param right integer|optional
----@param bottom integer|optional
+---@param left integer|nil
+---@param top integer|nil
+---@param right integer|nil
+---@param bottom integer|nil
 ---@return nil
 function ui.buffer.text(buffer, t, tC, tBG, align, scaleW, scaleH, richText, left, top, right, bottom)
     left, top, right, bottom = left or 0, top or 0, right or 0, bottom or 0

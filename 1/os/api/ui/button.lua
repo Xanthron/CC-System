@@ -8,7 +8,7 @@ ui.button = {}
 ---@param y integer
 ---@param w integer
 ---@param h integer
----@param key string|optional
+---@param key string|nil
 ---@return button
 function ui.button.new(parent, text, style, x, y, w, h, key)
     ---A simple button
@@ -26,7 +26,7 @@ function ui.button.new(parent, text, style, x, y, w, h, key)
     ---@param data table
     ---@return boolean
     this.animation =
-        ui.parallelElement.new(
+    ui.parallelElement.new(
         function(data)
             local clock = data[1] - os.clock() + 0.15
             if clock > 0 then
@@ -40,10 +40,10 @@ function ui.button.new(parent, text, style, x, y, w, h, key)
     )
     ---Function for handling every event dedicated to the mouse
     ---@param event event
-    ---@param x integer|optional
-    ---@param y integer|optional
-    ---@param w integer|optional
-    ---@param h integer|optional
+    ---@param x integer|nil
+    ---@param y integer|nil
+    ---@param w integer|nil
+    ---@param h integer|nil
     ---@return element|nil
     function this:pointerEvent(event, x, y, w, h)
         x, y, w, h = ui.rect.overlaps(x, y, w, h, self.buffer.rect:getUnpacked())
@@ -64,13 +64,15 @@ function ui.button.new(parent, text, style, x, y, w, h, key)
                 return self
             end
         elseif event.name == "mouse_drag" then
-            if self.mode == 3 and event.param2 >= x and event.param2 < x + w and event.param3 >= y and event.param3 < y + h then
+            if self.mode == 3 and event.param2 >= x and event.param2 < x + w and event.param3 >= y and
+                event.param3 < y + h then
                 self.mode = 4
                 if self._inAnimation == false then
                     self:recalculate()
                     self:repaint("this", x, y, w, h)
                 end
-            elseif self.mode == 4 and (event.param2 < x or event.param2 >= x + w or event.param3 < y or event.param3 >= y + h) then
+            elseif self.mode == 4 and
+                (event.param2 < x or event.param2 >= x + w or event.param3 < y or event.param3 >= y + h) then
                 self.mode = 3
                 if self._inAnimation == false then
                     self:recalculate()
@@ -78,7 +80,8 @@ function ui.button.new(parent, text, style, x, y, w, h, key)
                 end
             end
         elseif event.name == "mouse_up" then
-            if self.mode == 4 and event.param2 >= x and event.param2 < x + w and event.param3 >= y and event.param3 < y + h then
+            if self.mode == 4 and event.param2 >= x and event.param2 < x + w and event.param3 >= y and
+                event.param3 < y + h then
                 self.mode = 1
                 if self._inAnimation == false then
                     self:recalculate()
@@ -88,7 +91,8 @@ function ui.button.new(parent, text, style, x, y, w, h, key)
                     self:onClick(event)
                 end
                 return self
-            elseif self.mode == 3 and (event.param2 < x or event.param2 >= x + w or event.param3 < y or event.param3 >= y + h) then
+            elseif self.mode == 3 and
+                (event.param2 < x or event.param2 >= x + w or event.param3 < y or event.param3 >= y + h) then
                 self.mode = 1
                 if self._inAnimation == false then
                     self:recalculate()
@@ -98,6 +102,7 @@ function ui.button.new(parent, text, style, x, y, w, h, key)
             end
         end
     end
+
     ---Function for handling every event except events dedicated do the mouse
     ---@param event event
     ---@return element|nil
@@ -112,7 +117,8 @@ function ui.button.new(parent, text, style, x, y, w, h, key)
                 self:getDrawer():getParallelManager():addFunction(self.animation)
             end
             return self
-        elseif event.name == "key_up" and self.mode == 4 and (event.param1 == 57 or event.param1 == 28 or event.param1 == 29) then
+        elseif event.name == "key_up" and self.mode == 4 and
+            (event.param1 == 57 or event.param1 == 28 or event.param1 == 29) then
             self.mode = 3
             if self._inAnimation == false then
                 self:recalculate()
@@ -124,6 +130,7 @@ function ui.button.new(parent, text, style, x, y, w, h, key)
             return self
         end
     end
+
     ---Recalculate the buffer of this element
     ---@return nil
     function this:recalculate()
@@ -138,7 +145,8 @@ function ui.button.new(parent, text, style, x, y, w, h, key)
         else
             theme = self.style.pTheme
         end
-        ui.buffer.borderLabelBox(self.buffer, self.text, theme.tC, theme.tBG, theme.b, theme.bC, theme.bBG, self.style.align)
+        ui.buffer.borderLabelBox(self.buffer, self.text, theme.tC, theme.tBG, theme.b, theme.bC, theme.bBG,
+            self.style.align)
     end
 
     this:recalculate()
